@@ -21,15 +21,15 @@ public interface ScriptDAO {
     @Insert("insert into tb_script_node (word,script_id,choice1,choice2,influence1,influence2,influence3,influence4,influence5,jump_for_choice1,jump_for_choice2,jump_for_stop) values (#{word},#{script_id},#{choice1},#{choice2},#{influence1},#{influence2},#{influence3},#{influence4},#{influence5},#{jump_for_choice1},#{jump_for_choice2},#{jump_for_stop})")
     public int insertScriptNode(ScriptNode scriptNode);
 
-    @Select("select * from tbl_book where id = #{id}")
-    public Book getById(Integer id);
+//    @Select("select * from tbl_book where id = #{id}")
+//    public Book getById(Integer id);
 
     @Select("select * from tb_script where id = #{scriptId}")
     public Script getScript(Integer scriptId);
 
     @Select("select * from tb_script")
     @Options(useGeneratedKeys = true, keyProperty = "scriptId")
-    public List<Script> getScript();
+    public List<Script> getAllScript();
 
     @Select("select * from tb_script_node where script_id = #{scriptId}")
     public List<ScriptNode> getScriptNode(Integer scriptId);

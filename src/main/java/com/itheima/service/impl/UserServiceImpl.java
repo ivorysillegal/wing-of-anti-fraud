@@ -1,11 +1,22 @@
 package com.itheima.service.impl;
 
+import com.itheima.controller.Result;
 import com.itheima.dao.UserDAO;
+import com.itheima.pojo.user.ImageUploadRequest;
 import com.itheima.pojo.user.User;
 import com.itheima.pojo.user.UserValue;
 import com.itheima.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Base64Utils;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.UUID;
+
+import static com.itheima.controller.Code.PIC_UPLOAD_ERR;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,21 +40,53 @@ public class UserServiceImpl implements UserService {
     }
 
     //    注册
-    public boolean register(String username, String password) {
+    public int register(String username, String password) {
         User user = userDAO.getByUsername(username);
         if (user != null)
-            return false;
+            return -1;
         try {
             userDAO.insertBasic(new User(username, password));
             userDAO.insertValue(new UserValue());
 //            创建用户个人信息 补充默认信息
         } catch (Exception e) {
+            return 0;
+        }
+        return 1;
+    }
+
+    @Override
+    public boolean picUpload(ImageUploadRequest request) {
+        try {
+            String fileName = request.getFileName();
+            String base64ImageData = request.getFile();
+            byte[] imageData = Base64Utils.decodeFromString(base64ImageData);
+
+//        // 获取绝对路径
+            String parent = new File("static/images").getAbsolutePath();
+            File dir = new File(parent);
+            if (!dir.exists()) {
+                dir.mkdirs(); // 创建当前的目录
+            }
+
+            String[] split = fileName.split("\\.");
+            String fileExtension = split[1];
+            String newFileName = UUID.randomUUID().toString().toUpperCase() + "." + fileExtension;
+            File dest = new File(dir, newFileName);
+
+            try (OutputStream os = new FileOutputStream(dest)) {
+                os.write(imageData);
+            } catch (IOException e) {
+                return false;
+            }
+            String avatar = "../images/wms/" + newFileName;
+            Integer userId = user.getUserId();
+//        UserValue userValue = userDAO.getValueById(userId);
+            userDAO.updatePic(userId, avatar);
+        }catch (Exception e){
             return false;
         }
         return true;
     }
-
-
 }
 
 

@@ -5,9 +5,11 @@ import com.itheima.pojo.Script;
 import com.itheima.pojo.ScriptNode;
 import com.itheima.service.ScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ScriptServiceImpl implements ScriptService {
 
     @Autowired
@@ -31,7 +33,7 @@ public class ScriptServiceImpl implements ScriptService {
     public List<Script> getScript() {
         List<Script> script;
         try {
-            script = scriptDAO.getScript();
+            script = scriptDAO.getAllScript();
         } catch (Exception e) {
             return null;
         }

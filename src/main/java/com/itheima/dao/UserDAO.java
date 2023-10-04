@@ -1,5 +1,6 @@
 package com.itheima.dao;
 
+import com.itheima.domain.Book;
 import com.itheima.pojo.user.User;
 import com.itheima.pojo.user.UserValue;
 import org.apache.ibatis.annotations.*;
@@ -27,6 +28,9 @@ public interface UserDAO {
     @Select("select * from tb_user_basic where username = #{username}")
     public User getByUsername(String username);
 
-//    @Select("select * from tbl_book")
-//    public List<Book> getAll();
+    @Update("update user_value set pic_avatar = #{picAvatar} where user_id = #{userId}")
+    public int updatePic(Integer userId,String picAvatar);
+
+    @Select("select * from user_value where user_id = #{id}")
+    public UserValue  getValueById(Integer id);
 }
