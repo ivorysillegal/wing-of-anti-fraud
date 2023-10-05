@@ -74,9 +74,8 @@ public class StrongPasswordServiceImpl implements StrongPasswordService {
             password += insertPunctuation();
             password += translatedText;
         }
-        String s = password.replaceAll("\\s", "").replaceAll("'", "");
-//        至此达到效果 所有的英文单词之间都将会有一个标点符号 并且删除空格
-        return s;
+        //        至此达到效果 所有的英文单词之间都将会有一个标点符号 并且删除空格 处理引号等
+        return password.replaceAll("\\s", "").replaceAll("'", "");
     }
 
     private static char insertPunctuation() {

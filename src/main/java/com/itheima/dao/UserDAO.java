@@ -33,4 +33,7 @@ public interface UserDAO {
 
     @Select("select * from user_value where user_id = #{id}")
     public UserValue  getValueById(Integer id);
+
+    @Update("update user_value set sign = #{sign},age = #{age},gender = #{gender} where user_id = #{user_id}")
+    public int UpdateUserValue(UserValue userValue);
 }

@@ -1,6 +1,5 @@
 package com.itheima.service.impl;
 
-import com.itheima.controller.Result;
 import com.itheima.dao.UserDAO;
 import com.itheima.pojo.user.ImageUploadRequest;
 import com.itheima.pojo.user.User;
@@ -15,8 +14,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
-
-import static com.itheima.controller.Code.PIC_UPLOAD_ERR;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -82,8 +79,29 @@ public class UserServiceImpl implements UserService {
             Integer userId = user.getUserId();
 //        UserValue userValue = userDAO.getValueById(userId);
             userDAO.updatePic(userId, avatar);
-        }catch (Exception e){
-            return false;   
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public UserValue showUser() {
+        UserValue userValue;
+        try {
+            userValue = userDAO.getValueById(user.getUserId());
+        } catch (Exception e) {
+            return null;
+        }
+        return userValue;
+    }
+
+    @Override
+    public boolean updateUser(UserValue userValue) {
+        try {
+            userDAO.UpdateUserValue(userValue);
+        } catch (Exception e) {
+            return false;
         }
         return true;
     }

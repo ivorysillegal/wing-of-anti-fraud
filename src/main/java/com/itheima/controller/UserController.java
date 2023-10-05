@@ -1,22 +1,14 @@
 package com.itheima.controller;
 
-import cn.hutool.crypto.SecureUtil;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.itheima.pojo.StrongPasswordAnswer;
 import com.itheima.pojo.StrongPasswordQuestion;
 import com.itheima.pojo.user.ImageUploadRequest;
+import com.itheima.pojo.user.UserValue;
 import com.itheima.service.StrongPasswordService;
 import com.itheima.service.UserService;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.Base64Utils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -31,8 +23,6 @@ import static com.itheima.controller.Code.*;
 public class UserController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private StrongPasswordService strongPasswordService;
 
     @PostMapping("/login")
     public Result login(@RequestBody Map<String, String> requestBody) {
@@ -64,6 +54,7 @@ public class UserController {
     }
 
 
+//    头像上传
     @PostMapping("/picUpload")
     public Result picUpload(@RequestBody ImageUploadRequest request) {
         String base64ImageData = request.getFile();
@@ -81,40 +72,16 @@ public class UserController {
     }
 
 
-    @GetMapping("/password")
-    public Result passwordMaker() {
+//    更新个人信息
+    @PostMapping
+    public Result updateMsg(@RequestBody UserValue userValue) {
         try {
-            List<StrongPasswordQuestion> strongPasswordQuestions = strongPasswordService.showQuestion();
-            return new Result("获取问题成功", SHOW_PASSWORD_QUESTION_OK, strongPasswordQuestions);
+            boolean b = userService.updateUser(userValue);
+            if (!b)
+                return new Result("个人信息更新失败", UPDATE_MSG_ERR, null);
         } catch (Exception e) {
-            return new Result("获取问题失败", SHOW_PASSWORD_QUESTION_ERR, strongPasswordService);
+            return new Result("个人信息更新失败", UPDATE_MSG_ERR, null);
         }
-    }
-
-
-    @PostMapping("/password")
-//    public Result passwordMaker(@RequestBody StrongPasswordAnswer strongPasswordAnswer) {
-    public Result passwordMaker(@RequestBody Object strongPasswordAnswer) {
-
-        LinkedHashMap linkedHashMap = (LinkedHashMap) strongPasswordAnswer;
-        System.out.println(linkedHashMap);
-        ArrayList<String> answer = (ArrayList<String>) linkedHashMap.get("answers");
-//        String[] answer = (String[])strongPasswordAnswer;
-//        String[] answer = new String[8];
-
-        String password;
-        try {
-//            String[] answer = strongPasswordAnswer.getAnswer();
-            String originalText = "";
-            for (String s : answer) {
-                originalText += s;
-                originalText += ' ';
-            }
-            password = strongPasswordService.translateText(originalText, "zh", "en");
-
-        } catch (Exception e) {
-            return new Result("密码生成失败", PASSWORD_SEND_ERR, null);
-        }
-        return new Result("密码生成完毕", PASSWORD_SEND_OK, password);
+        return new Result("个人信息更新成功", UPDATE_MSG_OK, null);
     }
 }

@@ -1,0 +1,16 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "22773567",
+      "name": "系统安全",
+      "font_class": "xitonganquan",
+      "unicode": "e651",
+      "unicode_decimal": 58961
+    }
+  ]
+}

@@ -37,4 +37,7 @@ public class Code {
     public static final Integer PIC_UPLOAD_OK = 200;
     public static final Integer PIC_UPLOAD_ERR = 241;
 
+    public static final Integer UPDATE_MSG_OK = 200;
+    public static final Integer UPDATE_MSG_ERR = 251;
+
 }
