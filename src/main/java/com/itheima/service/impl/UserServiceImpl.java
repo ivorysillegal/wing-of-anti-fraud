@@ -21,7 +21,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDAO userDAO;
 
-    private User user;
+    protected static User user;
 //    public static User user;
 //    仅为测试所用
 

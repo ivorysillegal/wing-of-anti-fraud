@@ -15,10 +15,21 @@ public class ScriptServiceImpl implements ScriptService {
     @Autowired
     private ScriptDAO scriptDAO;
 
+//    增加剧本 （名称及id及乱七八糟）
     @Override
-    public boolean insertScript(Script script, List<ScriptNode> scriptNodes) {
+    public boolean insertScript(Script script) {
         try {
             scriptDAO.insertScript(script);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+//    增加剧本节点（每个节点的信息）
+    @Override
+    public boolean insertScriptNodes(List<ScriptNode> scriptNodes) {
+        try {
             for (ScriptNode scriptNode : scriptNodes) {
                 scriptDAO.insertScriptNode(scriptNode);
             }
@@ -27,7 +38,6 @@ public class ScriptServiceImpl implements ScriptService {
         }
         return true;
     }
-
 
     @Override
     public List<Script> getScript() {

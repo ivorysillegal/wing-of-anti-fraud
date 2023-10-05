@@ -81,8 +81,7 @@ loadRegister[0].addEventListener("click", function() {
         console.log(data)
         axios({
                 method: "POST",
-                // url: 'http://localhost:3000/users/register',
-                url: 'http://47.113.231.211:3000/users/register',
+                url: '47.113.231.211:3000/users/register',
                 data: {
                     username: username,
                     password: password
@@ -95,7 +94,18 @@ loadRegister[0].addEventListener("click", function() {
                 console.log(error)
             })
     })
+    //     ajax('47.113.231.211:3000/users/login', 'POST', data)
+    //         .then(function(response) {
+    //             // 处理成功响应
+    //             console.log(response);
+    //         })
+    //         .catch(function(error) {
+    //             // 处理请求失败或错误
+    //             console.error(error);
 
+//         });
+
+// })
 // 登录功能
 loadRegister[1].addEventListener("click", function() {
         const un = document.querySelector('.login_name')
@@ -109,8 +119,7 @@ loadRegister[1].addEventListener("click", function() {
         console.log(data)
         axios({
                 method: "POST",
-                // url: 'http://localhost:3000/users/login',
-                url: 'http://47.113.231.211:3000/users/login',
+                url: '47.113.231.211:3000/users/login',
                 data: {
                     username: username,
                     password: password
@@ -123,3 +132,76 @@ loadRegister[1].addEventListener("click", function() {
                 console.log(error)
             })
     })
+    //     ajax('47.113.231.211:3000/users/login', 'POST', data)
+    //         .then(function(response) {
+    //             // 处理成功响应
+    //             console.log(response);
+    //         })
+    //         .catch(function(error) {
+    //             // 处理请求失败或错误
+    //             console.error(error);
+
+//         });
+
+// })
+// var xhr = new XMLHttpRequest();
+
+// // 设置请求方法和 URL
+// xhr.open("POST", "47.113.231.211:3000/users/login", true);
+
+// // 设置请求头（如果有需要）
+// xhr.setRequestHeader("Content-Type", "multipart/form-data");
+// // 构造要发送的数据
+// let data = {
+//     username: '123',
+//     password: '123'
+// }
+// console.log(data);
+// // let jsonData = JSON.stringify(data)
+// // console.log(jsonData);
+// // let username = 'heyboy'
+// // let password = 'aa12345'
+// // console.log(username, password)
+// // 将数据转换为 JSON 字符串
+// // var jsonData = JSON.stringify(data);
+// // console.log(jsonData)
+// // 发送请求
+// xhr.send(data);
+// // 监听状jsonData态变化事件
+// xhr.onreadystatechange = function() {
+//     if (xhr.readyState === 4) {
+//         if (xhr.status >= 200 || xhr.status < 300) {
+//             // 请求成功，处理返回的数据
+//             var response = xhr.responseText;
+//             console.log('11');
+//         } else {
+//             // 请求失败，处理错误信息
+//             console.error("请求失败：" + xhr.status);
+//         }
+//     }
+// };
+
+
+
+// 用promise封装ajax
+// function ajax(url, method, data) {
+//     return new Promise(function(resolve, reject) {
+//         const xhr = new XMLHttpRequest();
+//         xhr.open(method, url);
+//         xhr.setRequestHeader('Content-Type', 'application/json');
+
+//         xhr.onload = function() {
+//             if (xhr.status >= 200 && xhr.status < 300) {
+//                 resolve(xhr.responseText);
+//             } else {
+//                 reject(new Error('请求失败'));
+//             }
+//         };
+
+//         xhr.onerror = function() {
+//             reject(new Error('请求失败'));
+//         };
+
+//         xhr.send(JSON.stringify(data));
+//     });
+// }

@@ -1,18 +1,12 @@
 package com.itheima.controller;
 
-import com.itheima.pojo.StrongPasswordQuestion;
 import com.itheima.pojo.user.ImageUploadRequest;
 import com.itheima.pojo.user.UserValue;
-import com.itheima.service.StrongPasswordService;
 import com.itheima.service.UserService;
-import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.itheima.controller.Code.*;
@@ -54,7 +48,7 @@ public class UserController {
     }
 
 
-//    头像上传
+    //    头像上传
     @PostMapping("/picUpload")
     public Result picUpload(@RequestBody ImageUploadRequest request) {
         String base64ImageData = request.getFile();
@@ -72,7 +66,7 @@ public class UserController {
     }
 
 
-//    更新个人信息
+    //    更新个人信息
     @PostMapping
     public Result updateMsg(@RequestBody UserValue userValue) {
         try {
@@ -83,5 +77,21 @@ public class UserController {
             return new Result("个人信息更新失败", UPDATE_MSG_ERR, null);
         }
         return new Result("个人信息更新成功", UPDATE_MSG_OK, null);
+    }
+
+
+    //    个人信息展示（主页）
+    @GetMapping
+    public Result showMsg() {
+        UserValue userValue;
+        try {
+            userValue = userService.showUser();
+            if (userValue == null) {
+                return new Result("个人信息展示失败", SHOW_MSG_ERR, null);
+            }
+        } catch (Exception e) {
+            return new Result("个人信息展示失败", SHOW_MSG_ERR, null);
+        }
+        return new Result("个人信息展示成功", SHOW_MSG_OK, userValue);
     }
 }

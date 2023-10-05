@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.itheima.controller.Code.SCRIPT_READ_ERR;
-import static com.itheima.controller.Code.SCRIPT_READ_OK;
+import static com.itheima.controller.Code.*;
 
 @RestController
 @CrossOrigin
@@ -18,8 +17,17 @@ public class ScriptController {
     @Autowired
     private ScriptService scriptService;
 
-//    @PostMapping("")
-//    public Result makeScript(@RequestBody )
+//    保存剧本
+    @PostMapping("/make")
+    public Result saveScript(@RequestBody Script script) {
+        try {
+            if (!scriptService.insertScript(script)
+            ) return new Result("剧本保存失败", SCRIPT_READ_ERR, null);
+        } catch (Exception e) {
+            return new Result("剧本保存失败", SCRIPT_READ_ERR, null);
+        }
+        return new Result("剧本保存成功", SCRIPT_SAVE_OK, null);
+    }
 
     @GetMapping
     public Result getScript(@PathVariable Integer scriptId) {

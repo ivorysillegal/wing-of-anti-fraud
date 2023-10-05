@@ -14,7 +14,7 @@ import static com.itheima.controller.Code.PASSWORD_SEND_OK;
 
 @RestController
 //@CrossOrigin
-@RequestMapping("/users")
+@RequestMapping("/")
 public class PasswordController {
 
     @Autowired
@@ -38,7 +38,7 @@ public class PasswordController {
 
         LinkedHashMap linkedHashMap = (LinkedHashMap) strongPasswordAnswer;
         System.out.println(linkedHashMap);
-        ArrayList<String> answer = (ArrayList<String>) linkedHashMap.get("answers");
+        ArrayList<String> answer = (ArrayList<String>) linkedHashMap.get("Answer");
         String password;
         try {
             String originalText = "";

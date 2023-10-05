@@ -8,7 +8,9 @@ import java.util.List;
 
 @Transactional
 public interface ScriptService {
-    public boolean insertScript(Script script, List<ScriptNode> scriptNodes);
+    public boolean insertScript(Script script);
+
+    public boolean insertScriptNodes(List<ScriptNode> scriptNodes);
 
     public List<Script> getScript();
 

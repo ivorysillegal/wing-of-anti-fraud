@@ -34,10 +34,24 @@ public class Code {
     public static final Integer SCRIPT_READ_OK = 200;
     public static final Integer SCRIPT_READ_ERR = 231;
 
+    public static final Integer SCRIPT_SAVE_OK = 200;
+    public static final Integer SCRIPT_SAVE_ERR = 232;
+
+    public static final Integer SCRIPT_NODES_SAVE_OK = 200;
+    public static final Integer SCRIPT_NODES_SAVE_ERR = 233;
+
     public static final Integer PIC_UPLOAD_OK = 200;
     public static final Integer PIC_UPLOAD_ERR = 241;
 
     public static final Integer UPDATE_MSG_OK = 200;
-    public static final Integer UPDATE_MSG_ERR = 251;
+    public static final Integer UPDATE_MSG_ERR = 241;
 
+    public static final Integer SHOW_MSG_OK = 200;
+    public static final Integer SHOW_MSG_ERR = 251;
+
+    public static final Integer SHOW_QUESTION_OK = 200;
+    public static final Integer SHOW_QUESTION_ERR = 261;
+
+    public static final Integer GET_QUESTION_CONDITION_OK = 200;
+    public static final Integer GET_QUESTION_CONDITION_ERR = 261;
 }
