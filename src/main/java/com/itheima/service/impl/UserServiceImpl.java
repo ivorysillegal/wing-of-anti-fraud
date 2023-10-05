@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
 //        UserValue userValue = userDAO.getValueById(userId);
             userDAO.updatePic(userId, avatar);
         }catch (Exception e){
-            return false;
+            return false;   
         }
         return true;
     }

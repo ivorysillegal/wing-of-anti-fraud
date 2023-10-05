@@ -1,22 +1,27 @@
 package com.itheima.controller;
 
+import cn.hutool.crypto.SecureUtil;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.itheima.pojo.StrongPasswordAnswer;
 import com.itheima.pojo.StrongPasswordQuestion;
 import com.itheima.pojo.user.ImageUploadRequest;
 import com.itheima.service.StrongPasswordService;
 import com.itheima.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpSession;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static com.itheima.controller.Code.*;
 
@@ -87,4 +92,29 @@ public class UserController {
     }
 
 
+    @PostMapping("/password")
+//    public Result passwordMaker(@RequestBody StrongPasswordAnswer strongPasswordAnswer) {
+    public Result passwordMaker(@RequestBody Object strongPasswordAnswer) {
+
+        LinkedHashMap linkedHashMap = (LinkedHashMap) strongPasswordAnswer;
+        System.out.println(linkedHashMap);
+        ArrayList<String> answer = (ArrayList<String>) linkedHashMap.get("answers");
+//        String[] answer = (String[])strongPasswordAnswer;
+//        String[] answer = new String[8];
+
+        String password;
+        try {
+//            String[] answer = strongPasswordAnswer.getAnswer();
+            String originalText = "";
+            for (String s : answer) {
+                originalText += s;
+                originalText += ' ';
+            }
+            password = strongPasswordService.translateText(originalText, "zh", "en");
+
+        } catch (Exception e) {
+            return new Result("密码生成失败", PASSWORD_SEND_ERR, null);
+        }
+        return new Result("密码生成完毕", PASSWORD_SEND_OK, password);
+    }
 }

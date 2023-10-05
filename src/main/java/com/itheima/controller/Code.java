@@ -28,12 +28,13 @@ public class Code {
 
     public static final Integer SHOW_PASSWORD_QUESTION_OK = 200;
     public static final Integer SHOW_PASSWORD_QUESTION_ERR = 221;
+    public static final Integer PASSWORD_SEND_OK = 200;
+    public static final Integer PASSWORD_SEND_ERR = 221;
 
     public static final Integer SCRIPT_READ_OK = 200;
     public static final Integer SCRIPT_READ_ERR = 231;
 
     public static final Integer PIC_UPLOAD_OK = 200;
     public static final Integer PIC_UPLOAD_ERR = 241;
-
 
 }
