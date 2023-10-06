@@ -1,194 +1,66 @@
-const btn = document.querySelector('.pw_btn')
-console.log(btn)
-const page = document.querySelector('.page')
-console.log(page)
-    // 一开始渲染一个页面
-    // const answers = document.querySelector('.q_answer')
-    // const expassword = document.querySelector('.exclusive_pw')
-    // answers.innerHTML = ''
-    // expassword.innerHTML = ''
-    // axios({
-    //         method: 'GET',
-    //         url: 'http://47.113.231.211:3000/password',
-    //     })
-    //     .then(res => {
-    //         // 接口数据
-    //         console.log(res.data);
-    //         let { data } = res.data
-    //         problemRnder(res.data)
-    //     })
-    //     .catch(error => {
-    //         // 处理错误
-    //         console.error(error);
-    //     });
-
-const nextpage = document.querySelector('.nextpage')
+// const btn = document.querySelector('.pw_btn')
+// console.log(btn)
+// const page = document.querySelector('.page')
+// console.log(page)
+// 一开始渲染一个页面
+const answers = document.querySelector('.q_answer')
+const expassword = document.querySelector('.exclusive_pw')
+answers.innerHTML = ''
+expassword.innerHTML = ''
+axios({
+        method: 'GET',
+    url: 'http://47.113.231.211:3000/password',
+    })
+    .then(res => {
+        // 接口数据
+        console.log(res.data);
+        let { data } = res.data
+        problemRnder(res.data)
+        const btn = document.querySelector('.pw_btn')
+        btn1()
+        nextP()
+    })
+    .catch(error => {
+        // 处理错误
+        console.error(error);
+    });
+function nextP() {
+    const nextpage = document.querySelector('.nextpage')
     // 添加翻页事件，重新加载题目
-nextpage.addEventListener('click', function() {
-    page.style.display = 'block'
-    page.style.zIndex = 2
-    page.style.transform = 'rotateY(-170deg)'
-    const answers = document.querySelector('.q_answer')
-    const expassword = document.querySelector('.exclusive_pw')
-    answers.innerHTML = ''
-    expassword.innerHTML = ''
-    let timer = setTimeout(function() {
-        const page = document.querySelector('.page')
-        page.style.display = 'none'
-        page.style.zIndex = -1
-        page.style.transform = 'rotateY(170deg)'
-    }, 2100)
-    axios({
+    nextpage.addEventListener('click', function () {
+        page.style.display = 'block'
+        page.style.zIndex = 2
+        page.style.transform = 'rotateY(-170deg)'
+        const answers = document.querySelector('.q_answer')
+        const expassword = document.querySelector('.exclusive_pw')
+        answers.innerHTML = ''
+        expassword.innerHTML = ''
+        let timer = setTimeout(function () {
+            const page = document.querySelector('.page')
+            page.style.display = 'none'
+            page.style.zIndex = -1
+            page.style.transform = 'rotateY(170deg)'
+        }, 2100)
+        axios({
             method: 'GET',
-            // url: 'http://47.113.231.211:3000/password',
-            url: 'http://localhost:3000/password',
+            url: 'http://47.113.231.211:3000/password',
+            // url: 'http://localhost:3000/password',
         })
-        .then(res => {
-            // 接口数据
-            console.log(res.data);
-            let { data } = res.data
-            problemRnder(data)
-            const btn = document.querySelector('.pw_btn')
-            console.log(btn);
-            btn.addEventListener('click', function() {
-                const q1 = document.getElementsByName('question1');
-                console.log(q1);
-                let an1;
-                for (let i = 0; i < q1.length; i++) {
-                    if (q1[i].checked) {
-                        an1 = q1[i].value;
-                        break;
-                    }
-                }
-                const q2 = document.getElementsByName('question2');
-                let an2;
-                for (let i = 0; i < q2.length; i++) {
-                    if (q2[i].checked) {
-                        an2 = q2[i].value;
-                        break;
-                    }
-                }
-                const q3 = document.getElementsByName('question3');
-                let an3;
-                for (let i = 0; i < q3.length; i++) {
-                    if (q3[i].checked) {
-                        an3 = q3[i].value;
-                        break;
-                    }
-                }
-                const q4 = document.getElementsByName('question4');
-                let an4;
-                for (let i = 0; i < q4.length; i++) {
-                    if (q4[i].checked) {
-                        an4 = q4[i].value;
-                        break;
-                    }
-                }
-                const q5 = document.getElementsByName('question5');
-                let an5;
-                for (let i = 0; i < q5.length; i++) {
-                    if (q5[i].checked) {
-                        an5 = q5[i].value;
-                        break;
-                    }
-                }
-                console.log(an1, an2, an3, an4, an5)
-                let Answer = [an1, an2, an3, an4, an5]
-                // 将表单的值传给后端翻译
-                axios({
-                    method: "POST",
-                    // url: 'http://47.113.231.211:3000/password',
-                    url: 'http://localhost:3000/password',
-                    data: {
-                        Answer
-                    }
-                })
-                    .then(res => {
-                        console.log(res)
-                        let { data } = res
-
-                        console.log(data.data)
-                        conservesion(data.data)
-                    })
-                    .catch(error => {
-                        console.log(error)
-                    })
+            .then(res => {
+                // 接口数据
+                console.log(res.data);
+                let {data} = res.data
+                const btn = document.querySelector('.pw_btn')
+                problemRnder(data)
+                btn1()
             })
+            .catch(error => {
+                // 处理错误
+                console.error(error);
+            });
 
-        })
-
-})
-        .catch(error => {
-            // 处理错误
-            console.error(error);
-        });
-
-//     console.log(btn);
-//     btn.addEventListener('click', function() {
-//         const q1 = document.getElementsByName('question1');
-//         console.log(q1);
-//         let an1;
-//         for (let i = 0; i < q1.length; i++) {
-//             if (q1[i].checked) {
-//                 an1 = q1[i].value;
-//                 break;
-//             }
-//         }
-//         const q2 = document.getElementsByName('question2');
-//         let an2;
-//         for (let i = 0; i < q2.length; i++) {
-//             if (q2[i].checked) {
-//                 an2 = q2[i].value;
-//                 break;
-//             }
-//         }
-//         const q3 = document.getElementsByName('question3');
-//         let an3;
-//         for (let i = 0; i < q3.length; i++) {
-//             if (q3[i].checked) {
-//                 an3 = q3[i].value;
-//                 break;
-//             }
-//         }
-//         const q4 = document.getElementsByName('question4');
-//         let an4;
-//         for (let i = 0; i < q4.length; i++) {
-//             if (q4[i].checked) {
-//                 an4 = q4[i].value;
-//                 break;
-//             }
-//         }
-//         const q5 = document.getElementsByName('question5');
-//         let an5;
-//         for (let i = 0; i < q5.length; i++) {
-//             if (q5[i].checked) {
-//                 an5 = q5[i].value;
-//                 break;
-//             }
-//         }
-//         console.log(an1, an2, an3, an4, an5)
-//         let Answer = [an1, an2, an3, an4, an5]
-//         // 将表单的值传给后端翻译
-//         axios({
-//             method: "POST",
-//             // url: 'http://47.113.231.211:3000/password',
-//             url: 'http://localhost:3000/password',
-//             data: {
-//                 Answer
-//             }
-//         })
-//             .then(res => {
-//                 console.log(res)
-//                 let { data } = res
-//                 conservesion(data)
-//             })
-//             .catch(error => {
-//                 console.log(error)
-//             })
-//     })
-//
-// })
-
+    })
+}
 function problemRnder(data) {
     const answers = document.querySelector('.q_answer')
     const expassword = document.querySelector('.exclusive_pw')
@@ -241,81 +113,103 @@ function problemRnder(data) {
 // const product = document.querySelector('.pw_btn')
 // btn.addEventListener('click', function() {
 //     let pwArr = ['!', '?', '.', '@', '#', '$', '%', '&', '*', ',']
-// btn.addEventListener('click', function() {
-//     const q1 = document.getElementsByName('question1');
-//     console.log(q1);
-//     let an1;
-//     for (let i = 0; i < q1.length; i++) {
-//         if (q1[i].checked) {
-//             an1 = q1[i].value;
-//             break;
-//         }
-//     }
-//     const q2 = document.getElementsByName('question2');
-//     let an2;
-//     for (let i = 0; i < q2.length; i++) {
-//         if (q2[i].checked) {
-//             an2 = q2[i].value;
-//             break;
-//         }
-//     }
-//     const q3 = document.getElementsByName('question3');
-//     let an3;
-//     for (let i = 0; i < q3.length; i++) {
-//         if (q3[i].checked) {
-//             an3 = q3[i].value;
-//             break;
-//         }
-//     }
-//     const q4 = document.getElementsByName('question4');
-//     let an4;
-//     for (let i = 0; i < q4.length; i++) {
-//         if (q4[i].checked) {
-//             an4 = q4[i].value;
-//             break;
-//         }
-//     }
-//     const q5 = document.getElementsByName('question5');
-//     let an5;
-//     for (let i = 0; i < q5.length; i++) {
-//         if (q5[i].checked) {
-//             an5 = q5[i].value;
-//             break;
-//         }
-//     }
-//     console.log(an1, an2, an3, an4, an5)
-//     let Answer = [an1, an2, an3, an4, an5]
-//         // 将表单的值传给后端翻译
-//     axios({
-//             method: "POST",
-//             // url: 'http://47.113.231.211:3000/password',
-//             url: 'http://localhost:3000/password',
-//             data: {
-//                 Answer
-//             }
-//         })
-//         .then(res => {
-//             console.log(res)
-//             let { data } = res
-//             conservesion(data)
-//         })
-//         .catch(error => {
-//             console.log(error)
-//         })
-// })
+function btn1() {
+
+    btn.addEventListener('click', function() {
+        const q1 = document.getElementsByName('question1');
+        console.log(q1);
+        let an1;
+        for (let i = 0; i < q1.length; i++) {
+            if (q1[i].checked) {
+                an1 = q1[i].value;
+                break;
+            }
+        }
+        const q2 = document.getElementsByName('question2');
+        let an2;
+        for (let i = 0; i < q2.length; i++) {
+            if (q2[i].checked) {
+                an2 = q2[i].value;
+                break;
+            }
+        }
+        const q3 = document.getElementsByName('question3');
+        let an3;
+        for (let i = 0; i < q3.length; i++) {
+            if (q3[i].checked) {
+                an3 = q3[i].value;
+                break;
+            }
+        }
+        const q4 = document.getElementsByName('question4');
+        let an4;
+        for (let i = 0; i < q4.length; i++) {
+            if (q4[i].checked) {
+                an4 = q4[i].value;
+                break;
+            }
+        }
+        const q5 = document.getElementsByName('question5');
+        let an5;
+        for (let i = 0; i < q5.length; i++) {
+            if (q5[i].checked) {
+                an5 = q5[i].value;
+                break;
+            }
+        }
+        console.log(an1, an2, an3, an4, an5)
+        let Answer = [an1, an2, an3, an4, an5]
+            // 将表单的值传给后端翻译
+        axios({
+                method: "POST",
+                url: 'http://47.113.231.211:3000/password',
+                // url: 'http://localhost:3000/password',
+                data: {
+                    Answer
+                }
+            })
+            .then(res => {
+                console.log(res)
+                let { data } = res
+                conservesion(data.data)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    })
+}
 
 // 字符串拼接组成密码
 function conservesion(data) {
     let pwArr = ['!', '?', '.', '@', '#', '$', '%', '&', '*', ',']
-    const index1 = Math.floor(Math.random() * pwArr.length);
-    const index2 = Math.floor(Math.random() * pwArr.length);
-    let graph = [pwArr[index1], pwArr[index2]]
+    let graph1 = punctuation(pwArr)
+    let graph2 = punctuation(pwArr)
+    let graph3 = punctuation(pwArr)
+    let graph4 = punctuation(pwArr)
     data = data.split(',')
-    const pwarr = [...graph, ...data]
-    shuffleArray(pwarr)
-    let pwarrstr = pwarr.join(',')
-    const product_pw = document.querySelector('.product_pw')
-    product_pw.innerHTML = pwarrstr
+    let choice1 = choose(data)
+    let choice2 = choose(data)
+    let choice3 = choose(data)
+    let choice4 = choose(data)
+    const pwarr1 = [...graph1, ...choice1]
+    const pwarr2 = [...graph2, ...choice2]
+    const pwarr3 = [...graph3, ...choice3]
+    const pwarr4 = [...graph4, ...choice4]
+    shuffleArray(pwarr1)
+    shuffleArray(pwarr2)
+    shuffleArray(pwarr3)
+    shuffleArray(pwarr4)
+
+    let pwarrstr1 = pwarr1.join(',')
+    let pwarrstr2 = pwarr2.join(',')
+    let pwarrstr3 = pwarr3.join(',')
+    let pwarrstr4 = pwarr4.join(',')
+
+    const pw_result = document.querySelector('.pw_result')
+    pw_result.innerHTML = ` <div class="choice1">A.${pwarrstr1}</div>
+    <div class="choice2">B.${pwarrstr2}</div>
+    <div class="choice3">C.${pwarrstr3}</div>
+    <div class="choice4">D.${pwarrstr4}</div>`
 }
 
 function shuffleArray(arr) {
@@ -326,4 +220,21 @@ function shuffleArray(arr) {
         arr[i] = arr[j];
         arr[j] = temp;
     }
+}
+
+function choose(array) {
+    let randomIndex1 = Math.floor(Math.random() * array.length);
+
+    let randomIndex2;
+    do {
+        randomIndex2 = Math.floor(Math.random() * array.length);
+    } while (randomIndex2 === randomIndex1);
+    return [array[randomIndex1], array[randomIndex2]];
+
+}
+
+function punctuation(array) {
+    const index1 = Math.floor(Math.random() * array.length);
+    const index2 = Math.floor(Math.random() * array.length);
+    let graph = [array[index1], array[index2]]
 }

@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.itheima.controller.Code.*;
@@ -35,12 +37,22 @@ public class QuestionController {
     }
 
     //    插入问题 变成错题集
+//    不知道为什么接收的时候会直接接收成LinkedListHashMap
+//    于是直接通过一堆获取 遍历操作将其搞定
     @PostMapping
-    public Result getCondition(@RequestBody ArrayList<QuestionRelate> questionRelate) {
-        boolean b = questionService.saveWrongAnswerQuestion(questionRelate);
-        if (!b)
-            return new Result("获取回答情况失败", GET_QUESTION_CONDITION_ERR, null);
-        return new Result("获取回答情况成功", GET_QUESTION_CONDITION_OK, null);
+    public Result getCondition(@RequestBody LinkedHashMap questionRelate) {
+        ArrayList<LinkedHashMap<String, Integer>> data = (ArrayList<LinkedHashMap<String, Integer>>) questionRelate.get("data");
+        Iterator<LinkedHashMap<String, Integer>> iterator = data.iterator();
+        ArrayList<QuestionRelate> value = new ArrayList<>();
+        while (iterator.hasNext()) {
+            LinkedHashMap<String, Integer> linkedHashMap = iterator.next();
+            QuestionRelate qr = new QuestionRelate(linkedHashMap.get("userId"), linkedHashMap.get("questionId"));
+            value.add(qr);
+        }
+        boolean success = questionService.saveWrongAnswerQuestion(value);
+        if (!success)
+            return new Result("发送回答情况失败", GET_QUESTION_CONDITION_ERR, null);
+        return new Result("发送回答情况成功", GET_QUESTION_CONDITION_OK, null);
     }
 
     @GetMapping("/wrong")

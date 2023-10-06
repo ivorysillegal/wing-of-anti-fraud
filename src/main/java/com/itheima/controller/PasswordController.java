@@ -14,7 +14,7 @@ import static com.itheima.controller.Code.PASSWORD_SEND_OK;
 
 @RestController
 //@CrossOrigin
-@RequestMapping("/")
+@RequestMapping("")
 public class PasswordController {
 
     @Autowired

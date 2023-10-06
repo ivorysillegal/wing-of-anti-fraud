@@ -81,7 +81,7 @@ loadRegister[0].addEventListener("click", function() {
         console.log(data)
         axios({
                 method: "POST",
-                url: '47.113.231.211:3000/users/register',
+                url: 'http://47.113.231.211:3000/users/register',
                 data: {
                     username: username,
                     password: password

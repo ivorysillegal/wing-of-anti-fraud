@@ -65,19 +65,18 @@ public class StrongPasswordServiceImpl implements StrongPasswordService {
         JsonNode translationResult = response.getBody();
 
         JsonNode transResultArray = translationResult.get("trans_result");
-
         String password = "";
 //        此字符串用来处理翻译之后的数据 并且加上标点符号
         for (JsonNode transResult : transResultArray) {
             String translatedText = transResult.get("dst").asText();
 //            password += insertPunctuation();
-            password += ",";
+//            password += ",";
             password += translatedText;
 
 //            控制长度
         }
         //        至此达到效果 所有的英文单词之间都将会有一个标点符号 并且删除空格 处理引号等
-        return password.replaceAll("\\s", "").replaceAll("'", "");
+        return password.replaceAll("\\s", ",").replaceAll("'", "");
     }
 
     private static char insertPunctuation() {
