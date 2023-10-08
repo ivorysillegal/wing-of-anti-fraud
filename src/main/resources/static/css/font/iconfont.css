@@ -1,6 +1,6 @@
 @font-face {
   font-family: "iconfont"; /* Project id  */
-  src: url('iconfont.ttf?t=1696004526755') format('truetype');
+  src: url('iconfont.ttf?t=1696434231120') format('truetype');
 }
 
 .iconfont {
@@ -11,7 +11,175 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-31wode:before {
+  content: "\f01d8";
+}
+
+.icon-youxiyouxiji:before {
+  content: "\e61e";
+}
+
+.icon-biaoxingfill:before {
+  content: "\e732";
+}
+
+.icon-fenxiang:before {
+  content: "\e739";
+}
+
+.icon-gengduo:before {
+  content: "\e73a";
+}
+
+.icon-liebiaoxingshi:before {
+  content: "\e742";
+}
+
+.icon-liuyanfill:before {
+  content: "\e743";
+}
+
+.icon-liuyan:before {
+  content: "\e744";
+}
+
+.icon-saoma:before {
+  content: "\e749";
+}
+
+.icon-sousuo:before {
+  content: "\e752";
+}
+
+.icon-xihuanfill:before {
+  content: "\e760";
+}
+
+.icon-xihuan:before {
+  content: "\e761";
+}
+
+.icon-zhengli:before {
+  content: "\e766";
+}
+
+.icon-dingbu:before {
+  content: "\e76c";
+}
+
+.icon-xiangshang5:before {
+  content: "\e770";
+}
+
+.icon-xiangxia2:before {
+  content: "\e772";
+}
+
+.icon-xiangyou1:before {
+  content: "\e775";
+}
+
+.icon-xiangyou3:before {
+  content: "\e778";
+}
+
+.icon-xiangzuo1:before {
+  content: "\e779";
+}
+
+.icon-xiangzuo2:before {
+  content: "\e77a";
+}
+
+.icon-shuaxin:before {
+  content: "\e782";
+}
+
+.icon-others:before {
+  content: "\e7bc";
+}
+
+.icon-xinwen:before {
+  content: "\e669";
+}
+
+.icon-pinglunxiao:before {
+  content: "\e8b9";
+}
+
+.icon-jingcha:before {
+  content: "\e60d";
+}
+
+.icon-jingchaju:before {
+  content: "\e60e";
+}
+
+.icon-mima:before {
+  content: "\e60c";
+}
+
+.icon-xuexi_nor:before {
+  content: "\e602";
+}
+
+.icon-ditu:before {
+  content: "\e638";
+}
+
+.icon-fenxiang1:before {
+  content: "\e624";
+}
+
+.icon-dianshangfenxi:before {
+  content: "\e620";
+}
+
+.icon-fanhui:before {
+  content: "\e676";
+}
+
+.icon-shequ:before {
+  content: "\e663";
+}
+
+.icon-gongnengpaihangbang:before {
+  content: "\e629";
+}
+
+.icon-fenxiang2:before {
+  content: "\e6af";
+}
+
+.icon-gaishuaipipei:before {
+  content: "\e771";
+}
+
+.icon-shenglve:before {
+  content: "\e603";
+}
+
+.icon-bangzhukefu:before {
+  content: "\e72a";
+}
+
+.icon-weizhi:before {
+  content: "\e6f1";
+}
+
+.icon-022-tv:before {
+  content: "\e714";
+}
+
 .icon-xitonganquan:before {
   content: "\e651";
+}
+
+.icon-a-28Bshuangji:before {
+  content: "\e68d";
+}
+
+.icon-touzi:before {
+  content: "\e679";
 }
 

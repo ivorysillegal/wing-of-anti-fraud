@@ -8,4 +8,5 @@ import lombok.Data;
 public class Script {
     private Integer scriptId;
     private Integer scriptName;
+    private Boolean scriptStatus;
 }

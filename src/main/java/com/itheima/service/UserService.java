@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 public interface UserService {
-    boolean login(String username, String password);
+    String login(String username, String password);
 
     int register(String username, String password);
 

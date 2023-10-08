@@ -44,6 +44,8 @@ public class QuestionServiceImpl implements QuestionService {
         List<Question> wrongQuestions = new ArrayList<>();
         try {
             List<QuestionRelate> questionRelates = questionDAO.selectWrongQuestion(UserServiceImpl.user.getUserId());
+//            供测试所用
+//                        List<QuestionRelate> questionRelates = questionDAO.selectWrongQuestion(1);
             for (QuestionRelate questionRelate : questionRelates) {
                 wrongQuestions.add(questionDAO.getQuestionById(questionRelate.getQuestionId()));
             }

@@ -22,9 +22,9 @@ public class UserController {
     public Result login(@RequestBody Map<String, String> requestBody) {
         String username = requestBody.get("username");
         String password = requestBody.get("password");
-        boolean loginOrNot = userService.login(username, password);
-        if (loginOrNot)
-            return new Result("登录成功", LOGIN_OK, null);
+        String token = userService.login(username, password);
+        if (token != null)
+            return new Result("登录成功", LOGIN_OK, token);
         else
             return new Result("登录失败", LOGIN_ERR, null);
     }

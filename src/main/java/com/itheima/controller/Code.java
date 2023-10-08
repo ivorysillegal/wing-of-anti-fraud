@@ -54,4 +54,12 @@ public class Code {
 
     public static final Integer GET_QUESTION_CONDITION_OK = 200;
     public static final Integer GET_QUESTION_CONDITION_ERR = 261;
+
+    public static final Integer SHOW_POST_OK = 200;
+    public static final Integer SHOW_POST_ERR = 271;
+    public static final Integer SHOW_POST_NULL = 272;
+
+    public static final Integer INSERT_POST_OK = 200;
+    public static final Integer INSERT_POST_ERR = 281;
+
 }

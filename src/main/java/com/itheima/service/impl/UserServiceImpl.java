@@ -5,6 +5,7 @@ import com.itheima.pojo.user.ImageUploadRequest;
 import com.itheima.pojo.user.User;
 import com.itheima.pojo.user.UserValue;
 import com.itheima.service.UserService;
+import com.itheima.util.TokenBasedAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
@@ -27,13 +28,17 @@ public class UserServiceImpl implements UserService {
 
     //    登录
     @Override
-    public boolean login(String username, String password) {
+    public String login(String username, String password) {
 //        先判断此用户名的用户是否存在
-        this.user = userDAO.getByUsername(username);
-        if (user != null)
-            return user.getPassword().equals(password);
-//        确认用户存在后 确认密码是否正确
-        return false;
+        user = userDAO.getByUsername(username);
+        if (user != null) {
+            boolean equals = user.getPassword().equals(password);
+            if (!equals)
+                return null;
+            //        确认用户存在后 确认密码是否正确
+        }
+        String token = TokenBasedAuthentication.generateToken();
+        return token;
     }
 
     //    注册
