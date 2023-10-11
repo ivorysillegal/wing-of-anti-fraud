@@ -1,12 +1,12 @@
-package com.gduf.pojo;
+package com.gduf.pojo.script;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Script {
+public class ScriptMsg {
     private Integer scriptId;
-    private Integer scriptName;
+    private String scriptName;
     private Boolean scriptStatus;
 }

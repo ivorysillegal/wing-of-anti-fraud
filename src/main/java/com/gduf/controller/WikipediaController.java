@@ -23,7 +23,7 @@ public class WikipediaController {
     @Autowired
     private QuestionService questionService;
 
-    @GetMapping
+    @PostMapping
     public Result showQuestionInDetail(@RequestBody LinkedHashMap classifications) {
         String classification = (String) classifications.get("classification");
         List<Question> questions;

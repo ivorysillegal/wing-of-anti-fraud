@@ -48,7 +48,8 @@ public class UserServiceImpl implements UserService {
             return -1;
         try {
             userDAO.insertBasic(new User(username, password));
-            userDAO.insertValue(new UserValue());
+//            userDAO.insertValue(new UserValue());
+//            上面这一行 暂且没用
 //            创建用户个人信息 补充默认信息
         } catch (Exception e) {
             return 0;

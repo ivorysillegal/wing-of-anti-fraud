@@ -5,7 +5,6 @@ import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
-// TODO 添加@Mapper
 @Mapper
 public interface BookDao {
     @Insert("insert into tbl_book (type,name,description) values(#{type},#{name},#{description})")

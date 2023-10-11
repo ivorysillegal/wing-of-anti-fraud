@@ -64,4 +64,10 @@ public class Code {
 
     public static final Integer SHOW_WIKIPEDIA_OK = 200;
     public static final Integer SHOW_WIKIPEDIA_ERR = 291;
+
+    public static final Integer LOAD_SCRIPT_OK = 300;
+    public static final Integer LOAD_SCRIPT_ERR = 301;
+
+    public static final Integer LOAD_SCRIPT_END_OK = 300;
+    public static final Integer LOAD_SCRIPT_END_ERR = 311;
 }

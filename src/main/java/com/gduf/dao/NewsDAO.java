@@ -8,6 +8,6 @@ import java.util.List;
 
 @Mapper
 public interface NewsDAO {
-    @Select("select * from tb_news where classification = #{classification}")
+    @Select("select * from tb_news where classification = #{classification} order by rand() limit 2")
     public List<News> showNewsByClassification(String classification);
 }
