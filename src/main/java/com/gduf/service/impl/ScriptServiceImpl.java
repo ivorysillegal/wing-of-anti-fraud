@@ -102,7 +102,7 @@ public class ScriptServiceImpl implements ScriptService {
 //            scriptSpecialEnd = scriptDAO.getScriptSpecialEnd(scriptId,scriptInfluence);
             scriptSpecialEnd = scriptDAO.getScriptSpecialEnd(scriptId, scriptInfluence.getInfluence1(), scriptInfluence.getInfluence2(), scriptInfluence.getInfluence3(), scriptInfluence.getInfluence4());
 //            scriptStoryEnd = scriptDAO.getScriptStoryEnd(scriptInfluence, scriptId);
-            scriptStoryEnd = scriptDAO.getScriptStoryEnd(scriptInfluence.getInfluence1(), scriptInfluence.getInfluence2(), scriptInfluence.getInfluence3(), scriptInfluence.getInfluence4(), scriptId);
+            scriptStoryEnd = scriptDAO.getScriptNormalEnd(scriptInfluence.getInfluence1(), scriptInfluence.getInfluence2(), scriptInfluence.getInfluence3(), scriptInfluence.getInfluence4(), scriptId);
         } catch (Exception e) {
             return null;
         }

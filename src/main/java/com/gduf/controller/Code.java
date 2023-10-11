@@ -19,12 +19,13 @@ public class Code {
 
     public static final Integer LOGIN_OK = 200;
     public static final Integer REGISTER_OK = 200;
-    public static final Integer DANMAKU_SEND_OK = 210;
 
     public static final Integer LOGIN_ERR = 201;
     public static final Integer REGISTER_ERR = 201;
-    public static final Integer DANMAKU_SEND_ERR = 211;
     public static final Integer REGISTER_REPEAT_NAME = 202;
+
+    public static final Integer SEND_CAPTCHA_OK = 210;
+    public static final Integer SEND_CAPTCHA_ERR = 211;
 
     public static final Integer SHOW_PASSWORD_QUESTION_OK = 200;
     public static final Integer SHOW_PASSWORD_QUESTION_ERR = 221;

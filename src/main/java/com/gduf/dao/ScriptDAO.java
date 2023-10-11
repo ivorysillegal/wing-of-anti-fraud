@@ -50,5 +50,5 @@ public interface ScriptDAO {
 
     @Select("SELECT CASE WHEN #{influence1} >= start_value1 AND #{influence1} <= end_value1 AND #{influence2} >= start_value2 AND #{influence2} <= end_value2 AND #{influence3} >= start_value3 AND #{influence3} <= end_value3 AND #{influence4} >= start_value4 AND #{influence4} <= end_value4 THEN normal_end1 ELSE normal_end2 END AS result FROM tb_script_normal_end WHERE script_id = #{scriptId}")
 //    public String getScriptStoryEnd(ScriptInfluence scriptInfluence,Integer scriptId);
-    public String getScriptStoryEnd(Integer influence1,Integer influence2,Integer influence3,Integer influence4,Integer scriptId);
+    public String getScriptNormalEnd(Integer influence1,Integer influence2,Integer influence3,Integer influence4,Integer scriptId);
 }

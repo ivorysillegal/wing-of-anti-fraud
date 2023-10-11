@@ -1,12 +1,17 @@
 package com.gduf.controller;
 
+import cn.hutool.captcha.AbstractCaptcha;
+import cn.hutool.captcha.LineCaptcha;
+import com.gduf.pojo.CaptchaCode;
 import com.gduf.pojo.user.ImageUploadRequest;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.service.UserService;
+import com.gduf.util.Captcha;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import static com.gduf.controller.Code.*;
@@ -15,6 +20,9 @@ import static com.gduf.controller.Code.*;
 //@CrossOrigin
 @RequestMapping("/users")
 public class UserController {
+
+    private AbstractCaptcha captcha;
+
     @Autowired
     private UserService userService;
 
@@ -45,6 +53,23 @@ public class UserController {
             return new Result("注册失败 系统繁忙", REGISTER_ERR, null);
         else
             return new Result("用户名重复 请重试！", REGISTER_REPEAT_NAME, null);
+    }
+
+    @PostMapping("/send_captcha")
+    public Result sendCaptcha() {
+        CaptchaCode captchaCode;
+        byte[] imageBytes;
+        try {
+            captcha = Captcha.createCaptcha();
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            captcha.write(outputStream);
+            String code = captcha.getCode();
+            imageBytes = outputStream.toByteArray();
+            captchaCode = new CaptchaCode(imageBytes, code);
+        } catch (Exception e) {
+            return new Result("验证码发送失败", SEND_CAPTCHA_ERR, null);
+        }
+        return new Result("验证码发送成功", SEND_CAPTCHA_OK, captchaCode);
     }
 
 
