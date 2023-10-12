@@ -21,6 +21,8 @@ public interface CommunityDAO {
     @Select("select * from tb_post where writer_id = #{writerId}")
     public List<Post> showPostByWriter(Integer writerId);
 
+
+
 //    当点赞的时候 更新社区表中点赞数量
     @Update("update tb_post set likes = (likes + 1) where post_id = #{postId}")
     public void updateLikesInCommunity(Integer postId);
@@ -36,16 +38,19 @@ public interface CommunityDAO {
     @Update("update tb_comments set likes = (likes + 1) where comment_id = #{commentId} ")
     public void updateLikesForCommentsInCommunity(Integer commentId);
 
+
+
+
 //    关系表增加
     @Insert("insert into user_like_posts (user_id,post_id) values (#{userId},#{postId}) ")
-    public void insetLikesInUser(Integer postId, Integer userId);
+    public void insetLike(Integer postId, Integer userId);
 
     @Insert("insert into user_star_posts (user_id,post_id) values (#{userId},#{postId})")
-    public void insertStarsInUser(Integer postId, Integer userId);
+    public void insertStar(Integer postId, Integer userId);
 
-    @Insert("insert into tb_comment (comment_msg,post_id) values (#{commentMsg},#{postId})")
-    public void insertComment(String commentMsg,Integer postId);
+    @Insert("insert into tb_comment (comment_msg,post_id,user_id) values (#{commentMsg},#{postId},#{userId})")
+    public void insertComment(String commentMsg,Integer postId,Integer userId);
 
     @Insert("insert into user_like_comments (user_id,comment_id) values (#{userId},#{commentId})")
-    public void insertLikeCommentInUser(Integer userId,Integer commentId);
+    public void insertLikesForComment(Integer userId,Integer commentId);
 }

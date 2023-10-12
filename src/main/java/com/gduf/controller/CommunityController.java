@@ -5,7 +5,9 @@ import com.gduf.service.CommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.gduf.controller.Code.*;
 
@@ -43,7 +45,7 @@ public class CommunityController {
     }
 
 
-//    作者上传自己的帖子
+    //    作者上传自己的帖子
     @PostMapping("/write")
     public Result writePost(@RequestBody Post post) {
         if (communityService.insertPost(post)) {
@@ -51,11 +53,60 @@ public class CommunityController {
         } else return new Result("上传帖子失败", INSERT_POST_ERR, null);
     }
 
-////    点赞功能
-//   @PostMapping("/likes")
-//   public Result like(@RequestBody Map<Integer,Integer> likes){
-////    Map的键和值可以是postId和userId
-//
-//
-//   }
+    //    点赞功能
+    @PostMapping("/like")
+    public Result like(@RequestBody Map<String, Integer> likes) {
+//    Map的键和值可以是postId和userId
+        try {
+            Integer postId = likes.get("postId");
+            Integer userId = likes.get("userId");
+            communityService.insertLike(userId, postId);
+        } catch (Exception e) {
+            return new Result("点赞失败", COMMUNITY_LIKE_ERR, null);
+        }
+        return new Result("点赞成功", COMMUNITY_LIKE_OK, null);
+    }
+
+//    收藏功能
+    @PostMapping("/star")
+    public Result star(@RequestBody Map<String, Integer> stars) {
+//    Map的键和值可以是postId和userId
+        try {
+            Integer postId = stars.get("postId");
+            Integer userId = stars.get("userId");
+            communityService.insertStar(userId, postId);
+        } catch (Exception e) {
+            return new Result("收藏失败", COMMUNITY_STAR_ERR, null);
+        }
+        return new Result("收藏成功", COMMUNITY_STAR_OK, null);
+    }
+
+//    评论功能
+    @PostMapping("/comment")
+    public Result comment(@RequestBody LinkedHashMap comments) {
+//    Map的键和值可以是commentMsg和userId和postId
+        try {
+            String commentMsg = (String) comments.get("commentMsg");
+            Integer userId = (Integer) comments.get("userId");
+            Integer postId = (Integer) comments.get("postId");
+            communityService.insertComment(commentMsg, postId, userId);
+        } catch (Exception e) {
+            return new Result("收藏失败", COMMUNITY_STAR_ERR, null);
+        }
+        return new Result("收藏成功", COMMUNITY_STAR_OK, null);
+    }
+
+//    点赞评论
+    @PostMapping("/comment/like")
+    public Result likesForComment(@RequestBody Map<String, Integer> likesComment) {
+        try {
+            Integer userId = likesComment.get("userId");
+            Integer postId = likesComment.get("postId");
+            communityService.insertLikesForComment(userId, postId);
+        } catch (Exception e) {
+            return new Result("点赞评论失败", COMMUNITY_COMMENT_LIKE_ERR, null);
+        }
+        return new Result("点赞评论成功", COMMUNITY_COMMENT_LIKE_OK, null);
+    }
+
 }

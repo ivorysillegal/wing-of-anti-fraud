@@ -71,4 +71,13 @@ public class Code {
 
     public static final Integer LOAD_SCRIPT_END_OK = 300;
     public static final Integer LOAD_SCRIPT_END_ERR = 311;
+
+    public static final Integer COMMUNITY_LIKE_OK = 300;
+    public static final Integer COMMUNITY_LIKE_ERR = 321;
+
+    public static final Integer COMMUNITY_STAR_OK = 300;
+    public static final Integer COMMUNITY_STAR_ERR = 321;
+
+    public static final Integer COMMUNITY_COMMENT_LIKE_OK = 300;
+    public static final Integer COMMUNITY_COMMENT_LIKE_ERR = 331;
 }

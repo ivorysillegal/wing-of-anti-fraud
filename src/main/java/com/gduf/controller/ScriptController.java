@@ -71,7 +71,7 @@ public class ScriptController {
         } catch (Exception e) {
             return new Result("读取剧本结局失败", LOAD_SCRIPT_END_ERR, null);
         }
-        return new Result("剧本读取结局成功", LOAD_SCRIPT_OK, scriptEnd);
+        return new Result("剧本读取结局成功", LOAD_SCRIPT_END_OK, scriptEnd);
 
     }
 
