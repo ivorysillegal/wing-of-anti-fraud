@@ -9,4 +9,6 @@ public class ScriptMsg {
     private Integer scriptId;
     private String scriptName;
     private Boolean scriptStatus;
+    private String scriptBackground;
+    private String classification;
 }

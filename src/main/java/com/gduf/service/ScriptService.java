@@ -7,7 +7,7 @@ import java.util.List;
 
 @Transactional
 public interface ScriptService {
-    public boolean insertScript(ScriptMsg scriptMsg);
+    public boolean insertScript(ScriptMsg scriptMsg,ScriptInfluenceName scriptInfluenceName);
 
     public boolean insertScriptNodes(List<ScriptNode> scriptNodes);
 
@@ -19,5 +19,7 @@ public interface ScriptService {
 
     public List<ScriptNode> getScriptDetail(Integer scriptId);
 
-    public ScriptEnd getScriptEnd(Integer scriptId, ScriptInfluence scriptInfluence);
+    public ScriptEnd getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange);
+
+    public ScriptInfluenceName getScriptInfluenceName(Integer scriptId);
 }

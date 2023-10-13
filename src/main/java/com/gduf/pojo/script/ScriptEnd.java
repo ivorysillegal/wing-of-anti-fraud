@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ScriptEnd {
-    private String scriptSpecialEnd;
-    private String scriptNormalEnd;
+    private String specialEnd;
+    private String normalEnd;
 }

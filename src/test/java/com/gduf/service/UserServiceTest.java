@@ -3,7 +3,6 @@ package com.gduf.service;
 import com.gduf.dao.ScriptDAO;
 import com.gduf.dao.UserDAO;
 import com.gduf.domain.Book;
-import com.gduf.pojo.script.ScriptInfluence;
 import com.gduf.pojo.script.ScriptNodeMsg;
 import com.gduf.pojo.user.User;
 import org.junit.jupiter.api.Test;
@@ -66,7 +65,7 @@ public class UserServiceTest {
 
     @Test
     public void test() {
-        System.out.println(scriptDAO.getScript(1));
+        System.out.println(scriptDAO.getScriptMsg(1));
     }
 
 
@@ -76,8 +75,12 @@ public class UserServiceTest {
 //        System.out.println(scriptDAO.getScriptSpecialEnd(1, 0, 50, 50, 50));
 //        System.out.println(scriptDAO.getScriptStoryEnd(new ScriptInfluence(50, 50, 50, 50), 1));
 //        System.out.println(scriptDAO.getScriptStoryEnd(50,50,50,50,1));
+    }
 
 
+    @Test
+    public void testInfluence() {
+        System.out.println(scriptDAO.getInfluenceName(2));
     }
 
 }

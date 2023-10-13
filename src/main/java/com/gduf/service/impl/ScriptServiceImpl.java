@@ -17,9 +17,10 @@ public class ScriptServiceImpl implements ScriptService {
 
     //    增加剧本 （名称及id及乱七八糟）
     @Override
-    public boolean insertScript(ScriptMsg scriptMsg) {
+    public boolean insertScript(ScriptMsg scriptMsg, ScriptInfluenceName scriptInfluenceName) {
         try {
             scriptDAO.insertScript(scriptMsg);
+            scriptDAO.insertScriptInfluenceName(scriptInfluenceName);
         } catch (Exception e) {
             return false;
         }
@@ -54,7 +55,7 @@ public class ScriptServiceImpl implements ScriptService {
     public ScriptMsg getScriptMsg(Integer scriptId) {
         ScriptMsg scriptMsg;
         try {
-            scriptMsg = scriptDAO.getScript(scriptId);
+            scriptMsg = scriptDAO.getScriptMsg(scriptId);
         } catch (Exception e) {
             return null;
         }
@@ -95,18 +96,29 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
-    public ScriptEnd getScriptEnd(Integer scriptId, ScriptInfluence scriptInfluence) {
-        String scriptSpecialEnd;
-        String scriptStoryEnd;
+    public ScriptEnd getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange) {
+        String specialEnd;
+        String normalEnd;
         try {
 //            scriptSpecialEnd = scriptDAO.getScriptSpecialEnd(scriptId,scriptInfluence);
-            scriptSpecialEnd = scriptDAO.getScriptSpecialEnd(scriptId, scriptInfluence.getInfluence1(), scriptInfluence.getInfluence2(), scriptInfluence.getInfluence3(), scriptInfluence.getInfluence4());
+            specialEnd = scriptDAO.getScriptSpecialEnd(scriptId, scriptInfluenceChange.getInfluence1(), scriptInfluenceChange.getInfluence2(), scriptInfluenceChange.getInfluence3(), scriptInfluenceChange.getInfluence4());
 //            scriptStoryEnd = scriptDAO.getScriptStoryEnd(scriptInfluence, scriptId);
-            scriptStoryEnd = scriptDAO.getScriptNormalEnd(scriptInfluence.getInfluence1(), scriptInfluence.getInfluence2(), scriptInfluence.getInfluence3(), scriptInfluence.getInfluence4(), scriptId);
+            normalEnd = scriptDAO.getScriptNormalEnd(scriptInfluenceChange.getInfluence1(), scriptInfluenceChange.getInfluence2(), scriptInfluenceChange.getInfluence3(), scriptInfluenceChange.getInfluence4(), scriptId);
         } catch (Exception e) {
             return null;
         }
-        ScriptEnd scriptEnd = new ScriptEnd(scriptSpecialEnd, scriptStoryEnd);
+        ScriptEnd scriptEnd = new ScriptEnd(specialEnd, normalEnd);
         return scriptEnd;
+    }
+
+    @Override
+    public ScriptInfluenceName getScriptInfluenceName(Integer scriptId) {
+        ScriptInfluenceName scriptInfluenceName;
+        try {
+            scriptInfluenceName = scriptDAO.getInfluenceName(scriptId);
+        } catch (Exception e) {
+            return null;
+        }
+        return scriptInfluenceName;
     }
 }

@@ -19,12 +19,15 @@ public class ScriptController {
 
     //    保存剧本
     @PostMapping("/make")
-    public Result saveScript(@RequestBody ScriptMsg scriptMsg) {
+//    public Result saveScript(@RequestBody ScriptMsg scriptMsg) {
+    public Result saveScript(@RequestBody ScriptMsgWithInfluenceName scriptMsgWithInfluenceName) {
+        ScriptInfluenceName scriptInfluenceName = scriptMsgWithInfluenceName.getScriptInfluenceName();
+        ScriptMsg scriptMsg = scriptMsgWithInfluenceName.getScriptMsg();
         try {
-            if (!scriptService.insertScript(scriptMsg)
-            ) return new Result("剧本保存失败", SCRIPT_READ_ERR, null);
+            if (!scriptService.insertScript(scriptMsg,scriptInfluenceName)
+            ) return new Result("剧本保存失败", SCRIPT_SAVE_ERR, null);
         } catch (Exception e) {
-            return new Result("剧本保存失败", SCRIPT_READ_ERR, null);
+            return new Result("剧本保存失败", SCRIPT_SAVE_ERR, null);
         }
         return new Result("剧本保存成功", SCRIPT_SAVE_OK, null);
     }
@@ -39,9 +42,9 @@ public class ScriptController {
 
     @PostMapping
     public Result showScript() {
-        List<ScriptMsg> scriptMsgs = scriptService.getScript();
-        if (scriptMsgs != null) {
-            return new Result("剧本读取成功", SCRIPT_READ_OK, scriptMsgs);
+        List<ScriptMsg> scriptMsg = scriptService.getScript();
+        if (scriptMsg != null) {
+            return new Result("剧本读取成功", SCRIPT_READ_OK, scriptMsg);
         } else return new Result("剧本读取失败", SCRIPT_READ_ERR, null);
     }
 
@@ -64,10 +67,10 @@ public class ScriptController {
         int influence2 = (int) scriptEndValue.get("influence2");
         int influence3 = (int) scriptEndValue.get("influence3");
         int influence4 = (int) scriptEndValue.get("influence4");
-        ScriptInfluence scriptInfluence = new ScriptInfluence(influence1, influence2, influence3, influence4);
+        ScriptInfluenceChange scriptInfluenceChange = new ScriptInfluenceChange(influence1, influence2, influence3, influence4);
         ScriptEnd scriptEnd;
         try {
-            scriptEnd = scriptService.getScriptEnd(scriptId, scriptInfluence);
+            scriptEnd = scriptService.getScriptEnd(scriptId, scriptInfluenceChange);
         } catch (Exception e) {
             return new Result("读取剧本结局失败", LOAD_SCRIPT_END_ERR, null);
         }
@@ -79,7 +82,8 @@ public class ScriptController {
     private Script createScript(Integer scriptId) {
         List<ScriptNode> scriptDetail = scriptService.getScriptDetail(scriptId);
         ScriptMsg scriptMsg = scriptService.getScriptMsg(scriptId);
-        Script script = new Script(scriptMsg, scriptDetail);
+        ScriptInfluenceName scriptInfluenceName = scriptService.getScriptInfluenceName(scriptId);
+        Script script = new Script(scriptMsg, scriptDetail, scriptInfluenceName);
         return script;
     }
 }

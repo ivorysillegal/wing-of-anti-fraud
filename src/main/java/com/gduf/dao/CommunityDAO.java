@@ -1,6 +1,5 @@
 package com.gduf.dao;
 
-import com.gduf.domain.Book;
 import com.gduf.pojo.Post;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
