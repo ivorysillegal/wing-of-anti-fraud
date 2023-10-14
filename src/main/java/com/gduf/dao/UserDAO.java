@@ -15,14 +15,8 @@ public interface UserDAO {
     @Insert("insert into user_value (sign,age,gender,pic,last_game) values (#{sign},#{age},#{gender},#{pic},#{lastGame})")
     public int insertValue(UserValue userValue);
 
-//    @Insert("insert into user_game (coins,last_played_game) values(#{coins},#{lastPlayedGame})")
-//    public int insertGame();
-
 //    @Delete("delete from tb_user_basic where id = #{id}")
 //    public int selectOne(Integer id);
-//
-//    @Select("select * from tbl_book where id = #{id}")
-//    public Book getById(Integer id);
 
     @Select("select * from tb_user_basic where username = #{username}")
     public User getByUsername(String username);

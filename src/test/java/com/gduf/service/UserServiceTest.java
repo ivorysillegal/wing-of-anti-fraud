@@ -15,25 +15,11 @@ import java.util.List;
 public class UserServiceTest {
 
     @Autowired
-    private BookService bookService;
-    @Autowired
     private UserDAO userDAO;
     @Autowired
     private ScriptDAO scriptDAO;
     @Autowired
     private ScriptService scriptService;
-
-    @Test
-    public void testGetById() {
-        Book book = bookService.getById(2);
-        System.out.println(book);
-    }
-
-    @Test
-    public void testGetAll() {
-        List<Book> all = bookService.getAll();
-        System.out.println(all);
-    }
 
     @Test
     public void testInsert() {
@@ -62,21 +48,10 @@ public class UserServiceTest {
         System.out.println(scriptDAO.getScriptNodeChoice(1, 1));
 //        System.out.println(scriptDAO.test());
     }
-
     @Test
     public void test() {
         System.out.println(scriptDAO.getScriptMsg(1));
     }
-
-
-    @Test
-    public void testLoadEnd() {
-//        System.out.println(scriptService.getScriptEnd(1, new ScriptInfluence(100, 0, 0, 0)));
-//        System.out.println(scriptDAO.getScriptSpecialEnd(1, 0, 50, 50, 50));
-//        System.out.println(scriptDAO.getScriptStoryEnd(new ScriptInfluence(50, 50, 50, 50), 1));
-//        System.out.println(scriptDAO.getScriptStoryEnd(50,50,50,50,1));
-    }
-
 
     @Test
     public void testInfluence() {

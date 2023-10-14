@@ -25,7 +25,7 @@ public interface QuestionDAO {
     @Select("select * from tb_question where question_id = #{questionId}")
     public Question getQuestionById(Integer questionId);
 
-    @Select("select * from tb_question where classification = #{classification} order by rand() limit 5")
+    @Select("select * from tb_question where classification = #{classification} order by rand() limit 4")
     public List<Question> showQuestionByClassification(String classification);
 
 }
