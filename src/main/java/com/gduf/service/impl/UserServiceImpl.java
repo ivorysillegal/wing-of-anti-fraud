@@ -36,7 +36,8 @@ public class UserServiceImpl implements UserService {
             if (!equals)
                 return null;
             //        确认用户存在后 确认密码是否正确
-        }
+        }else
+            return null;
         String token = TokenBasedAuthentication.generateToken();
         return token;
     }
@@ -65,13 +66,14 @@ public class UserServiceImpl implements UserService {
             byte[] imageData = Base64Utils.decodeFromString(base64ImageData);
 
 //        // 获取绝对路径
-            String parent = new File("static/images").getAbsolutePath();
+            String parent = new File("src\\main\\resources\\image").getAbsolutePath();
             File dir = new File(parent);
             if (!dir.exists()) {
                 dir.mkdirs(); // 创建当前的目录
             }
 
             String[] split = fileName.split("\\.");
+//            这里分割前要先确保他有后缀名
             String fileExtension = split[1];
             String newFileName = UUID.randomUUID().toString().toUpperCase() + "." + fileExtension;
             File dest = new File(dir, newFileName);
@@ -82,8 +84,7 @@ public class UserServiceImpl implements UserService {
                 return false;
             }
             String avatar = "../images/wms/" + newFileName;
-            Integer userId = user.getUserId();
-//        UserValue userValue = userDAO.getValueById(userId);
+            Integer userId = request.getUserId();
             userDAO.updatePic(userId, avatar);
         } catch (Exception e) {
             return false;

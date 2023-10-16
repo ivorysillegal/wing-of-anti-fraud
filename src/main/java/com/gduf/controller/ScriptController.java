@@ -18,7 +18,7 @@ public class ScriptController {
     private ScriptService scriptService;
 
     //    保存剧本
-    @PostMapping("/make")
+    @PostMapping("/design")
 //    public Result saveScript(@RequestBody ScriptMsg scriptMsg) {
     public Result saveScript(@RequestBody ScriptMsgWithInfluenceName scriptMsgWithInfluenceName) {
         ScriptInfluenceName scriptInfluenceName = scriptMsgWithInfluenceName.getScriptInfluenceName();
