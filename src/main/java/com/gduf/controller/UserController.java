@@ -106,10 +106,10 @@ public class UserController {
 
     //    个人信息展示（主页）
     @GetMapping
-    public Result showMsg() {
+    public Result showMsg(@RequestHeader String token) {
         UserValue userValue;
         try {
-            userValue = userService.showUser();
+            userValue = userService.showUser(token);
             if (userValue == null) {
                 return new Result("个人信息展示失败", SHOW_MSG_ERR, null);
             }

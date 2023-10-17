@@ -12,7 +12,7 @@ public interface UserService {
 
     boolean picUpload(ImageUploadRequest imageUploadRequest);
 
-    UserValue showUser();
+    UserValue showUser(String token);
 
     boolean updateUser(UserValue userValue);
 }

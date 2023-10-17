@@ -5,8 +5,11 @@ import com.gduf.pojo.user.ImageUploadRequest;
 import com.gduf.pojo.user.User;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.service.UserService;
-import com.gduf.util.TokenBasedAuthentication;
+import com.gduf.util.JwtUtil;
+import com.gduf.util.RedisCache;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 
@@ -22,24 +25,30 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDAO userDAO;
 
-    protected static User user;
+//    protected static User user;
 //    public static User user;
 //    仅为测试所用
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private RedisCache redisCache;
 
     //    登录
     @Override
     public String login(String username, String password) {
-//        先判断此用户名的用户是否存在
-        user = userDAO.getByUsername(username);
+        User user = userDAO.getByUsername(username);
         if (user != null) {
-            boolean equals = user.getPassword().equals(password);
-            if (!equals)
+            if (user.getPassword().equals(password)) {
                 return null;
-            //        确认用户存在后 确认密码是否正确
-        }else
-            return null;
-        String token = TokenBasedAuthentication.generateToken();
-        return token;
+            }
+            Integer userId = user.getUserId();
+//        生成token
+            String jwt = JwtUtil.createJWT(String.valueOf(userId));
+//        存入redis
+            redisCache.setCacheObject("login" + userId, user);
+            return jwt;
+        } else return null;
     }
 
     //    注册
@@ -93,13 +102,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserValue showUser() {
-        UserValue userValue;
+    public UserValue showUser(String token) {
+        UserValue userValue = null;
+        User user;
         try {
-            userValue = userDAO.getValueById(user.getUserId());
+            user = decode(token);
         } catch (Exception e) {
             return null;
         }
+        userValue = userDAO.getValueById(user.getUserId());
         return userValue;
     }
 
@@ -111,6 +122,14 @@ public class UserServiceImpl implements UserService {
             return false;
         }
         return true;
+    }
+
+    public User decode(String token) throws Exception {
+        Claims claims = JwtUtil.parseJWT(token);
+        String userId = claims.getSubject();
+//            getSubject获取的是未加密之前的原始值
+        User user = redisCache.getCacheObject("login" + userId);
+        return user;
     }
 }
 
