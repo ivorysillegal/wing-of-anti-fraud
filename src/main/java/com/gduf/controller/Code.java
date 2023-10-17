@@ -78,6 +78,12 @@ public class Code {
     public static final Integer COMMUNITY_STAR_OK = 300;
     public static final Integer COMMUNITY_STAR_ERR = 321;
 
+    public static final Integer COMMUNITY_COMMENT_OK = 300;
+    public static final Integer COMMUNITY_COMMENT_ERR = 331;
+
     public static final Integer COMMUNITY_COMMENT_LIKE_OK = 300;
     public static final Integer COMMUNITY_COMMENT_LIKE_ERR = 331;
+
+    public static final Integer SHOW_POST_MAIN_OK = 300;
+    public static final Integer SHOW_POST_MAIN_ERR = 341;
 }

@@ -1,7 +1,9 @@
 package com.gduf.service.impl;
 
 import com.gduf.dao.CommunityDAO;
-import com.gduf.pojo.Post;
+import com.gduf.pojo.community.Comment;
+import com.gduf.pojo.community.Post;
+import com.gduf.pojo.community.PostWithComments;
 import com.gduf.service.CommunityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,12 +19,15 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public List<Post> showAllPost() {
         List<Post> posts;
-        try {
-            posts = communityDAO.showAllPost();
-        } catch (Exception e) {
-            return null;
-        }
+        posts = communityDAO.showAllPost();
         return posts;
+    }
+
+    @Override
+    public PostWithComments showPostById(Integer postId) {
+        Post post = communityDAO.showPostById(postId);
+        List<Comment> comments = communityDAO.showEachPostComment(postId);
+        return new PostWithComments(post, comments);
     }
 
     @Override
@@ -59,8 +64,8 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void insertComment(String commentMsg, Integer postId,Integer userId) {
-        communityDAO.insertComment(commentMsg, postId,userId);
+    public void insertComment(String commentMsg, Integer postId, Integer userId) {
+        communityDAO.insertComment(commentMsg, postId, userId);
         communityDAO.updateCommentsInCommunity(postId);
     }
 

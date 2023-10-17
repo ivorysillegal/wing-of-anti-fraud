@@ -1,6 +1,7 @@
 package com.gduf.dao;
 
-import com.gduf.pojo.Post;
+import com.gduf.pojo.community.Comment;
+import com.gduf.pojo.community.Post;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -20,27 +21,29 @@ public interface CommunityDAO {
     @Select("select * from tb_post where writer_id = #{writerId}")
     public List<Post> showPostByWriter(Integer writerId);
 
+    @Select("select * from tb_post where post_id = #{postId}")
+    public Post showPostById(Integer postId);
 
+    @Select("select * from tb_comment where post_id = #{postId}")
+    public List<Comment> showEachPostComment(Integer postId);
 
-//    当点赞的时候 更新社区表中点赞数量
+    //    当点赞的时候 更新社区表中点赞数量
     @Update("update tb_post set likes = (likes + 1) where post_id = #{postId}")
     public void updateLikesInCommunity(Integer postId);
 
-//    更新收藏
+    //    更新收藏
     @Update("update tb_post set stars = (stars + 1) where post_id = #{postId}")
     public void updateStarsInCommunity(Integer postId);
 
-//    更新评论
+    //    更新评论
     @Update("update tb_post set comments = (comments + 1) where post_id = #{postId}")
     public void updateCommentsInCommunity(Integer postId);
 
-    @Update("update tb_comments set likes = (likes + 1) where comment_id = #{commentId} ")
+    @Update("update tb_comment set likes = (likes + 1) where comment_id = #{commentId} ")
     public void updateLikesForCommentsInCommunity(Integer commentId);
 
 
-
-
-//    关系表增加
+    //    关系表增加
     @Insert("insert into user_like_posts (user_id,post_id) values (#{userId},#{postId}) ")
     public void insetLike(Integer postId, Integer userId);
 
@@ -48,8 +51,8 @@ public interface CommunityDAO {
     public void insertStar(Integer postId, Integer userId);
 
     @Insert("insert into tb_comment (comment_msg,post_id,user_id) values (#{commentMsg},#{postId},#{userId})")
-    public void insertComment(String commentMsg,Integer postId,Integer userId);
+    public void insertComment(String commentMsg, Integer postId, Integer userId);
 
     @Insert("insert into user_like_comments (user_id,comment_id) values (#{userId},#{commentId})")
-    public void insertLikesForComment(Integer userId,Integer commentId);
+    public void insertLikesForComment(Integer userId, Integer commentId);
 }

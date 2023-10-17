@@ -1,6 +1,7 @@
 package com.gduf.service;
 
-import com.gduf.pojo.Post;
+import com.gduf.pojo.community.Post;
+import com.gduf.pojo.community.PostWithComments;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.List;
 @Transactional
 public interface CommunityService {
     public List<Post> showAllPost();
+
+    public PostWithComments showPostById(Integer postId);
 
     public List<Post> showPostByWriter(Integer writerId);
 

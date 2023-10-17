@@ -14,3 +14,9 @@ spring mvc:
   hiddenmethod:
     filter:
       enabled: true
+
+
+#mybatis配置
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
