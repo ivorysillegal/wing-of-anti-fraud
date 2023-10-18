@@ -12,7 +12,7 @@ import java.util.List;
 @Mapper
 public interface CommunityDAO {
 
-    @Insert("insert into tb_post (title,article,create_time) values (#{title},#{article},#{createTime})")
+    @Insert("insert into tb_post (title,article,create_time,writer_id) values (#{title},#{article},#{createTime},#{writerId})")
     public int insertPost(Post post);
 
     @Select("select * from tb_post")

@@ -40,22 +40,6 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public List<Question> showWrongQuestion() {
-        List<Question> wrongQuestions = new ArrayList<>();
-        try {
-            List<QuestionRelate> questionRelates = questionDAO.selectWrongQuestion(UserServiceImpl.user.getUserId());
-//            供测试所用
-//                        List<QuestionRelate> questionRelates = questionDAO.selectWrongQuestion(1);
-            for (QuestionRelate questionRelate : questionRelates) {
-                wrongQuestions.add(questionDAO.getQuestionById(questionRelate.getQuestionId()));
-            }
-        } catch (Exception e) {
-            return null;
-        }
-        return wrongQuestions;
-    }
-
-    @Override
     public List<Question> showQuestionInClassification(String classification) {
         List<Question> questions;
         try {

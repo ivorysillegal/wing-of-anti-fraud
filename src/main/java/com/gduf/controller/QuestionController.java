@@ -54,12 +54,4 @@ public class QuestionController {
             return new Result("发送回答情况失败", GET_QUESTION_CONDITION_ERR, null);
         return new Result("发送回答情况成功", GET_QUESTION_CONDITION_OK, null);
     }
-
-    @GetMapping("/wrong")
-    public Result showWrongQuestion() {
-        List<Question> questions = questionService.showWrongQuestion();
-        if (questions == null || questions.isEmpty())
-            return new Result("获取错题失败", GET_QUESTION_CONDITION_ERR, null);
-        return new Result("获取错题成功", GET_QUESTION_CONDITION_OK, questions);
-    }
 }

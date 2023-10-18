@@ -14,7 +14,7 @@ public interface CommunityService {
 
     public List<Post> showPostByWriter(Integer writerId);
 
-    public boolean insertPost(Post post);
+    public boolean insertPost(Post post,String token);
 
     public void insertLike(Integer userId,Integer postId);
 

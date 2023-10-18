@@ -87,11 +87,11 @@
 			<version>1.2.33</version>
 		</dependency>
 
-		<!--SpringSecurity启动器-->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
+<!--		&lt;!&ndash;SpringSecurity启动器&ndash;&gt;-->
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-security</artifactId>-->
+<!--		</dependency>-->
 
 		<!--redis依赖-->
 		<dependency>

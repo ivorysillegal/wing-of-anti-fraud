@@ -4,7 +4,9 @@ import com.gduf.dao.CommunityDAO;
 import com.gduf.pojo.community.Comment;
 import com.gduf.pojo.community.Post;
 import com.gduf.pojo.community.PostWithComments;
+import com.gduf.pojo.user.User;
 import com.gduf.service.CommunityService;
+import com.gduf.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +44,10 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public boolean insertPost(Post post) {
+    public boolean insertPost(Post post, String token) {
         try {
+            User user = JwtUtil.decode(token);
+            post.setWriterId(user.getUserId());
             communityDAO.insertPost(post);
         } catch (Exception e) {
             return false;

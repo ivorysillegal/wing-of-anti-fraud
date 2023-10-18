@@ -7,9 +7,7 @@ import com.gduf.pojo.user.UserValue;
 import com.gduf.service.UserService;
 import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
 
@@ -19,27 +17,27 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
+import static com.gduf.util.JwtUtil.decode;
+
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserDAO userDAO;
 
+    @Autowired
+    private RedisCache redisCache;
+
 //    protected static User user;
 //    public static User user;
 //    仅为测试所用
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private RedisCache redisCache;
 
     //    登录
     @Override
     public String login(String username, String password) {
         User user = userDAO.getByUsername(username);
         if (user != null) {
-            if (user.getPassword().equals(password)) {
+            if (!user.getPassword().equals(password)) {
                 return null;
             }
             Integer userId = user.getUserId();
@@ -124,13 +122,6 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
-    public User decode(String token) throws Exception {
-        Claims claims = JwtUtil.parseJWT(token);
-        String userId = claims.getSubject();
-//            getSubject获取的是未加密之前的原始值
-        User user = redisCache.getCacheObject("login" + userId);
-        return user;
-    }
 }
 
 

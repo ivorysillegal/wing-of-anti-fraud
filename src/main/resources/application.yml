@@ -9,11 +9,15 @@ spring:
     url: jdbc:mysql://localhost:3306/anti-fraud #?servierTimezone=UTC
     username: root
     password: mhi7UeyXtm
+  redis:
+    host: 127.0.0.1
+    port: 6379
 
 spring mvc:
   hiddenmethod:
     filter:
       enabled: true
+
 
 
 #mybatis配置

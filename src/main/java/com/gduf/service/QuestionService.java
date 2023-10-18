@@ -12,7 +12,5 @@ public interface QuestionService {
 
     public boolean saveWrongAnswerQuestion(List<QuestionRelate> questionRelate);
 
-    public List<Question> showWrongQuestion();
-
     public List<Question> showQuestionInClassification(String classification);
 }
