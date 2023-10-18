@@ -4,6 +4,7 @@ import cn.hutool.captcha.AbstractCaptcha;
 import com.gduf.pojo.CaptchaCode;
 import com.gduf.pojo.user.ImageUploadRequest;
 import com.gduf.pojo.user.UserValue;
+import com.gduf.pojo.user.UserWithValue;
 import com.gduf.service.UserService;
 import com.gduf.util.Captcha;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,23 +84,20 @@ public class UserController {
         if (imageData.length > 512 * 512) {
             return new Result("照片大小超出限制", PIC_UPLOAD_ERR, null);
         }
-        boolean b = userService.picUpload(request);
-        if (!b)
+        try {
+            userService.picUpload(request);
+        } catch (Exception e) {
             return new Result("头像上传失败", PIC_UPLOAD_ERR, null);
+        }
         return new Result("头像上传成功", PIC_UPLOAD_OK, null);
     }
 
 
     //    更新个人信息
     @PostMapping
-    public Result updateMsg(@RequestBody UserValue userValue) {
-        try {
-            boolean b = userService.updateUser(userValue);
-            if (!b)
+    public Result updateMsg(@RequestHeader String token, @RequestBody UserValue userValue) {
+            if (!userService.updateUser(userValue,token))
                 return new Result("个人信息更新失败", UPDATE_MSG_ERR, null);
-        } catch (Exception e) {
-            return new Result("个人信息更新失败", UPDATE_MSG_ERR, null);
-        }
         return new Result("个人信息更新成功", UPDATE_MSG_OK, null);
     }
 
@@ -107,15 +105,15 @@ public class UserController {
     //    个人信息展示（主页）
     @GetMapping
     public Result showMsg(@RequestHeader String token) {
-        UserValue userValue;
+        UserWithValue userWithValue;
         try {
-            userValue = userService.showUser(token);
-            if (userValue == null) {
+            userWithValue = userService.showUser(token);
+            if (userWithValue == null) {
                 return new Result("个人信息展示失败", SHOW_MSG_ERR, null);
             }
         } catch (Exception e) {
             return new Result("个人信息展示失败", SHOW_MSG_ERR, null);
         }
-        return new Result("个人信息展示成功", SHOW_MSG_OK, userValue);
+        return new Result("个人信息展示成功", SHOW_MSG_OK, userWithValue);
     }
 }

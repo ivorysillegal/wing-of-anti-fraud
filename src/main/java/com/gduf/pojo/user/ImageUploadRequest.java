@@ -7,6 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class ImageUploadRequest {
     private Integer userId;
-    private String fileName;
+//    private String fileName;
     private String file;
+//    file指图片的base64字符串
 }

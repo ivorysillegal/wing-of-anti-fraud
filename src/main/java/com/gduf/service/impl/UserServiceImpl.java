@@ -4,9 +4,11 @@ import com.gduf.dao.UserDAO;
 import com.gduf.pojo.user.ImageUploadRequest;
 import com.gduf.pojo.user.User;
 import com.gduf.pojo.user.UserValue;
+import com.gduf.pojo.user.UserWithValue;
 import com.gduf.service.UserService;
 import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Base64Utils;
@@ -17,20 +19,19 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
-import static com.gduf.util.JwtUtil.decode;
-
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserDAO userDAO;
 
-    @Autowired
-    private RedisCache redisCache;
+    //    @Autowired
+    private final RedisCache redisCache;
 
-//    protected static User user;
-//    public static User user;
-//    仅为测试所用
+    @Autowired
+    public UserServiceImpl(RedisCache redisCache) {
+        this.redisCache = redisCache;
+    }
 
     //    登录
     @Override
@@ -66,41 +67,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean picUpload(ImageUploadRequest request) {
-        try {
-            String fileName = request.getFileName();
-            String base64ImageData = request.getFile();
-            byte[] imageData = Base64Utils.decodeFromString(base64ImageData);
-
-//        // 获取绝对路径
-            String parent = new File("src\\main\\resources\\image").getAbsolutePath();
-            File dir = new File(parent);
-            if (!dir.exists()) {
-                dir.mkdirs(); // 创建当前的目录
-            }
-
-            String[] split = fileName.split("\\.");
-//            这里分割前要先确保他有后缀名
-            String fileExtension = split[1];
-            String newFileName = UUID.randomUUID().toString().toUpperCase() + "." + fileExtension;
-            File dest = new File(dir, newFileName);
-
-            try (OutputStream os = new FileOutputStream(dest)) {
-                os.write(imageData);
-            } catch (IOException e) {
-                return false;
-            }
-            String avatar = "../images/wms/" + newFileName;
-            Integer userId = request.getUserId();
-            userDAO.updatePic(userId, avatar);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
+    public void picUpload(ImageUploadRequest request) {
+        Integer userId = request.getUserId();
+        String picFile = request.getFile();
+        userDAO.updatePic(userId, picFile);
     }
 
     @Override
-    public UserValue showUser(String token) {
+    public UserWithValue showUser(String token) {
         UserValue userValue = null;
         User user;
         try {
@@ -109,19 +83,27 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         userValue = userDAO.getValueById(user.getUserId());
-        return userValue;
+        return new UserWithValue(user, userValue);
     }
 
     @Override
-    public boolean updateUser(UserValue userValue) {
+    public boolean updateUser(UserValue userValue, String token) {
         try {
-            userDAO.UpdateUserValue(userValue);
+            User user = decode(token);
+            userDAO.UpdateUserValue(userValue, user.getUserId());
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
+    private User decode(String token) throws Exception {
+        Claims claims = JwtUtil.parseJWT(token);
+        String userId = claims.getSubject();
+//            getSubject获取的是未加密之前的原始值
+        User user = redisCache.getCacheObject("login" + userId);
+        return user;
+    }
 }
 
 

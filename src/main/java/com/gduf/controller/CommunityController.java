@@ -5,6 +5,8 @@ import com.gduf.pojo.community.PostWithComments;
 import com.gduf.pojo.user.User;
 import com.gduf.service.CommunityService;
 import com.gduf.util.JwtUtil;
+import com.gduf.util.RedisCache;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,9 @@ public class CommunityController {
 
     @Autowired
     private CommunityService communityService;
+
+    @Autowired
+    private RedisCache redisCache;
 
     //    社区首页渲染帖子
     @GetMapping
@@ -61,7 +66,8 @@ public class CommunityController {
     public Result like(@RequestHeader String token, @RequestBody Map<String, Integer> likes) {
         try {
             Integer postId = likes.get("postId");
-            User user = JwtUtil.decode(token);
+//            User user = JwtUtil.decode(token);
+            User user = decode(token);
             communityService.insertLike(user.getUserId(), postId);
         } catch (Exception e) {
             return new Result("点赞失败", COMMUNITY_LIKE_ERR, null);
@@ -74,7 +80,8 @@ public class CommunityController {
     public Result star(@RequestHeader String token, @RequestBody Map<String, Integer> stars) {
         try {
             Integer postId = stars.get("postId");
-            User user = JwtUtil.decode(token);
+//            User user = JwtUtil.decode(token);
+            User user = decode(token);
             communityService.insertStar(user.getUserId(), postId);
         } catch (Exception e) {
             return new Result("收藏失败", COMMUNITY_STAR_ERR, null);
@@ -86,7 +93,8 @@ public class CommunityController {
     @PostMapping("/comment")
     public Result comment(@RequestHeader String token, @RequestBody LinkedHashMap comments) {
         try {
-            User user = JwtUtil.decode(token);
+//            User user = JwtUtil.decode(token);
+            User user = decode(token);
             String commentMsg = (String) comments.get("commentMsg");
             Integer postId = (Integer) comments.get("postId");
             communityService.insertComment(commentMsg, postId, user.getUserId());
@@ -100,7 +108,8 @@ public class CommunityController {
     @PostMapping("/comment/like")
     public Result likesForComment(@RequestHeader String token, @RequestBody Map<String, Integer> likesComment) {
         try {
-            User user = JwtUtil.decode(token);
+//            User user = JwtUtil.decode(token);
+            User user = decode(token);
             Integer postId = likesComment.get("postId");
             communityService.insertLikesForComment(user.getUserId(), postId);
         } catch (Exception e) {
@@ -119,5 +128,15 @@ public class CommunityController {
             return new Result("读取帖子主要内容失败", SHOW_POST_MAIN_ERR, null);
         }
         return new Result("查看帖子主要内容成功", SHOW_POST_MAIN_OK, postWithComments);
+    }
+
+
+    public  User decode(String token) throws Exception {
+        Claims claims = JwtUtil.parseJWT(token);
+        String userId = claims.getSubject();
+//            getSubject获取的是未加密之前的原始值
+        User user = redisCache.getCacheObject("login0");
+//        User user = redisCache.getCacheObject("login" + userId);
+        return user;
     }
 }

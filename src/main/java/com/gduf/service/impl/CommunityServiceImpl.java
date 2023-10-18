@@ -7,6 +7,8 @@ import com.gduf.pojo.community.PostWithComments;
 import com.gduf.pojo.user.User;
 import com.gduf.service.CommunityService;
 import com.gduf.util.JwtUtil;
+import com.gduf.util.RedisCache;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,9 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
     private CommunityDAO communityDAO;
+
+    @Autowired
+    private RedisCache redisCache;
 
     @Override
     public List<Post> showAllPost() {
@@ -46,7 +51,8 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public boolean insertPost(Post post, String token) {
         try {
-            User user = JwtUtil.decode(token);
+//            User user = JwtUtil.decode(token);
+            User user = decode(token);
             post.setWriterId(user.getUserId());
             communityDAO.insertPost(post);
         } catch (Exception e) {
@@ -79,5 +85,12 @@ public class CommunityServiceImpl implements CommunityService {
         communityDAO.updateLikesForCommentsInCommunity(commentId);
     }
 
+    private  User decode(String token) throws Exception {
+        Claims claims = JwtUtil.parseJWT(token);
+        String userId = claims.getSubject();
+//            getSubject获取的是未加密之前的原始值
+        User user = redisCache.getCacheObject("login" + userId);
+        return user;
+    }
 
 }

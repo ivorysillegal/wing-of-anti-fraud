@@ -18,8 +18,13 @@ import java.util.UUID;
  */
 public class JwtUtil {
 
-    @Autowired
+//    @Autowired
     private static RedisCache redisCache;
+
+    @Autowired
+    public JwtUtil(RedisCache redisCache){
+        this.redisCache = redisCache;
+    }
 
     //有效期为
     public static final Long JWT_TTL = 60 * 60 *1000L;// 60 * 60 *1000  一个小时
@@ -61,14 +66,14 @@ public class JwtUtil {
             ttlMillis=JwtUtil.JWT_TTL;
         }
         long expMillis = nowMillis + ttlMillis;
-        Date expDate = new Date(expMillis);
+//        Date expDate = new Date(expMillis);
         return Jwts.builder()
                 .setId(uuid)              //唯一的ID
                 .setSubject(subject)   // 主题  可以是JSON数据
                 .setIssuer("sg")     // 签发者
                 .setIssuedAt(now)      // 签发时间
-                .signWith(signatureAlgorithm, secretKey) //使用HS256对称加密算法签名, 第二个参数为秘钥
-                .setExpiration(expDate);
+                .signWith(signatureAlgorithm, secretKey); //使用HS256对称加密算法签名, 第二个参数为秘钥
+//                .setExpiration(expDate);
     }
 
     /**
@@ -84,9 +89,13 @@ public class JwtUtil {
     }
 
     public static void main(String[] args) throws Exception {
-        String token = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjYWM2ZDVhZi1mNjVlLTQ0MDAtYjcxMi0zYWEwOGIyOTIwYjQiLCJzdWIiOiJzZyIsImlzcyI6InNnIiwiaWF0IjoxNjM4MTA2NzEyLCJleHAiOjE2MzgxMTAzMTJ9.JVsSbkP94wuczb4QryQbAke3ysBDIL5ou8fWsbt_ebg";
-        Claims claims = parseJWT(token);
-        System.out.println(claims);
+//        String token = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjYWM2ZDVhZi1mNjVlLTQ0MDAtYjcxMi0zYWEwOGIyOTIwYjQiLCJzdWIiOiJzZyIsImlzcyI6InNnIiwiaWF0IjoxNjM4MTA2NzEyLCJleHAiOjE2MzgxMTAzMTJ9.JVsSbkP94wuczb4QryQbAke3ysBDIL5ou8fWsbt_ebg";
+//        Claims claims = parseJWT(token);
+//        System.out.println(claims);
+        String jwt = createJWT("0");
+        System.out.println(jwt);
+        Claims x = parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhMzJkYTM2ZTYxY2I0MjJiOTc3NmY5ODJmNTk5Njg4ZCIsInN1YiI6IjAiLCJpc3MiOiJzZyIsImlhdCI6MTY5NzYzODg1OH0.5-zD7hDvC-iCWyqMyNMlmdF8XTkBx8HvuQ8NtyUD5F8");
+        System.out.println(x.getSubject());
     }
 
     /**
@@ -115,11 +124,12 @@ public class JwtUtil {
     }
 
 
-    public static User decode(String token) throws Exception {
+    public  User decode(String token) throws Exception {
         Claims claims = JwtUtil.parseJWT(token);
         String userId = claims.getSubject();
 //            getSubject获取的是未加密之前的原始值
-        User user = redisCache.getCacheObject("login" + userId);
+        User user = redisCache.getCacheObject("login0");
+//        User user = redisCache.getCacheObject("login" + userId);
         return user;
     }
 
