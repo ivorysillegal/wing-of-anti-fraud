@@ -1,4 +1,3 @@
-
 server:
   port: 3000
   max-http-header-size: 102400
@@ -15,6 +14,14 @@ spring:
     host: 127.0.0.1
     port: 6379
     password: 666666
+  mail:
+      host: smtp.qq.com
+      username: 160850241@qq.com
+      password: hchoqtaezpqsbije
+      port: 25
+#      port:465
+#      465是基于SSL协议 25是名文传输
+      default-encoding: utf-8
 
 spring mvc:
   hiddenmethod:

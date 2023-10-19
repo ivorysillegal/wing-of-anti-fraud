@@ -9,7 +9,12 @@ import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -17,8 +22,14 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserDAO userDAO;
 
-    //    @Autowired
+    //        @Autowired
     private final RedisCache redisCache;
+
+    @Value("${spring.mail.username}")
+    private String from;   // 邮件发送人
+
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Autowired
     public UserServiceImpl(RedisCache redisCache) {
@@ -100,6 +111,18 @@ public class UserServiceImpl implements UserService {
 //            getSubject获取的是未加密之前的原始值
         User user = redisCache.getCacheObject("login" + userId);
         return user;
+    }
+
+    @Override
+    public void sendMsg(String to, String subject, String context, String code) {
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setFrom(from);
+        mailMessage.setTo(to);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(context);
+        // 真正的发送邮件操作，从 from到 to
+        mailSender.send(mailMessage);
+        redisCache.setCacheObject(to, code, 5, TimeUnit.MINUTES);
     }
 }
 

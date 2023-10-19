@@ -10,9 +10,11 @@ public interface UserService {
 
     int register(String username, String password);
 
-    boolean picUpload(String base64ImageData,String token);
+    boolean picUpload(String base64ImageData, String token);
 
     UserWithValue showUser(String token);
 
-    boolean updateUser(UserValue userValue,String token);
+    boolean updateUser(UserValue userValue, String token);
+
+    void sendMsg(String to, String subject, String context, String code);
 }

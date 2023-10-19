@@ -6,6 +6,7 @@ import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
 import com.gduf.service.UserService;
 import com.gduf.util.Captcha;
+import com.gduf.util.ValidateCodeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,28 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    //    发送验证码
+    @PostMapping("/sendMsg")
+    public Result sendMsg(@RequestBody Map emailCode) {
+        String email = (String) emailCode.get("email");
+        String usage = (String) emailCode.get("usage");
+        String subject;
+        String code = ValidateCodeUtils.generateValidateCode(4).toString();
+        String context;
+        // 获取邮箱账号
+        if (usage.equals("passwordForgotten")) {
+            subject = "反诈通注册验证码";
+            context = "欢迎使用反诈通，登录验证码为: " + code + ",五分钟内有效，请妥善保管!";
+            userService.sendMsg(email, subject, context, code);
+        } else if (usage.equals("register")) {
+            subject = "反诈通重置密码 注册码";
+            context = "欢迎使用反诈通，重置密码验证码为: " + code + ",五分钟内有效，请妥善保管!";
+            userService.sendMsg(email, subject, context, code);
+            return new Result("验证码发送成功", 200, null);
+        }
+        return new Result("验证码发送失败", 201, null);
+    }
+
     @PostMapping("/login")
     public Result login(@RequestBody Map<String, String> requestBody) {
         String username = requestBody.get("username");
@@ -34,7 +57,6 @@ public class UserController {
         else
             return new Result("登录失败", LOGIN_ERR, null);
     }
-
 
     //    注册账号
     @PostMapping("/register")
