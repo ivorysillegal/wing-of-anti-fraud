@@ -1,6 +1,5 @@
 package com.gduf.service;
 
-import com.gduf.pojo.user.ImageUploadRequest;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +10,7 @@ public interface UserService {
 
     int register(String username, String password);
 
-    void picUpload(ImageUploadRequest imageUploadRequest);
+    boolean picUpload(String base64ImageData,String token);
 
     UserWithValue showUser(String token);
 

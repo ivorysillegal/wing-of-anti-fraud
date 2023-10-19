@@ -4,7 +4,6 @@ import com.gduf.dao.CommunityDAO;
 import com.gduf.dao.ScriptDAO;
 import com.gduf.dao.UserDAO;
 import com.gduf.pojo.script.ScriptNodeMsg;
-import com.gduf.pojo.user.ImageUploadRequest;
 import com.gduf.pojo.user.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

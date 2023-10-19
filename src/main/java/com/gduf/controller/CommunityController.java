@@ -68,7 +68,9 @@ public class CommunityController {
             Integer postId = likes.get("postId");
 //            User user = JwtUtil.decode(token);
             User user = decode(token);
+            System.out.println(123456);
             communityService.insertLike(user.getUserId(), postId);
+            System.out.println(123);
         } catch (Exception e) {
             return new Result("点赞失败", COMMUNITY_LIKE_ERR, null);
         }
@@ -131,12 +133,19 @@ public class CommunityController {
     }
 
 
-    public  User decode(String token) throws Exception {
+    public User decode(String token) throws Exception {
         Claims claims = JwtUtil.parseJWT(token);
         String userId = claims.getSubject();
 //            getSubject获取的是未加密之前的原始值
-        User user = redisCache.getCacheObject("login0");
-//        User user = redisCache.getCacheObject("login" + userId);
+//        User user = redisCache.getCacheObject("login0");
+        User user = redisCache.getCacheObject("login" + userId);
+        if (user == null) {
+            System.out.println("" +
+                    "____________________________________________________" +
+                    "redis is null and i dont know why" +
+                    "_________________________________________________________________" +
+                    "");
+        }
         return user;
     }
 }

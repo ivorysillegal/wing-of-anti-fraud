@@ -2,13 +2,11 @@ package com.gduf.controller;
 
 import cn.hutool.captcha.AbstractCaptcha;
 import com.gduf.pojo.CaptchaCode;
-import com.gduf.pojo.user.ImageUploadRequest;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
 import com.gduf.service.UserService;
 import com.gduf.util.Captcha;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
@@ -75,17 +73,15 @@ public class UserController {
 
     //    头像上传
     @PostMapping("/picUpload")
-    public Result picUpload(@RequestBody ImageUploadRequest request) {
-        String base64ImageData = request.getFile();
+    public Result picUpload(@RequestHeader String token, @RequestBody Map map) {
+        String base64ImageData = (String) map.get("file");
         if (base64ImageData == null || base64ImageData.isEmpty()) {
             return new Result("文件为空", PIC_UPLOAD_ERR, null);
         }
-        byte[] imageData = Base64Utils.decodeFromString(base64ImageData);
-        if (imageData.length > 512 * 512) {
-            return new Result("照片大小超出限制", PIC_UPLOAD_ERR, null);
-        }
         try {
-            userService.picUpload(request);
+            boolean b = userService.picUpload(base64ImageData, token);
+            if (!b)
+                return new Result("头像上传失败", PIC_UPLOAD_ERR, null);
         } catch (Exception e) {
             return new Result("头像上传失败", PIC_UPLOAD_ERR, null);
         }
@@ -96,8 +92,8 @@ public class UserController {
     //    更新个人信息
     @PostMapping
     public Result updateMsg(@RequestHeader String token, @RequestBody UserValue userValue) {
-            if (!userService.updateUser(userValue,token))
-                return new Result("个人信息更新失败", UPDATE_MSG_ERR, null);
+        if (!userService.updateUser(userValue, token))
+            return new Result("个人信息更新失败", UPDATE_MSG_ERR, null);
         return new Result("个人信息更新成功", UPDATE_MSG_OK, null);
     }
 

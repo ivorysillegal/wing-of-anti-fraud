@@ -22,7 +22,7 @@ public interface UserDAO {
     public User getByUsername(String username);
 
     @Update("update user_value set pic = #{pic} where user_id = #{userId}")
-    public int updatePic(Integer userId,String picAvatar);
+    public int updatePic(Integer userId,String pic);
 
     @Select("select * from user_value where user_id = #{id}")
     public UserValue  getValueById(Integer id);

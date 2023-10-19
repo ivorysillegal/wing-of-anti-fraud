@@ -1,7 +1,6 @@
 package com.gduf.service.impl;
 
 import com.gduf.dao.UserDAO;
-import com.gduf.pojo.user.ImageUploadRequest;
 import com.gduf.pojo.user.User;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
@@ -11,13 +10,6 @@ import com.gduf.util.RedisCache;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Base64Utils;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -67,10 +59,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void picUpload(ImageUploadRequest request) {
-        Integer userId = request.getUserId();
-        String picFile = request.getFile();
-        userDAO.updatePic(userId, picFile);
+    public boolean picUpload(String base64ImageData, String token) {
+        User user;
+        try {
+            user = decode(token);
+            userDAO.updatePic(user.getUserId(), base64ImageData);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     @Override
