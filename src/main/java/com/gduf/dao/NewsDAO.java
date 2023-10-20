@@ -1,6 +1,6 @@
 package com.gduf.dao;
 
-import com.gduf.pojo.News;
+import com.gduf.pojo.wikipedia.News;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 

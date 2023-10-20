@@ -1,8 +1,8 @@
 package com.gduf.controller;
 
-import com.gduf.pojo.News;
-import com.gduf.pojo.Question;
-import com.gduf.pojo.Wikipedia;
+import com.gduf.pojo.wikipedia.News;
+import com.gduf.pojo.wikipedia.Question;
+import com.gduf.pojo.wikipedia.Wikipedia;
 import com.gduf.service.NewsService;
 import com.gduf.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;

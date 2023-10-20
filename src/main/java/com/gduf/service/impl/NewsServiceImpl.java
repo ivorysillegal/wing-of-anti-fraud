@@ -1,7 +1,7 @@
 package com.gduf.service.impl;
 
 import com.gduf.dao.NewsDAO;
-import com.gduf.pojo.News;
+import com.gduf.pojo.wikipedia.News;
 import com.gduf.service.NewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

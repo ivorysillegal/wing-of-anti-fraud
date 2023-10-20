@@ -77,7 +77,7 @@ public class UserController {
     }
 
     //    重置密码
-    @PostMapping
+    @PostMapping("update_password")
     public Result passwordForgotten(@RequestBody Map map) {
         String username = (String) map.get("username");
         String beforePassword = (String) map.get("beforePassword");

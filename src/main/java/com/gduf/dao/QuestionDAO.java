@@ -1,7 +1,6 @@
 package com.gduf.dao;
 
-import com.gduf.pojo.Question;
-import com.gduf.pojo.user.QuestionRelate;
+import com.gduf.pojo.wikipedia.Question;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -15,15 +14,6 @@ public interface QuestionDAO {
 
     @Select("select * from tb_question order by rand() limit 10")
     public List<Question> randomGetQuestions();
-
-    @Insert("insert into user_question (question_id,user_id) values (#{questionId},#{userId})")
-    public int insertWrongAnswer(QuestionRelate questionRelate);
-
-    @Select("select * from user_question where user_id = #{userId}")
-    public List<QuestionRelate> selectWrongQuestion(Integer userId);
-
-    @Select("select * from tb_question where question_id = #{questionId}")
-    public Question getQuestionById(Integer questionId);
 
     @Select("select * from tb_question where classification = #{classification} order by rand() limit 4")
     public List<Question> showQuestionByClassification(String classification);

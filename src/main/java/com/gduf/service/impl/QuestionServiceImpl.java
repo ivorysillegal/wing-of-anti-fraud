@@ -1,13 +1,11 @@
 package com.gduf.service.impl;
 
 import com.gduf.dao.QuestionDAO;
-import com.gduf.pojo.Question;
-import com.gduf.pojo.user.QuestionRelate;
+import com.gduf.pojo.wikipedia.Question;
 import com.gduf.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,18 +23,6 @@ public class QuestionServiceImpl implements QuestionService {
             return null;
         }
         return questions;
-    }
-
-    @Override
-    public boolean saveWrongAnswerQuestion(List<QuestionRelate> questionRelate) {
-        try {
-            for (QuestionRelate relate : questionRelate) {
-                questionDAO.insertWrongAnswer(relate);
-            }
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
     }
 
     @Override

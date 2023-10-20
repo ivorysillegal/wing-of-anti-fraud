@@ -1,4 +1,4 @@
-package com.gduf.pojo;
+package com.gduf.pojo.wikipedia;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

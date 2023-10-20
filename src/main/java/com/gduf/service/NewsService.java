@@ -1,6 +1,6 @@
 package com.gduf.service;
 
-import com.gduf.pojo.News;
+import com.gduf.pojo.wikipedia.News;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

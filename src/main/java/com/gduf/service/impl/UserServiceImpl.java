@@ -74,9 +74,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean picUpload(String base64ImageData, String token) {
         User user;
+        int userId;
         try {
             user = decode(token);
-            userDAO.updatePic(user.getUserId(), base64ImageData);
+             if (user != null) {
+                userId = user.getUserId();
+            }else {
+                userId = decodeToId(token);
+            }
+            if (userDAO.getValueById(userId) == null) {
+                userDAO.initializationUserValue(userId);
+            }
+            userDAO.updatePic(userId, base64ImageData);
         } catch (Exception e) {
             return false;
         }
@@ -100,6 +109,9 @@ public class UserServiceImpl implements UserService {
     public boolean updateUser(UserValue userValue, String token) {
         try {
             User user = decode(token);
+            if (Objects.isNull(userDAO.getValueById(user.getUserId())))
+                userDAO.initializationUserValue(user.getUserId());
+
             userDAO.UpdateUserValue(userValue.getSign(), userValue.getAge(), userValue.getGender(), user.getUserId());
         } catch (Exception e) {
             return false;
@@ -113,6 +125,12 @@ public class UserServiceImpl implements UserService {
 //            getSubject获取的是未加密之前的原始值
         User user = redisCache.getCacheObject("login" + userId);
         return user;
+    }
+
+    private int decodeToId(String token) throws Exception {
+        Claims claims = JwtUtil.parseJWT(token);
+        String userId = claims.getSubject();
+        return Integer.parseInt(userId);
     }
 
     @Override
@@ -130,15 +148,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean verifyAccount(String username, String beforePassword, String afterPassword) {
         User user = userDAO.getByUsername(username);
-        if (Objects.isNull(user)) {
-            return false;
-        } else {
+        if (!Objects.isNull(user)) {
             if (user.getPassword().equals(beforePassword)) {
                 userDAO.updatePassword(afterPassword, username);
                 return true;
             }
-            return false;
         }
+        return false;
     }
 }
 

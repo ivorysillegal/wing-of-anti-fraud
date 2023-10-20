@@ -21,6 +21,7 @@ public class FakeUserServiceImpl implements FakeUserService {
     @Override
     public void generateFakeUser() {
         if (!Objects.isNull(redisCache.getCacheObject("login0")))
+//            如果不存在login0这一个假用户的话 就先设置 方便调试
             redisCache.setCacheObject("login0", new User(0, "admin", "admin"));
     }
 }

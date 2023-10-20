@@ -14,12 +14,12 @@ import static com.gduf.controller.Code.*;
 @CrossOrigin
 @RequestMapping("/script")
 public class ScriptController {
+
     @Autowired
     private ScriptService scriptService;
 
     //    保存剧本
     @PostMapping("/design")
-//    public Result saveScript(@RequestBody ScriptMsg scriptMsg) {
     public Result saveScript(@RequestBody ScriptMsgWithInfluenceName scriptMsgWithInfluenceName) {
         ScriptInfluenceName scriptInfluenceName = scriptMsgWithInfluenceName.getScriptInfluenceName();
         ScriptMsg scriptMsg = scriptMsgWithInfluenceName.getScriptMsg();
@@ -53,7 +53,7 @@ public class ScriptController {
         int scriptId = (int) scriptValue.get("scriptId");
         Script script;
         try {
-            script = createScript(scriptId);
+            script = mergeScript(scriptId);
         } catch (Exception e) {
             return new Result("读取剧本失败", LOAD_SCRIPT_ERR, null);
         }
@@ -75,11 +75,10 @@ public class ScriptController {
             return new Result("读取剧本结局失败", LOAD_SCRIPT_END_ERR, null);
         }
         return new Result("剧本读取结局成功", LOAD_SCRIPT_END_OK, scriptEnd);
-
     }
 
 
-    private Script createScript(Integer scriptId) {
+    private Script mergeScript(Integer scriptId) {
         List<ScriptNode> scriptDetail = scriptService.getScriptDetail(scriptId);
         ScriptMsg scriptMsg = scriptService.getScriptMsg(scriptId);
         ScriptInfluenceName scriptInfluenceName = scriptService.getScriptInfluenceName(scriptId);

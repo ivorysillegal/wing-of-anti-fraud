@@ -5,6 +5,7 @@ import com.gduf.dao.ScriptDAO;
 import com.gduf.dao.UserDAO;
 import com.gduf.pojo.script.ScriptNodeMsg;
 import com.gduf.pojo.user.User;
+import com.gduf.util.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -87,4 +88,9 @@ public class UserServiceTest {
         System.out.println(userDAO.getValueById(0));
     }
 
+
+    @Test
+    public void testUserValue(){
+        System.out.println(userService.picUpload("111",JwtUtil.createJWT(String.valueOf(42))));
+    }
 }

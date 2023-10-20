@@ -9,13 +9,13 @@ public interface UserDAO {
 
     @Insert("insert into tb_user_basic (username, password) values (#{username}, #{password})")
     @Options(useGeneratedKeys = true, keyProperty = "userId")
-//    这里使用了 回显主键的方法 但是一定要记住 keyProperty指的是类名
+//    这里使用了 回显主键的方法 但是一定要记住 keyProperty
     public int insertBasic(User user);
 
     @Insert("insert into user_value (sign,age,gender,pic) values (#{sign},#{age},#{gender},#{pic})")
     public int insertValue(UserValue userValue);
 
-    @Insert("insert into user_value (user_id) values #{userId}")
+    @Insert("insert into user_value (user_id) values (#{userId})")
     public int initializationUserValue(Integer userId);
 
     @Select("select * from tb_user_basic where username = #{username}")
