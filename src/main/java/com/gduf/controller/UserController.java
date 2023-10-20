@@ -42,7 +42,7 @@ public class UserController {
             subject = "反诈通重置密码 注册码";
             context = "欢迎使用反诈通，重置密码验证码为: " + code + ",五分钟内有效，请妥善保管!";
             userService.sendMsg(email, subject, context, code);
-            return new Result("验证码发送成功", 200, null);
+            return new Result("验证码发送成功", 200, code);
         }
         return new Result("验证码发送失败", 201, null);
     }
@@ -63,16 +63,29 @@ public class UserController {
     public Result register(@RequestBody Map<String, String> requestBody) {
         String username = requestBody.get("username");
         String password = requestBody.get("password");
+        String email = requestBody.get("email");
         if (password == null || username == null) {
             return new Result("账号或密码为空", REGISTER_ERR, null);
         }
-        int register = userService.register(username, password);
+        int register = userService.register(username, password, email);
         if (register == 1) {
             return new Result("注册成功", REGISTER_OK, null);
         } else if (register == 0)
             return new Result("注册失败 系统繁忙", REGISTER_ERR, null);
         else
             return new Result("用户名重复 请重试！", REGISTER_REPEAT_NAME, null);
+    }
+
+    //    重置密码
+    @PostMapping
+    public Result passwordForgotten(@RequestBody Map map) {
+        String username = (String) map.get("username");
+        String beforePassword = (String) map.get("beforePassword");
+        String afterPassword = (String) map.get("afterPassword");
+        if (!userService.verifyAccount(username, beforePassword, afterPassword)) {
+        return new Result("密码修改成功",UPDATE_PASSWORD_OK,null);
+        }
+        return new Result("密码修改失败",UPDATE_PASSWORD_ERR,null);
     }
 
     @PostMapping("/send_captcha")

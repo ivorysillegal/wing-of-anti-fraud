@@ -81,4 +81,10 @@ public class UserServiceTest {
 //        System.out.println(communityDAO.showPostByWriter(38));
 //        System.out.println(communityDAO.show());
     }
+
+    @Test
+    public void testShow(){
+        System.out.println(userDAO.getValueById(0));
+    }
+
 }

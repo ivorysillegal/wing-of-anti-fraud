@@ -50,6 +50,9 @@ public class Code {
     public static final Integer SHOW_MSG_OK = 200;
     public static final Integer SHOW_MSG_ERR = 251;
 
+    public static final Integer UPDATE_PASSWORD_OK = 200;
+    public static final Integer UPDATE_PASSWORD_ERR = 251;
+
     public static final Integer SHOW_QUESTION_OK = 200;
     public static final Integer SHOW_QUESTION_ERR = 261;
 
@@ -86,4 +89,5 @@ public class Code {
 
     public static final Integer SHOW_POST_MAIN_OK = 300;
     public static final Integer SHOW_POST_MAIN_ERR = 341;
+
 }

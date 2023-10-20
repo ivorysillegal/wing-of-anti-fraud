@@ -14,6 +14,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -54,13 +55,14 @@ public class UserServiceImpl implements UserService {
     }
 
     //    注册
-    public int register(String username, String password) {
+    public int register(String username, String password, String email) {
         User user = userDAO.getByUsername(username);
         if (user != null)
             return -1;
         try {
-            userDAO.insertBasic(new User(username, password));
-//            userDAO.insertValue(new UserValue());
+            User newUser = new User(username, password);
+            userDAO.insertBasic(newUser);
+            userDAO.initializationUserValue(newUser.getUserId());
 //            上面这一行 暂且没用
 //            创建用户个人信息 补充默认信息
         } catch (Exception e) {
@@ -98,7 +100,7 @@ public class UserServiceImpl implements UserService {
     public boolean updateUser(UserValue userValue, String token) {
         try {
             User user = decode(token);
-            userDAO.UpdateUserValue(userValue, user.getUserId());
+            userDAO.UpdateUserValue(userValue.getSign(), userValue.getAge(), userValue.getGender(), user.getUserId());
         } catch (Exception e) {
             return false;
         }
@@ -123,6 +125,20 @@ public class UserServiceImpl implements UserService {
         // 真正的发送邮件操作，从 from到 to
         mailSender.send(mailMessage);
         redisCache.setCacheObject(to, code, 5, TimeUnit.MINUTES);
+    }
+
+    @Override
+    public boolean verifyAccount(String username, String beforePassword, String afterPassword) {
+        User user = userDAO.getByUsername(username);
+        if (Objects.isNull(user)) {
+            return false;
+        } else {
+            if (user.getPassword().equals(beforePassword)) {
+                userDAO.updatePassword(afterPassword, username);
+                return true;
+            }
+            return false;
+        }
     }
 }
 

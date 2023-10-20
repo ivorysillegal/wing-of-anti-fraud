@@ -6,16 +6,20 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class UserValue {
-    private Integer userId;
-    private boolean gender;
-    private int age;
+    private Integer userValueId;
+    private Boolean gender;
+    private Integer age;
     private String sign;
-    private String picAvatar;
+    private String pic;
+    private String email;
+    private Integer userId;
 
     public UserValue() {
         this.sign = null;
-        this.age = 0;
+        this.age = null;
         this.gender = false;
-        this.picAvatar = null;
+        this.pic = null;
+        this.email = null;
+        this.userId = 0;
     }
 }
