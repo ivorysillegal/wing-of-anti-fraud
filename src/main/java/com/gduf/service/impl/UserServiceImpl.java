@@ -57,6 +57,7 @@ public class UserServiceImpl implements UserService {
     //    注册
     public int register(String username, String password, String email) {
         User user = userDAO.getByUsername(username);
+        password = JwtUtil.createJWT(password);
         if (user != null)
             return -1;
         try {
@@ -77,9 +78,9 @@ public class UserServiceImpl implements UserService {
         int userId;
         try {
             user = decode(token);
-             if (user != null) {
+            if (user != null) {
                 userId = user.getUserId();
-            }else {
+            } else {
                 userId = decodeToId(token);
             }
             if (userDAO.getValueById(userId) == null) {

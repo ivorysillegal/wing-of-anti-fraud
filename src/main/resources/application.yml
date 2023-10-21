@@ -15,13 +15,30 @@ spring:
     port: 6379
     password: 666666
   mail:
-      host: smtp.qq.com
-      username: 160850241@qq.com
-      password: hchoqtaezpqsbije
-      port: 25
-#      port:465
-#      465是基于SSL协议 25是名文传输
-      default-encoding: utf-8
+    default-encoding: UTF-8
+#    host: smtp.qq.com
+    host: smtp.sina.com
+#    username: 160850241@qq.com
+    username: chenzczczczc@sina.com
+#    password: hchoqtaezpqsbije
+    password: f2afcea9b0b0a43d
+    properties: # 配置以SSL的方式发送, 这个需要使用这种方式并且端口是465
+      mail:
+        smtp:
+        #          auth: true
+        #            ssl:
+        #              enable: true
+        #                socketFactory:
+        #                  class: com.sun.mail.util.MailSSLSocketFactory
+        #                  fallback: false
+        #        debug: true
+        auth: true
+        starttls:
+          enable: true
+          required: true
+        socketFactory:
+          class: javax.net.ssl.SSLSocketFactory
+          port: 465
 
 spring mvc:
   hiddenmethod:

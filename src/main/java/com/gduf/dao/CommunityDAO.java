@@ -42,7 +42,6 @@ public interface CommunityDAO {
     @Update("update tb_comment set likes = (likes + 1) where comment_id = #{commentId} ")
     public void updateLikesForCommentsInCommunity(Integer commentId);
 
-
     //    关系表增加
     @Insert("insert into user_like_posts (user_id,post_id) values (#{userId},#{postId}) ")
     public void insetLike(Integer postId, Integer userId);

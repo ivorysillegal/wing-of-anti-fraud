@@ -1,6 +1,8 @@
 package com.gduf.controller;
 
 public class Code {
+    public static final Integer SYSTEM_ERROR = 100;
+
     public static final Integer LOGIN_OK = 200;
     public static final Integer REGISTER_OK = 200;
 
