@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     public String login(String username, String password) {
         User user = userDAO.getByUsername(username);
         if (user != null) {
-            if (!user.getPassword().equals(password)) {
+            if (!user.getPassword().equals(JwtUtil.createJWT(password))) {
                 return null;
             }
             Integer userId = user.getUserId();
