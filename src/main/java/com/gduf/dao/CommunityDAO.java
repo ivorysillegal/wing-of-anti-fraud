@@ -54,4 +54,10 @@ public interface CommunityDAO {
 
     @Insert("insert into user_like_comments (user_id,comment_id) values (#{userId},#{commentId})")
     public void insertLikesForComment(Integer userId, Integer commentId);
+
+    @Select("select post_id from user_like_posts where user_id = #{userId}")
+    public List<Integer> showLikePostId(Integer userId);
+
+    @Select("select comment_id from tb_comment where user_id = #{userId}")
+    public List<Comment> showCommentId(Integer userId);
 }

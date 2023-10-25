@@ -77,4 +77,16 @@ public class Code {
     public static final Integer SHOW_POST_MAIN_OK = 300;
     public static final Integer SHOW_POST_MAIN_ERR = 341;
 
+    public static final Integer SHOW_LIKE_POST_OK = 300;
+    public static final Integer SHOW_LIKE_POST_ERR = 351;
+    public static final Integer SHOW_LIKE_POST_NULL = 352;
+
+    public static final Integer SHOW_MY_COMMENT_OK = 300;
+    public static final Integer SHOW_MY_COMMENT_ERR = 361;
+    public static final Integer SHOW_MY_COMMENT_NULL = 362;
+
+    public static final Integer SHOW_MY_POST_OK = 300;
+    public static final Integer SHOW_MY_POST_ERR = 371;
+    public static final Integer SHOW_MY_POST_NULL = 372;
+
 }

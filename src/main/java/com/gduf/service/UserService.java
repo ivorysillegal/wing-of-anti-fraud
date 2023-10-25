@@ -1,8 +1,12 @@
 package com.gduf.service;
 
+import com.gduf.pojo.community.Comment;
+import com.gduf.pojo.community.Post;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Transactional
 public interface UserService {
@@ -19,4 +23,12 @@ public interface UserService {
     void sendMsg(String to, String subject, String context, String code);
 
     boolean verifyAccount(String username, String beforePassword, String afterPassword);
+
+    UserWithValue showUser(Integer userId);
+
+    List<Post> showLikePost(String token);
+
+    List<Comment> showMyComment(String token);
+
+    List<Post> showMyPost(String token);
 }

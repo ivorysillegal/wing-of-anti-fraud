@@ -32,4 +32,7 @@ public interface UserDAO {
 
     @Update("update tb_user_basic set password = #{password} where username = #{username}")
     public int updatePassword(String password,String username);
+
+    @Select("select username from tb_user_basic where user_id = #{userId}")
+    public String getUsername(Integer userId);
 }

@@ -1,7 +1,10 @@
 package com.gduf.controller;
 
 import cn.hutool.captcha.AbstractCaptcha;
+import cn.hutool.core.collection.ListUtil;
 import com.gduf.pojo.CaptchaCode;
+import com.gduf.pojo.community.Comment;
+import com.gduf.pojo.community.Post;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
 import com.gduf.service.UserService;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 import java.util.Map;
 
 import static com.gduf.controller.Code.*;
@@ -83,9 +87,9 @@ public class UserController {
         String beforePassword = (String) map.get("beforePassword");
         String afterPassword = (String) map.get("afterPassword");
         if (!userService.verifyAccount(username, beforePassword, afterPassword)) {
-        return new Result("密码修改成功",UPDATE_PASSWORD_OK,null);
+            return new Result("密码修改成功", UPDATE_PASSWORD_OK, null);
         }
-        return new Result("密码修改失败",UPDATE_PASSWORD_ERR,null);
+        return new Result("密码修改失败", UPDATE_PASSWORD_ERR, null);
     }
 
     @PostMapping("/send_captcha")
@@ -136,15 +140,73 @@ public class UserController {
     //    个人信息展示（主页）
     @GetMapping
     public Result showMsg(@RequestHeader String token) {
-        UserWithValue userWithValue;
+        return getUser(null, token);
+    }
+
+    //    查找对应用户的信息(用于社区查找用户等乱七八糟)
+    @PostMapping("/detail")
+    public Result getUser(@RequestBody Map<String, Integer> map) {
+        Integer userId = map.get("userId");
+        return getUser(userId, null);
+    }
+
+    private Result getUser(Integer userId, String token) {
+        UserWithValue user = null;
         try {
-            userWithValue = userService.showUser(token);
-            if (userWithValue == null) {
+            if (token == null)
+                user = userService.showUser(userId);
+            else if (userId == null) {
+                user = userService.showUser(token);
+            }
+            if (user == null || user.getUserValue() == null || user.getUser() == null) {
                 return new Result("个人信息展示失败", SHOW_MSG_ERR, null);
             }
         } catch (Exception e) {
             return new Result("个人信息展示失败", SHOW_MSG_ERR, null);
         }
-        return new Result("个人信息展示成功", SHOW_MSG_OK, userWithValue);
+        return new Result("个人信息展示成功", SHOW_MSG_OK, user);
+    }
+
+    //    查看个人点赞
+    @GetMapping("/like")
+    public Result getMyLike(@RequestHeader String token) {
+        List<Post> posts;
+        try {
+            posts = userService.showLikePost(token);
+        } catch (Exception e) {
+            return new Result("展示个人喜欢帖子失败", SHOW_LIKE_POST_ERR, null);
+        }
+        if (posts == null) {
+            return new Result("此用户没有喜欢的帖子", SHOW_LIKE_POST_NULL, null);
+        }
+        return new Result("展示个人喜欢的帖子成功 或此用户没有喜欢的帖子", SHOW_LIKE_POST_OK, posts);
+    }
+
+    @GetMapping("/comment")
+    public Result getMyComment(@RequestHeader String token) {
+        List<Comment> comments;
+        try {
+            comments = userService.showMyComment(token);
+        } catch (Exception e) {
+            return new Result("展示我的评论失败", SHOW_MY_COMMENT_ERR, null);
+        }
+        if (comments == null) {
+            return new Result("展示我的评论失败", SHOW_MY_COMMENT_ERR, null);
+        }
+        return new Result("展示用户评论成功 或评论为空", SHOW_MY_COMMENT_OK, null);
+    }
+
+    @GetMapping("/mypost")
+    public Result getMyPost(@RequestHeader String token) {
+        List<Post> posts;
+        try {
+            posts = userService.showMyPost(token);
+        } catch (Exception e) {
+            return new Result("展示我写的帖子失败", SHOW_MY_POST_ERR, null);
+        }
+        if (posts == null) {
+            return new Result("展示我写的帖子失败", SHOW_MY_POST_ERR, null);
+        }
+        return new Result("展示我写的帖子成功", SHOW_MY_POST_OK, posts);
     }
 }

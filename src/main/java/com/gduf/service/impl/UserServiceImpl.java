@@ -1,6 +1,9 @@
 package com.gduf.service.impl;
 
+import com.gduf.dao.CommunityDAO;
 import com.gduf.dao.UserDAO;
+import com.gduf.pojo.community.Comment;
+import com.gduf.pojo.community.Post;
 import com.gduf.pojo.user.User;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
@@ -14,6 +17,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +27,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserDAO userDAO;
+    @Autowired
+    private CommunityDAO communityDAO;
 
     //        @Autowired
     private final RedisCache redisCache;
@@ -42,7 +49,8 @@ public class UserServiceImpl implements UserService {
     public String login(String username, String password) {
         User user = userDAO.getByUsername(username);
         if (user != null) {
-            if (!user.getPassword().equals(JwtUtil.createJWT(password))) {
+//            if (!user.getPassword().equals(JwtUtil.createJWT(password))) {
+            if (!user.getPassword().equals(password)) {
                 return null;
             }
             Integer userId = user.getUserId();
@@ -57,7 +65,7 @@ public class UserServiceImpl implements UserService {
     //    注册
     public int register(String username, String password, String email) {
         User user = userDAO.getByUsername(username);
-        password = JwtUtil.createJWT(password);
+//        password = JwtUtil.createJWT(password);
         if (user != null)
             return -1;
         try {
@@ -157,6 +165,58 @@ public class UserServiceImpl implements UserService {
         }
         return false;
     }
+
+    @Override
+    public UserWithValue showUser(Integer userId) {
+        UserValue userValue = userDAO.getValueById(userId);
+        String username = userDAO.getUsername(userId);
+        UserWithValue userWithValue = new UserWithValue(new User(username, userId), userValue);
+        return userWithValue;
+    }
+
+    @Override
+    public List<Post> showLikePost(String token) {
+        int userId = 0;
+        try {
+            userId = decodeToId(token);
+        } catch (Exception e) {
+            return null;
+        }
+        List<Integer> likePostId = communityDAO.showLikePostId(userId);
+        List<Post> posts = new ArrayList<>();
+        for (Integer postId : likePostId) {
+            Post post = communityDAO.showPostById(postId);
+            posts.add(post);
+        }
+        return posts;
+    }
+
+    @Override
+    public List<Comment> showMyComment(String token) {
+        int userId = 0;
+        try {
+            userId = decodeToId(token);
+        }catch (Exception e){
+            return null;
+        }
+        List<Comment> comments = new ArrayList<>();
+        comments = communityDAO.showCommentId(userId);
+        return comments;
+    }
+
+    @Override
+    public List<Post> showMyPost(String token) {
+        int userId;
+        try {
+            userId = decodeToId(token);
+        }catch (Exception e){
+            return null;
+        }
+        List<Post> posts = communityDAO.showPostByWriter(userId);
+        return posts;
+    }
+
+
 }
 
 
