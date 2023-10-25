@@ -2,6 +2,7 @@ package com.gduf.service;
 
 import com.gduf.pojo.community.Comment;
 import com.gduf.pojo.community.Post;
+import com.gduf.pojo.script.ScriptMsg;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,4 +32,6 @@ public interface UserService {
     List<Comment> showMyComment(String token);
 
     List<Post> showMyPost(String token);
+
+    List<ScriptMsg> showMyPlayedScript(String token);
 }

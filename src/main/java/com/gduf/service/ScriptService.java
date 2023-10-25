@@ -22,4 +22,7 @@ public interface ScriptService {
     public ScriptEnd getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange);
 
     public ScriptInfluenceName getScriptInfluenceName(Integer scriptId);
+
+//    记住用户此次玩过的剧本
+    public boolean rememberScript(String token,Integer scriptId);
 }

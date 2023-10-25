@@ -89,4 +89,6 @@ public class Code {
     public static final Integer SHOW_MY_POST_ERR = 371;
     public static final Integer SHOW_MY_POST_NULL = 372;
 
+    public static final Integer SHOW_PLAYED_SCRIPT_OK = 380;
+    public static final Integer SHOW_PLAYED_SCRIPT_ERR = 381;
 }

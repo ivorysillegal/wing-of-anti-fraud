@@ -54,4 +54,14 @@ public interface ScriptDAO {
 
     @Select("select * from tb_script_influence_name where script_id = #{scriptId}")
     public ScriptInfluenceName getInfluenceName(Integer scriptId);
+
+//    记录玩家曾经玩过了什么剧本
+    @Insert("insert into user_played_script (user_id,script_id) values (#{userId,scriptId})")
+    public void rememberPlayed(Integer userId,Integer scriptId);
+
+    @Select("select script_id from user_played_script where user_id = #{userId}")
+    public List<Integer> getPlayedScriptId(Integer userId);
+
+    @Select("select * from tb_script where script_id = #{scriptId}")
+    public ScriptMsg getScriptBypId(Integer scriptId);
 }

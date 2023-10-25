@@ -1,9 +1,11 @@
 package com.gduf.service.impl;
 
 import com.gduf.dao.CommunityDAO;
+import com.gduf.dao.ScriptDAO;
 import com.gduf.dao.UserDAO;
 import com.gduf.pojo.community.Comment;
 import com.gduf.pojo.community.Post;
+import com.gduf.pojo.script.ScriptMsg;
 import com.gduf.pojo.user.User;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
@@ -29,6 +31,8 @@ public class UserServiceImpl implements UserService {
     private UserDAO userDAO;
     @Autowired
     private CommunityDAO communityDAO;
+    @Autowired
+    private ScriptDAO scriptDAO;
 
     //        @Autowired
     private final RedisCache redisCache;
@@ -114,6 +118,7 @@ public class UserServiceImpl implements UserService {
         return new UserWithValue(user, userValue);
     }
 
+//    更新个人信息
     @Override
     public boolean updateUser(UserValue userValue, String token) {
         try {
@@ -142,6 +147,7 @@ public class UserServiceImpl implements UserService {
         return Integer.parseInt(userId);
     }
 
+//    发送邮件
     @Override
     public void sendMsg(String to, String subject, String context, String code) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -154,6 +160,7 @@ public class UserServiceImpl implements UserService {
         redisCache.setCacheObject(to, code, 5, TimeUnit.MINUTES);
     }
 
+//    重置密码
     @Override
     public boolean verifyAccount(String username, String beforePassword, String afterPassword) {
         User user = userDAO.getByUsername(username);
@@ -166,6 +173,7 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+//    展示个人详细信息
     @Override
     public UserWithValue showUser(Integer userId) {
         UserValue userValue = userDAO.getValueById(userId);
@@ -174,6 +182,7 @@ public class UserServiceImpl implements UserService {
         return userWithValue;
     }
 
+//    展示我喜欢的帖子
     @Override
     public List<Post> showLikePost(String token) {
         int userId = 0;
@@ -191,12 +200,13 @@ public class UserServiceImpl implements UserService {
         return posts;
     }
 
+//    展示我写的评论
     @Override
     public List<Comment> showMyComment(String token) {
         int userId = 0;
         try {
             userId = decodeToId(token);
-        }catch (Exception e){
+        } catch (Exception e) {
             return null;
         }
         List<Comment> comments = new ArrayList<>();
@@ -204,18 +214,38 @@ public class UserServiceImpl implements UserService {
         return comments;
     }
 
+//    展示我写的帖子
     @Override
     public List<Post> showMyPost(String token) {
         int userId;
+        List<Post> posts;
         try {
             userId = decodeToId(token);
-        }catch (Exception e){
+            posts = communityDAO.showPostByWriter(userId);
+        } catch (Exception e) {
             return null;
         }
-        List<Post> posts = communityDAO.showPostByWriter(userId);
         return posts;
     }
 
+//    展示我玩过的剧本
+    @Override
+    public List<ScriptMsg> showMyPlayedScript(String token) {
+        int userId;
+        List<Integer> playedScriptId;
+        List<ScriptMsg> scripts = new ArrayList<>();
+        try {
+            userId = decodeToId(token);
+            playedScriptId = scriptDAO.getPlayedScriptId(userId);
+        } catch (Exception e) {
+            return null;
+        }
+        for (Integer eachScriptId : playedScriptId) {
+            ScriptMsg script = scriptDAO.getScriptBypId(eachScriptId);
+            scripts.add(script);
+        }
+        return scripts;
+    }
 
 }
 

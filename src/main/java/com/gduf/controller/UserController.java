@@ -5,6 +5,7 @@ import cn.hutool.core.collection.ListUtil;
 import com.gduf.pojo.CaptchaCode;
 import com.gduf.pojo.community.Comment;
 import com.gduf.pojo.community.Post;
+import com.gduf.pojo.script.ScriptMsg;
 import com.gduf.pojo.user.UserValue;
 import com.gduf.pojo.user.UserWithValue;
 import com.gduf.service.UserService;
@@ -196,7 +197,7 @@ public class UserController {
         return new Result("展示用户评论成功 或评论为空", SHOW_MY_COMMENT_OK, null);
     }
 
-    @GetMapping("/mypost")
+    @GetMapping("/post")
     public Result getMyPost(@RequestHeader String token) {
         List<Post> posts;
         try {
@@ -208,5 +209,19 @@ public class UserController {
             return new Result("展示我写的帖子失败", SHOW_MY_POST_ERR, null);
         }
         return new Result("展示我写的帖子成功", SHOW_MY_POST_OK, posts);
+    }
+
+    @GetMapping("/playedScript")
+    public Result getPlayedScript(@RequestHeader String token) {
+        List<ScriptMsg> scripts;
+        try {
+            scripts = userService.showMyPlayedScript(token);
+        } catch (Exception e) {
+            return new Result("展示我玩过的剧本失败", SHOW_PLAYED_SCRIPT_ERR, null);
+        }
+        if (scripts == null) {
+            return new Result("展示我玩过的剧本失败 或者压根没玩过", SHOW_PLAYED_SCRIPT_ERR, null);
+        }
+        return new Result("展示我玩过的剧本成功", SHOW_PLAYED_SCRIPT_OK, scripts);
     }
 }

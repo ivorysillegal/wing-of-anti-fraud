@@ -3,6 +3,8 @@ package com.gduf.service.impl;
 import com.gduf.dao.ScriptDAO;
 import com.gduf.pojo.script.*;
 import com.gduf.service.ScriptService;
+import com.gduf.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -120,5 +122,23 @@ public class ScriptServiceImpl implements ScriptService {
             return null;
         }
         return scriptInfluenceName;
+    }
+
+    @Override
+    public boolean rememberScript(String token, Integer scriptId) {
+        int userId;
+        try {
+            userId = decodeToId(token);
+            scriptDAO.rememberPlayed(userId, scriptId);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private int decodeToId(String token) throws Exception {
+        Claims claims = JwtUtil.parseJWT(token);
+        String userId = claims.getSubject();
+        return Integer.parseInt(userId);
     }
 }

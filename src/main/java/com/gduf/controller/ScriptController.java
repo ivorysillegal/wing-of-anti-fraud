@@ -24,7 +24,7 @@ public class ScriptController {
         ScriptInfluenceName scriptInfluenceName = scriptMsgWithInfluenceName.getScriptInfluenceName();
         ScriptMsg scriptMsg = scriptMsgWithInfluenceName.getScriptMsg();
         try {
-            if (!scriptService.insertScript(scriptMsg,scriptInfluenceName)
+            if (!scriptService.insertScript(scriptMsg, scriptInfluenceName)
             ) return new Result("剧本保存失败", SCRIPT_SAVE_ERR, null);
         } catch (Exception e) {
             return new Result("剧本保存失败", SCRIPT_SAVE_ERR, null);
@@ -49,11 +49,15 @@ public class ScriptController {
     }
 
     @PostMapping("/play")
-    public Result loadScript(@RequestBody LinkedHashMap scriptValue) {
+    public Result loadScript(@RequestHeader String token, @RequestBody LinkedHashMap scriptValue) {
         int scriptId = (int) scriptValue.get("scriptId");
         Script script;
         try {
+            boolean isRemember = scriptService.rememberScript(token, scriptId);
             script = mergeScript(scriptId);
+            if (!isRemember){
+                return new Result("记录游玩操作失败", LOAD_SCRIPT_ERR, null);
+            }
         } catch (Exception e) {
             return new Result("读取剧本失败", LOAD_SCRIPT_ERR, null);
         }
