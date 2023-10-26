@@ -194,7 +194,7 @@ public class UserController {
         if (comments == null) {
             return new Result("展示我的评论失败", SHOW_MY_COMMENT_ERR, null);
         }
-        return new Result("展示用户评论成功 或评论为空", SHOW_MY_COMMENT_OK, null);
+        return new Result("展示用户评论成功 或评论为空", SHOW_MY_COMMENT_OK, comments);
     }
 
     @GetMapping("/post")

@@ -210,7 +210,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         List<Comment> comments = new ArrayList<>();
-        comments = communityDAO.showCommentId(userId);
+        comments = communityDAO.showCommentById(userId);
         return comments;
     }
 

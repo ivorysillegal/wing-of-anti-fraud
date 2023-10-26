@@ -56,7 +56,7 @@ public interface ScriptDAO {
     public ScriptInfluenceName getInfluenceName(Integer scriptId);
 
 //    记录玩家曾经玩过了什么剧本
-    @Insert("insert into user_played_script (user_id,script_id) values (#{userId,scriptId})")
+    @Insert("insert into user_played_script (user_id,script_id) values (#{userId},#{scriptId})")
     public void rememberPlayed(Integer userId,Integer scriptId);
 
     @Select("select script_id from user_played_script where user_id = #{userId}")

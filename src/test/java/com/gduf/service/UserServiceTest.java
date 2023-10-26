@@ -93,4 +93,9 @@ public class UserServiceTest {
     public void testUserValue(){
         System.out.println(userService.picUpload("111",JwtUtil.createJWT(String.valueOf(42))));
     }
+
+    @Test
+    public void testMyToken(){
+        System.out.println(userService.showMyComment("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhMzJkYTM2ZTYxY2I0MjJiOTc3NmY5ODJmNTk5Njg4ZCIsInN1YiI6IjAiLCJpc3MiOiJzZyIsImlhdCI6MTY5NzYzODg1OH0.5-zD7hDvC-iCWyqMyNMlmdF8XTkBx8HvuQ8NtyUD5F8"));
+    }
 }
