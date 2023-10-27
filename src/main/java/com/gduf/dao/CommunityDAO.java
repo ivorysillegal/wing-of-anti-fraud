@@ -58,6 +58,6 @@ public interface CommunityDAO {
     @Select("select post_id from user_like_posts where user_id = #{userId}")
     public List<Integer> showLikePostId(Integer userId);
 
-    @Select("select comment_id from tb_comment where user_id = #{userId}")
-    public List<Comment> showCommentId(Integer userId);
+    @Select("select * from tb_comment where user_id = #{userId}")
+    public List<Comment> showCommentById(Integer userId);
 }

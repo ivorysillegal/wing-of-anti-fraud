@@ -97,9 +97,12 @@ public class CommunityController {
         try {
 //            User user = JwtUtil.decode(token);
             User user = decode(token);
+            System.out.println(user.getUserId());
             String commentMsg = (String) comments.get("commentMsg");
-            Integer postId = (Integer) comments.get("postId");
-            communityService.insertComment(commentMsg, postId, user.getUserId());
+//            Integer postId = (Integer) comments.get("postId");
+            String postId = (String) comments.get("postId");
+            System.out.println(postId);
+            communityService.insertComment(commentMsg, Integer.parseInt(postId), user.getUserId());
         } catch (Exception e) {
             return new Result("评论失败", COMMUNITY_COMMENT_ERR, null);
         }
