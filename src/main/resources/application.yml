@@ -25,19 +25,8 @@ spring:
     properties: # 配置以SSL的方式发送, 这个需要使用这种方式并且端口是465
       mail:
         smtp:
-        #          auth: true
-        #            ssl:
-        #              enable: true
-        #                socketFactory:
-        #                  class: com.sun.mail.util.MailSSLSocketFactory
-        #                  fallback: false
-        #        debug: true
-        auth: true
-        starttls:
-          enable: true
-          required: true
-        socketFactory:
-          class: javax.net.ssl.SSLSocketFactory
+          ssl:
+            enable: true
           port: 465
 
 spring mvc:

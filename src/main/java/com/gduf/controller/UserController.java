@@ -39,17 +39,20 @@ public class UserController {
         String code = ValidateCodeUtils.generateValidateCode(4).toString();
         String context;
         // 获取邮箱账号
-        if (usage.equals("passwordForgotten")) {
-            subject = "反诈通注册验证码";
-            context = "欢迎使用反诈通，登录验证码为: " + code + ",五分钟内有效，请妥善保管!";
-            userService.sendMsg(email, subject, context, code);
-        } else if (usage.equals("register")) {
-            subject = "反诈通重置密码 注册码";
-            context = "欢迎使用反诈通，重置密码验证码为: " + code + ",五分钟内有效，请妥善保管!";
-            userService.sendMsg(email, subject, context, code);
-            return new Result("验证码发送成功", 200, code);
+        try {
+            if (usage.equals("passwordForgotten")) {
+                subject = "反诈通注册验证码";
+                context = "欢迎使用反诈通，登录验证码为: " + code + ",五分钟内有效，请妥善保管!";
+                userService.sendMsg(email, subject, context, code);
+            } else if (usage.equals("register")) {
+                subject = "反诈通重置密码 注册码";
+                context = "欢迎使用反诈通，重置密码验证码为: " + code + ",五分钟内有效，请妥善保管!";
+                userService.sendMsg(email, subject, context, code);
+            }
+        } catch (Exception e) {
+            return new Result("验证码发送失败", 201, null);
         }
-        return new Result("验证码发送失败", 201, null);
+        return new Result("验证码发送成功", 200, code);
     }
 
     @PostMapping("/login")
