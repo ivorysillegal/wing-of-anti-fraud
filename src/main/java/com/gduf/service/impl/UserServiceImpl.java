@@ -118,7 +118,7 @@ public class UserServiceImpl implements UserService {
         return new UserWithValue(user, userValue);
     }
 
-//    更新个人信息
+    //    更新个人信息
     @Override
     public boolean updateUser(UserValue userValue, String token) {
         try {
@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
         return Integer.parseInt(userId);
     }
 
-//    发送邮件
+    //    发送邮件
     @Override
     public void sendMsg(String to, String subject, String context, String code) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
         redisCache.setCacheObject(to, code, 5, TimeUnit.MINUTES);
     }
 
-//    重置密码
+    //    重置密码
     @Override
     public boolean verifyAccount(String username, String beforePassword, String afterPassword) {
         User user = userDAO.getByUsername(username);
@@ -173,16 +173,22 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-//    展示个人详细信息
+    //    展示个人详细信息
     @Override
     public UserWithValue showUser(Integer userId) {
-        UserValue userValue = userDAO.getValueById(userId);
-        String username = userDAO.getUsername(userId);
-        UserWithValue userWithValue = new UserWithValue(new User(username, userId), userValue);
+        UserWithValue userWithValue = redisCache.getCacheObject(userId + "userValue");
+        if (userWithValue != null) {
+            return userWithValue;
+        } else {
+            UserValue userValue = userDAO.getValueById(userId);
+            String username = userDAO.getUsername(userId);
+            userWithValue = new UserWithValue(new User(username, userId), userValue);
+        }
+        redisCache.setCacheObject(userId + "userValue", userWithValue, 10, TimeUnit.MINUTES);
         return userWithValue;
     }
 
-//    展示我喜欢的帖子
+    //    展示我喜欢的帖子
     @Override
     public List<Post> showLikePost(String token) {
         int userId = 0;
@@ -200,7 +206,7 @@ public class UserServiceImpl implements UserService {
         return posts;
     }
 
-//    展示我写的评论
+    //    展示我写的评论
     @Override
     public List<Comment> showMyComment(String token) {
         int userId = 0;
@@ -209,41 +215,53 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             return null;
         }
-        List<Comment> comments = new ArrayList<>();
-        comments = communityDAO.showCommentById(userId);
+        List<Comment> comments = redisCache.getCacheList("userComments" + userId);
+        if (comments == null) {
+            comments = communityDAO.showCommentById(userId);
+        }
+        redisCache.setCacheList("userComments" + userId, comments, 10, TimeUnit.MINUTES);
         return comments;
     }
 
-//    展示我写的帖子
+    //    展示我写的帖子
     @Override
     public List<Post> showMyPost(String token) {
         int userId;
         List<Post> posts;
         try {
             userId = decodeToId(token);
-            posts = communityDAO.showPostByWriter(userId);
         } catch (Exception e) {
             return null;
         }
+        posts = redisCache.getCacheList("userPosts" + userId);
+        if (posts == null)
+            posts = communityDAO.showPostByWriter(userId);
+        redisCache.setCacheList("userPosts" + userId, posts, 10, TimeUnit.MINUTES);
         return posts;
     }
 
-//    展示我玩过的剧本
+    //    展示我玩过的剧本
     @Override
     public List<ScriptMsg> showMyPlayedScript(String token) {
         int userId;
         List<Integer> playedScriptId;
-        List<ScriptMsg> scripts = new ArrayList<>();
+        List<ScriptMsg> scripts;
         try {
             userId = decodeToId(token);
-            playedScriptId = scriptDAO.getPlayedScriptId(userId);
         } catch (Exception e) {
             return null;
         }
-        for (Integer eachScriptId : playedScriptId) {
-            ScriptMsg script = scriptDAO.getScriptBypId(eachScriptId);
-            scripts.add(script);
+        scripts = redisCache.getCacheList("userPlayedScripts" + userId);
+        if (scripts == null){
+            playedScriptId = scriptDAO.getPlayedScriptId(userId);
+            for (Integer eachScriptId : playedScriptId) {
+                ScriptMsg script = scriptDAO.getScriptBypId(eachScriptId);
+                if (scripts == null)
+                    scripts = new ArrayList<>();
+                scripts.add(script);
+            }
         }
+        redisCache.setCacheList("userPlayedScripts" + userId, scripts);
         return scripts;
     }
 

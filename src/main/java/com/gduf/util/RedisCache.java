@@ -38,7 +38,7 @@ public class RedisCache {
         redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
     }
 
-//    默认过期时间
+    //    默认过期时间
     public <T> void setCacheObject(final String key, final T value, final Integer timeout) {
         setCacheObject(key, value, timeout, TimeUnit.SECONDS);
     }
@@ -105,6 +105,12 @@ public class RedisCache {
      */
     public <T> long setCacheList(final String key, final List<T> dataList) {
         Long count = redisTemplate.opsForList().rightPushAll(key, dataList);
+        return count == null ? 0 : count;
+    }
+
+    public <T> long setCacheList(final String key, final List<T> dataList, final long timeout, final TimeUnit timeUnit) {
+        Long count = redisTemplate.opsForList().rightPushAll(key, dataList);
+        expire(key, timeout, timeUnit);
         return count == null ? 0 : count;
     }
 
