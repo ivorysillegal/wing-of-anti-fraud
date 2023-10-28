@@ -1,6 +1,7 @@
 package com.gduf.controller;
 
 import com.gduf.pojo.community.Post;
+import com.gduf.pojo.community.PostAbout;
 import com.gduf.pojo.community.PostWithComments;
 import com.gduf.pojo.user.User;
 import com.gduf.service.CommunityService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.gduf.controller.Code.*;
 
@@ -53,10 +55,33 @@ public class CommunityController {
         return new Result("获取帖子成功", SHOW_POST_OK, posts);
     }
 
+    //    根据标签查找帖子
+    @PostMapping("/search/tag")
+    public Result searchPostByTag(@RequestBody PostAbout postAbout) {
+        List<Post> posts;
+        try {
+            posts = communityService.showPostByTag(postAbout);
+            if (Objects.isNull(posts) || posts.isEmpty()) {
+                return new Result("没有此类标签的帖子", SHOW_POST_NULL, null);
+            }
+        } catch (Exception e) {
+            return new Result("获取帖子失败", SHOW_POST_ERR, null);
+        }
+        return new Result("获取帖子成功", SHOW_POST_OK, posts);
+    }
+
     //    作者上传自己的帖子
     @PostMapping("/write")
     public Result writePost(@RequestHeader String token, @RequestBody Post post) {
         if (communityService.insertPost(post, token)) {
+            return new Result("上传帖子成功", INSERT_POST_OK, null);
+        } else return new Result("上传帖子失败", INSERT_POST_ERR, null);
+    }
+
+    //    上传帖子的时候 分帖子的板块和主题
+    @PostMapping("/write/about")
+    public Result writePostAbout(@RequestBody PostAbout postAbout) {
+        if (communityService.insertPostAbout(postAbout)) {
             return new Result("上传帖子成功", INSERT_POST_OK, null);
         } else return new Result("上传帖子失败", INSERT_POST_ERR, null);
     }

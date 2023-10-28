@@ -1,9 +1,7 @@
 package com.gduf.service.impl;
 
 import com.gduf.dao.CommunityDAO;
-import com.gduf.pojo.community.Comment;
-import com.gduf.pojo.community.Post;
-import com.gduf.pojo.community.PostWithComments;
+import com.gduf.pojo.community.*;
 import com.gduf.pojo.user.User;
 import com.gduf.service.CommunityService;
 import com.gduf.util.JwtUtil;
@@ -12,6 +10,9 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -48,6 +49,26 @@ public class CommunityServiceImpl implements CommunityService {
         return posts;
     }
 
+    //    根据标签查找帖子
+    @Override
+    public List<Post> showPostByTag(PostAbout postAbout) {
+        PostTheme postTheme = postAbout.getPostTheme();
+        PostTopic postTopic = postAbout.getPostTopic();
+        List<Integer> postIdByTopic = communityDAO.showPostIdByTopic(postTopic);
+        List<Integer> postIdByTheme = communityDAO.showPostIdByTheme(postTheme);
+        boolean hasPost = postIdByTheme.retainAll(postIdByTopic);
+//        retainAll方法 保留两个集合中的交集 返回值为是否含有交集
+//        if (!hasPost)
+//            return null;
+        Iterator<Integer> postIterator = postIdByTheme.iterator();
+        List<Post> posts = new ArrayList<>();
+        while (postIterator.hasNext()) {
+            Post post = communityDAO.showPostById(postIterator.next());
+            posts.add(post);
+        }
+        return posts;
+    }
+
     @Override
     public boolean insertPost(Post post, String token) {
         try {
@@ -57,6 +78,46 @@ public class CommunityServiceImpl implements CommunityService {
             communityDAO.insertPost(post);
         } catch (Exception e) {
             return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean insertPostAbout(PostAbout postAbout) {
+        try {
+            Integer postId = postAbout.getPostId();
+            PostTheme postTheme = postAbout.getPostTheme();
+            postTheme.setPostId(postId);
+            PostTopic postTopic = postAbout.getPostTopic();
+            postTopic.setPostId(postId);
+            boolean isUpdate = updateValue(postTopic, postTheme);
+            if (!isUpdate)
+                return false;
+            communityDAO.insertPostTheme(postTheme);
+            communityDAO.insertPostTopic(postTopic);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean updateValue(Object o1, Object o2) {
+        return updateValue(o1) &&
+                updateValue(o2);
+    }
+
+    private static boolean updateValue(Object o) {
+        Class<?> clazz = o.getClass();
+        Field[] themeFields = clazz.getDeclaredFields();
+        for (Field field : themeFields) {
+            field.setAccessible(true);
+            try {
+                if ((Integer) field.get(o) == 0) {
+                    field.set(o, -1);
+                }
+            } catch (IllegalAccessException e) {
+                return false;
+            }
         }
         return true;
     }
@@ -85,7 +146,7 @@ public class CommunityServiceImpl implements CommunityService {
         communityDAO.updateLikesForCommentsInCommunity(commentId);
     }
 
-    private  User decode(String token) throws Exception {
+    private User decode(String token) throws Exception {
         Claims claims = JwtUtil.parseJWT(token);
         String userId = claims.getSubject();
 //            getSubject获取的是未加密之前的原始值
