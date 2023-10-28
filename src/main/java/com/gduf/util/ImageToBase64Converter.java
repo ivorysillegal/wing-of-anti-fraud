@@ -26,7 +26,7 @@ public class ImageToBase64Converter {
     }
 
     public static void main(String[] args) {
-        String imagePath = "H:\\wing-of-anti-fraud\\src\\main\\resources\\captcha\\captcha.jpg"; // 指定你的图片文件路径
+        String imagePath = "H:\\wing-of-anti-fraud\\src\\main\\resources\\static\\15e875eef6c380b7940aa9af729aa84.png"; // 指定你的图片文件路径
         String base64Image = convertImageToBase64(imagePath);
         System.out.println("Base64字符串: " + base64Image);
     }

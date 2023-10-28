@@ -165,6 +165,8 @@ public class UserController {
             if (user == null || user.getUserValue() == null || user.getUser() == null) {
                 return new Result("个人信息展示失败", SHOW_MSG_ERR, null);
             }
+            if (user.getUserValue().getPic() == null)
+                user.getUserValue().setPic(DEFAULT_PIC);
         } catch (Exception e) {
             return new Result("个人信息展示失败", SHOW_MSG_ERR, null);
         }
