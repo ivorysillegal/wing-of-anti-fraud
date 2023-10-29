@@ -40,11 +40,11 @@ public class UserController {
         String context;
         // 获取邮箱账号
         try {
-            if (usage.equals("passwordForgotten")) {
+            if (usage.equals("register")) {
                 subject = "反诈通注册验证码";
                 context = "欢迎使用反诈通，登录验证码为: " + code + ",五分钟内有效，请妥善保管!";
                 userService.sendMsg(email, subject, context, code);
-            } else if (usage.equals("register")) {
+            } else if (usage.equals("passwordForgotten")) {
                 subject = "反诈通重置密码 注册码";
                 context = "欢迎使用反诈通，重置密码验证码为: " + code + ",五分钟内有效，请妥善保管!";
                 userService.sendMsg(email, subject, context, code);

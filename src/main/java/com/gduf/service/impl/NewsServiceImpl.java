@@ -22,7 +22,7 @@ public class NewsServiceImpl implements NewsService {
     public List<News> showNewsByClassification(String classification) {
         List<News> news;
         news = redisCache.getCacheList("newsIn" + classification);
-        if (news == null) {
+        if (news.isEmpty()) {
             try {
                 news = newsDAO.showNewsByClassification(classification);
             } catch (Exception e) {

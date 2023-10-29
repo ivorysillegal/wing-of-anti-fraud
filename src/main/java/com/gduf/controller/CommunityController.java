@@ -140,14 +140,15 @@ public class CommunityController {
         try {
 //            User user = JwtUtil.decode(token);
             User user = decode(token);
-            Integer postId = likesComment.get("postId");
-            communityService.insertLikesForComment(user.getUserId(), postId);
+            Integer commentId = likesComment.get("commentId");
+            communityService.insertLikesForComment(user.getUserId(), commentId);
         } catch (Exception e) {
             return new Result("点赞评论失败", COMMUNITY_COMMENT_LIKE_ERR, null);
         }
         return new Result("点赞评论成功", COMMUNITY_COMMENT_LIKE_OK, null);
     }
 
+//    展示帖子主要内容
     @PostMapping("/main")
     public Result showPost(@RequestBody Map<String, Integer> map) {
         Integer postId = map.get("postId");

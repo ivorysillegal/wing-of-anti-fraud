@@ -216,7 +216,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         List<Comment> comments = redisCache.getCacheList("userComments" + userId);
-        if (comments == null) {
+        if (comments.isEmpty()) {
             comments = communityDAO.showCommentById(userId);
         }
         redisCache.setCacheList("userComments" + userId, comments, 10, TimeUnit.MINUTES);
@@ -234,7 +234,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         posts = redisCache.getCacheList("userPosts" + userId);
-        if (posts == null)
+        if (posts.isEmpty())
             posts = communityDAO.showPostByWriter(userId);
         redisCache.setCacheList("userPosts" + userId, posts, 10, TimeUnit.MINUTES);
         return posts;
@@ -252,7 +252,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         scripts = redisCache.getCacheList("userPlayedScripts" + userId);
-        if (scripts == null){
+        if (scripts.isEmpty()){
             playedScriptId = scriptDAO.getPlayedScriptId(userId);
             for (Integer eachScriptId : playedScriptId) {
                 ScriptMsg script = scriptDAO.getScriptBypId(eachScriptId);
