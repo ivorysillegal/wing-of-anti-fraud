@@ -92,4 +92,10 @@ public class Code {
 
     public static final Integer SHOW_PLAYED_SCRIPT_OK = 380;
     public static final Integer SHOW_PLAYED_SCRIPT_ERR = 381;
+
+    public static final Integer SHOW_VOTE_OK = 300;
+    public static final Integer SHOW_VOTE_ERR = 391;
+
+    public static final Integer VOTE_OK = 400;
+    public static final Integer VOTE_ERR = 401;
 }

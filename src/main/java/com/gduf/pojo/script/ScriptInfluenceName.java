@@ -2,9 +2,11 @@ package com.gduf.pojo.script;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ScriptInfluenceName {
 //    本类描述各剧本特有的指标的名字
     private Integer influenceNameId;

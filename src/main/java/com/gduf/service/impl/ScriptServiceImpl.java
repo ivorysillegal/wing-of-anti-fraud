@@ -100,7 +100,7 @@ public class ScriptServiceImpl implements ScriptService {
 //        对每一个选择 获取左右所产生的结果 （去到 tb_script_node_choice 中查数据）
 
         list = redisCache.getCacheList("scriptDetailIn" + scriptId);
-        if (list == null) {
+        if (list.isEmpty()) {
 
             for (ScriptNodeMsg nodeMsg : scriptNodeMsg) {
 
@@ -115,10 +115,6 @@ public class ScriptServiceImpl implements ScriptService {
 //                获取完成 封装到包装类中
                 ScriptNode scriptNode = new ScriptNode(scriptId, nodeMsg.getWord(), nodeMsg.getNodeId(), leftChoice, rightChoice);
 
-//                判空
-                if (Objects.isNull(list)){
-                    list = new LinkedList<>();
-                }
                 list.add(scriptNode);
             }
         }
@@ -155,7 +151,7 @@ public class ScriptServiceImpl implements ScriptService {
                 return null;
             }
         }
-        redisCache.setCacheObject("scriptDetailIn" + scriptId,scriptInfluenceName,5,TimeUnit.MINUTES);
+        redisCache.setCacheObject("scriptInfluenceName" + scriptId,scriptInfluenceName,5,TimeUnit.MINUTES);
         return scriptInfluenceName;
     }
 

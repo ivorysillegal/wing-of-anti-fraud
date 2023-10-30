@@ -2,9 +2,11 @@ package com.gduf.pojo.script;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ScriptNode {
     private Integer nodeId;
     //    节点的id

@@ -2,9 +2,11 @@ package com.gduf.pojo.script;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class ScriptInfluenceChange {
 //    本类描述游戏过程中指标的变化
     private Integer influence1;

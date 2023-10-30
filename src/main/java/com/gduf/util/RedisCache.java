@@ -108,11 +108,19 @@ public class RedisCache {
         return count == null ? 0 : count;
     }
 
+    //    overWrite表示是否续写 默认设置为不续写
     public <T> long setCacheList(final String key, final List<T> dataList, final long timeout, final TimeUnit timeUnit) {
+        return setCacheList(key, dataList, timeout, timeUnit, false);
+    }
+
+    public <T> long setCacheList(final String key, final List<T> dataList, final long timeout, final TimeUnit timeUnit, boolean overWrite) {
+        if (!overWrite)
+            redisTemplate.delete(key);
         Long count = redisTemplate.opsForList().rightPushAll(key, dataList);
         expire(key, timeout, timeUnit);
         return count == null ? 0 : count;
     }
+
 
     /**
      * 获得缓存的list对象
