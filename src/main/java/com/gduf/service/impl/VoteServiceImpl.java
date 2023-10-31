@@ -2,11 +2,10 @@ package com.gduf.service.impl;
 
 import com.gduf.dao.VoteDAO;
 import com.gduf.pojo.community.*;
+import com.gduf.pojo.user.User;
 import com.gduf.service.VoteService;
-import com.gduf.util.HashTree;
-import com.gduf.util.Tree;
-import com.gduf.util.TreeNode;
-import com.gduf.util.TreeUtils;
+import com.gduf.util.*;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,18 +18,28 @@ public class VoteServiceImpl implements VoteService {
 
     @Autowired
     private VoteDAO voteDAO;
+    @Autowired
+    private RedisCache redisCache;
 
     @Override
-    public VoteWithChoice showVote(Integer id) {
-        Vote vote = voteDAO.showVoteById(id);
-        VoteChoice voteChoice1 = voteDAO.showVoteChoiceById(vote.getVoteChoice1());
-        VoteChoice voteChoice2 = voteDAO.showVoteChoiceById(vote.getVoteChoice2());
+    public VoteWithChoice showVoteByTerm(Integer term) {
+        Vote vote = voteDAO.showVoteByTerm(term);
+        VoteChoice voteChoice1;
+        VoteChoice voteChoice2;
+        try {
+            voteChoice1 = voteDAO.showVoteChoiceById(vote.getVoteChoice1());
+            voteChoice2 = voteDAO.showVoteChoiceById(vote.getVoteChoice2());
+        } catch (NullPointerException e) {
+            return null;
+        }
         VoteWithChoice voteWithChoice = new VoteWithChoice(vote, voteChoice1, voteChoice2);
         return voteWithChoice;
     }
 
     @Override
-    public boolean voteAction(Integer voteId, Boolean opinion) {
+    public boolean voteAction(Integer voteId, Boolean opinion,String token) {
+        // TODO 结合token 判断用户是否曾经投票过
+
         try {
             voteDAO.voteAction(voteId, opinion);
         } catch (Exception e) {
@@ -65,14 +74,14 @@ public class VoteServiceImpl implements VoteService {
 
 
 //        不知道能不能跑的
-        List<VoteFirstComment> voteFirstComments = voteDAO.showFirstVoteCommentById(voteId);
-        List<VoteComment> voteComments = new ArrayList<>();
-        for (VoteFirstComment voteFirstComment : voteFirstComments) {
-            List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(voteFirstComment.getVoteCommentId());
-            Function<VoteSecondComment, Integer> idGetter = VoteSecondComment::getParentCommentId;
-            TreeNode<VoteSecondComment> secondCommentTreeNode = TreeUtils.createTree(voteSecondComments, idGetter);
-            voteComments.add(new VoteComment(voteFirstComment, secondCommentTreeNode));
-        }
+//        List<VoteFirstComment> voteFirstComments = voteDAO.showFirstVoteCommentById(voteId);
+//        List<VoteComment> voteComments = new ArrayList<>();
+//        for (VoteFirstComment voteFirstComment : voteFirstComments) {
+////            List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(voteFirstComment.getVoteCommentId());
+//            Function<VoteSecondComment, Integer> idGetter = VoteSecondComment::getParentCommentId;
+//            TreeNode<VoteSecondComment> secondCommentTreeNode = TreeUtils.createTree(voteSecondComments, idGetter);
+//            voteComments.add(new VoteComment(voteFirstComment, secondCommentTreeNode));
+//        }
 
 //        HashTree<VoteSecondComment> hashTree = new HashTree<>();
 //        for (VoteFirstComment voteFirstComment : voteFirstComments) {
@@ -85,7 +94,8 @@ public class VoteServiceImpl implements VoteService {
 //        }
 
 
-        return voteComments;
+//        return voteComments;
+        return null;
     }
 
     @Override
@@ -103,16 +113,18 @@ public class VoteServiceImpl implements VoteService {
 //    }
 
     @Override
-    public List<TreeNode<VoteSecondComment>> showExtraSecondVoteComment(Integer parentId) {
+    public List<TreeNode<VoteSecondComment>> showExtraSecondVoteComment(Integer firstVoteCommentId) {
         //        获取特定一级评论的所有二级评论 集成集合
         List<TreeNode<VoteSecondComment>> voteSecondCommentsNodes = new ArrayList<>();
-        List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(parentId);
+
+//        List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(firstVoteCommentId);
 //        将每一个二级评论全部组织 初始化成一个节点
-        for (VoteSecondComment voteSecondComment : voteSecondComments) {
-            TreeNode<VoteSecondComment> voteSecondCommentsNode = new TreeNode<>(voteSecondComment);
-            voteSecondCommentsNodes.add(voteSecondCommentsNode);
-        }
-        return TreeUtils.findParent(voteSecondCommentsNodes);
+//        for (VoteSecondComment voteSecondComment : voteSecondComments) {
+//            TreeNode<VoteSecondComment> voteSecondCommentsNode = new TreeNode<>(voteSecondComment);
+//            voteSecondCommentsNodes.add(voteSecondCommentsNode);
+//        }
+//        return TreeUtils.findParent(voteSecondCommentsNodes);
+        return null;
     }
 
     @Override
@@ -133,6 +145,14 @@ public class VoteServiceImpl implements VoteService {
             return false;
         }
         return true;
+    }
+
+    private User decode(String token) throws Exception {
+        Claims claims = JwtUtil.parseJWT(token);
+        String userId = claims.getSubject();
+//            getSubject获取的是未加密之前的原始值
+        User user = redisCache.getCacheObject("login" + userId);
+        return user;
     }
 
 }

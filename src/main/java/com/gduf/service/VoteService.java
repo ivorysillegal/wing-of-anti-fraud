@@ -11,10 +11,10 @@ import java.util.List;
 public interface VoteService {
 
 //    渲染投票
-    public VoteWithChoice showVote(Integer id);
+    public VoteWithChoice showVoteByTerm(Integer term);
 
 //    执行投票
-    public boolean voteAction(Integer voteId,Boolean opinion);
+    public boolean voteAction(Integer voteId,Boolean opinion,String token);
 
     public List<VoteWithChoice> showNewestVote();
 
@@ -28,7 +28,7 @@ public interface VoteService {
 //    public TreeNode<VoteSecondComment> showExtraSecondVoteComment(Integer firstVoteCommentId);
 
 //    获取特定帖子的二级评论
-    public List<TreeNode<VoteSecondComment>> showExtraSecondVoteComment(Integer parentId);
+    public List<TreeNode<VoteSecondComment>> showExtraSecondVoteComment(Integer firstVoteCommentId);
 
 //    添加一级评论 （输入评论）
     public boolean insertFirstComment(VoteFirstComment voteFirstComment);
