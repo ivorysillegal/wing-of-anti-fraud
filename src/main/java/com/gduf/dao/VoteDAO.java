@@ -4,6 +4,7 @@ import com.gduf.pojo.community.VoteSecondComment;
 import com.gduf.pojo.community.Vote;
 import com.gduf.pojo.community.VoteChoice;
 import com.gduf.pojo.community.VoteFirstComment;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -29,8 +30,13 @@ public interface VoteDAO {
     @Select("select * from vote_comment where vote_id = #{voteId}")
     public List<VoteFirstComment> showFirstVoteCommentById(Integer voteId);
 
-//    根据一级评论的id找二级评论
+    //    根据一级评论的id找二级评论
     @Select("select * from vote_second_comment where parent_comment_id = #{parentCommentId}")
     public List<VoteSecondComment> showSecondCommentByFirstId(Integer parentCommentId);
 
+    @Insert("insert into vote_comment (msg,vote_id,opinion,writer_id) values (#{msg},#{voteId},#{opinion},#{writerId})")
+    public void insertFirstComment(VoteFirstComment voteFirstComment);
+
+    @Insert("insert into vote_second_comment (msg,parent_comment_id,opinion,writer_id,first_vote_comment_id) values (#{msg},#{parentCommentId},#{opinion},#{writerId},#{firstVoteCommentId})")
+    public void insertSecondComment(VoteSecondComment voteSecondComment);
 }

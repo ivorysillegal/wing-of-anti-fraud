@@ -71,8 +71,20 @@ public class VoteServiceImpl implements VoteService {
             List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(voteFirstComment.getVoteCommentId());
             Function<VoteSecondComment, Integer> idGetter = VoteSecondComment::getParentCommentId;
             TreeNode<VoteSecondComment> secondCommentTreeNode = TreeUtils.createTree(voteSecondComments, idGetter);
-            voteComments.add(new VoteComment(voteFirstComment,secondCommentTreeNode));
+            voteComments.add(new VoteComment(voteFirstComment, secondCommentTreeNode));
         }
+
+//        HashTree<VoteSecondComment> hashTree = new HashTree<>();
+//        for (VoteFirstComment voteFirstComment : voteFirstComments) {
+//            List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(voteFirstComment.getVoteCommentId());
+//            for (VoteSecondComment voteSecondComment : voteSecondComments) {
+//                if (voteSecondComment.getParentCommentId() == 0) {
+//                    hashTree.add(voteSecondComment);
+//                }
+//            }
+//        }
+
+
         return voteComments;
     }
 
@@ -82,13 +94,47 @@ public class VoteServiceImpl implements VoteService {
         return voteFirstComments;
     }
 
+//    @Override
+//    public TreeNode<VoteSecondComment> showExtraSecondVoteComment(Integer firstVoteCommentId) {
+//        List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(firstVoteCommentId);
+//        Function<VoteSecondComment, Integer> idGetter = voteSecondComment -> firstVoteCommentId;
+//        TreeNode<VoteSecondComment> secondCommentTreeNode = TreeUtils.createTree(voteSecondComments, idGetter);
+//        return secondCommentTreeNode;
+//    }
+
     @Override
-    public TreeNode<VoteSecondComment> showExtraSecondVoteComment(Integer firstVoteCommentId) {
-            List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(firstVoteCommentId);
-            Function<VoteSecondComment, Integer> idGetter = voteSecondComment -> firstVoteCommentId;
-            TreeNode<VoteSecondComment> secondCommentTreeNode = TreeUtils.createTree(voteSecondComments, idGetter);
-            return secondCommentTreeNode;
+    public List<TreeNode<VoteSecondComment>> showExtraSecondVoteComment(Integer parentId) {
+        //        获取特定一级评论的所有二级评论 集成集合
+        List<TreeNode<VoteSecondComment>> voteSecondCommentsNodes = new ArrayList<>();
+        List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(parentId);
+//        将每一个二级评论全部组织 初始化成一个节点
+        for (VoteSecondComment voteSecondComment : voteSecondComments) {
+            TreeNode<VoteSecondComment> voteSecondCommentsNode = new TreeNode<>(voteSecondComment);
+            voteSecondCommentsNodes.add(voteSecondCommentsNode);
         }
+        return TreeUtils.findParent(voteSecondCommentsNodes);
     }
+
+    @Override
+    public boolean insertFirstComment(VoteFirstComment voteFirstComment) {
+        try {
+            voteDAO.insertFirstComment(voteFirstComment);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean insertSecondComment(VoteSecondComment voteSecondComment) {
+        try {
+            voteDAO.insertSecondComment(voteSecondComment);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+}
 
 

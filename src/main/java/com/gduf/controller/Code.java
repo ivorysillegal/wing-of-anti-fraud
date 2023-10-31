@@ -98,4 +98,10 @@ public class Code {
 
     public static final Integer VOTE_OK = 400;
     public static final Integer VOTE_ERR = 401;
+
+    public static final Integer SHOW_VOTE_COMMENT_OK = 400;
+    public static final Integer SHOW_VOTE_COMMENT_ERR = 411;
+
+    public static final Integer INSERT_VOTE_FIRST_COMMENT_OK = 400;
+    public static final Integer INSERT_VOTE_FIRST_COMMENT_ERR = 421;
 }

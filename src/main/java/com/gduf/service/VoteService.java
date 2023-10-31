@@ -25,5 +25,14 @@ public interface VoteService {
     public List<VoteFirstComment> showFirstVoteComment(Integer voteId);
 
 //    获取特定帖子的二级评论
-    public TreeNode<VoteSecondComment> showExtraSecondVoteComment(Integer firstVoteCommentId);
+//    public TreeNode<VoteSecondComment> showExtraSecondVoteComment(Integer firstVoteCommentId);
+
+//    获取特定帖子的二级评论
+    public List<TreeNode<VoteSecondComment>> showExtraSecondVoteComment(Integer parentId);
+
+//    添加一级评论 （输入评论）
+    public boolean insertFirstComment(VoteFirstComment voteFirstComment);
+
+//    添加二级评论（即 回复一级评论）
+    public boolean insertSecondComment(VoteSecondComment voteSecondComment);
 }
