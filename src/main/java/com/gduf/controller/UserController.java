@@ -1,7 +1,6 @@
 package com.gduf.controller;
 
 import cn.hutool.captcha.AbstractCaptcha;
-import cn.hutool.core.collection.ListUtil;
 import com.gduf.pojo.CaptchaCode;
 import com.gduf.pojo.community.Comment;
 import com.gduf.pojo.community.Post;

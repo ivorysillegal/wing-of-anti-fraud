@@ -1,12 +1,17 @@
 package com.gduf.controller;
 
+import com.gduf.pojo.script.mapper.Script;
+import com.gduf.pojo.script.mapper.ScriptNode;
+import com.gduf.pojo.script.mapper.ScriptNodes;
 import com.gduf.pojo.script.*;
+import com.gduf.pojo.script.mapper.ScriptMsgWithInfluenceName;
 import com.gduf.service.ScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import static com.gduf.controller.Code.*;
 
@@ -18,18 +23,39 @@ public class ScriptController {
     @Autowired
     private ScriptService scriptService;
 
-    //    保存剧本
-    @PostMapping("/design")
-    public Result saveScript(@RequestBody ScriptMsgWithInfluenceName scriptMsgWithInfluenceName) {
+    //    保存剧本信息 确认默认状态
+    @PostMapping("/design/scriptMsgWithInfluence")
+    public Result saveScriptMsgInfluence(@RequestHeader String token, @RequestBody ScriptMsgWithInfluenceName scriptMsgWithInfluenceName) {
         ScriptInfluenceName scriptInfluenceName = scriptMsgWithInfluenceName.getScriptInfluenceName();
         ScriptMsg scriptMsg = scriptMsgWithInfluenceName.getScriptMsg();
         try {
-            if (!scriptService.insertScript(scriptMsg, scriptInfluenceName)
-            ) return new Result("剧本保存失败", SCRIPT_SAVE_ERR, null);
+            ScriptMsg scriptMsgWithId = scriptService.insertOrUpdateScript(scriptMsg, scriptInfluenceName);
+//             保存剧本信息
+            if (Objects.isNull(scriptMsgWithId))
+                return new Result("剧本总体信息保存失败", SCRIPT_SAVE_ERR, null);
+            boolean isAccessible = scriptService.checkScriptStatus(token, scriptMsgWithId.getScriptId());
+//            确认 保存 或 更新剧本状态
+            if (!isAccessible)
+                return new Result("剧本总体信息保存失败", SCRIPT_SAVE_ERR, null);
         } catch (Exception e) {
-            return new Result("剧本保存失败", SCRIPT_SAVE_ERR, null);
+            return new Result("剧本总体信息保存失败", SCRIPT_SAVE_ERR, null);
         }
-        return new Result("剧本保存成功", SCRIPT_SAVE_OK, null);
+        return new Result("剧本总体信息保存成功", SCRIPT_SAVE_OK, null);
+    }
+
+    //    保存剧本节点
+    @PostMapping("/design/scriptNodes")
+    public Result saveScriptNode(@RequestBody ScriptNodes scriptNodeList) {
+        List<ScriptNode> scriptNodes = scriptNodeList.getScriptNodes();
+        boolean isInsert = false;
+        try {
+            isInsert = scriptService.insertScriptNodes(scriptNodes);
+        } catch (Exception e) {
+            return new Result("剧本节点保存失败", SCRIPT_NODES_SAVE_ERR, null);
+        }
+        if (!isInsert)
+            return new Result("剧本节点保存失败", SCRIPT_NODES_SAVE_ERR, null);
+        else return new Result("剧本节点保存成功", SCRIPT_NODES_SAVE_OK, null);
     }
 
     @GetMapping
@@ -55,13 +81,21 @@ public class ScriptController {
         try {
             boolean isRemember = scriptService.rememberScript(token, scriptId);
             script = mergeScript(scriptId);
-            if (!isRemember){
+            if (!isRemember) {
                 return new Result("记录游玩操作失败", LOAD_SCRIPT_ERR, null);
             }
         } catch (Exception e) {
             return new Result("读取剧本失败", LOAD_SCRIPT_ERR, null);
         }
         return new Result("读取剧本成功", LOAD_SCRIPT_OK, script);
+    }
+
+    private Script mergeScript(Integer scriptId) {
+        List<ScriptNode> scriptDetail = scriptService.getScriptDetail(scriptId);
+        ScriptMsg scriptMsg = scriptService.getScriptMsg(scriptId);
+        ScriptInfluenceName scriptInfluenceName = scriptService.getScriptInfluenceName(scriptId);
+        Script script = new Script(scriptMsg, scriptDetail, scriptInfluenceName);
+        return script;
     }
 
     @PostMapping("/play/end")
@@ -81,12 +115,4 @@ public class ScriptController {
         return new Result("剧本读取结局成功", LOAD_SCRIPT_END_OK, scriptEnd);
     }
 
-
-    private Script mergeScript(Integer scriptId) {
-        List<ScriptNode> scriptDetail = scriptService.getScriptDetail(scriptId);
-        ScriptMsg scriptMsg = scriptService.getScriptMsg(scriptId);
-        ScriptInfluenceName scriptInfluenceName = scriptService.getScriptInfluenceName(scriptId);
-        Script script = new Script(scriptMsg, scriptDetail, scriptInfluenceName);
-        return script;
-    }
 }

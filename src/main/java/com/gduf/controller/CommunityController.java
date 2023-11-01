@@ -87,6 +87,8 @@ public class CommunityController {
     }
 
     //    点赞功能
+//    TODO 增加取消点赞功能
+//    业务层增加判断是否点赞过就好 若未点赞过则点赞 点赞过则取消
     @PostMapping("/like")
     public Result like(@RequestHeader String token, @RequestBody Map<String, Integer> likes) {
         try {

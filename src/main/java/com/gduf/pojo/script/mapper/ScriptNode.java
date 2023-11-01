@@ -1,5 +1,6 @@
-package com.gduf.pojo.script;
+package com.gduf.pojo.script.mapper;
 
+import com.gduf.pojo.script.ScriptChoice;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

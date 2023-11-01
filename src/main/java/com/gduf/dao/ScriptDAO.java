@@ -1,10 +1,10 @@
 package com.gduf.dao;
 
+import com.gduf.pojo.script.ScriptChoice;
+import com.gduf.pojo.script.mapper.ScriptNode;
 import com.gduf.pojo.script.*;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
+import com.gduf.pojo.script.ScriptStatus;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -12,15 +12,42 @@ import java.util.List;
 public interface ScriptDAO {
 
     @Insert("insert into tb_script (script_name,script_background,classification) values (#{scriptName},#{scriptBackground},#{classification})")
-    public int insertScript(ScriptMsg scriptMsg);
+    @Options(useGeneratedKeys = true, keyProperty = "scriptId", keyColumn = "script_id")
+    public void insertScript(ScriptMsg scriptMsg);
 
-    @Insert("insert into tb_script_influence_name (influence1_name,influence2_name,influence3_name,influence4_name) values (#{influence1Name},#{influence2Name},#{influence3Name},#{influence4Name})")
+    @Update("update tb_script set script_name = #{scriptName},script_background = #{scriptBackground},classification = #{classification}")
+    public void updateScript(ScriptMsg scriptMsg);
+
+    @Insert("insert into tb_script_influence_name (influence1_name,influence2_name,influence3_name,influence4_name,script_id) values (#{influence1Name},#{influence2Name},#{influence3Name},#{influence4Name},#{scriptId})")
     public void insertScriptInfluenceName(ScriptInfluenceName scriptInfluenceName);
 
-//    @Insert("insert into tb_script_node (word,script_id,choice1,choice2,influence1,influence2,influence3,influence4,influence5,jump_for_choice1,jump_for_choice2,jump_for_stop) values (#{word},#{script_id},#{choice1},#{choice2},#{influence1},#{influence2},#{influence3},#{influence4},#{influence5},#{jumpForChoice1},#{jumpForChoice2},#{jumpForStop})")
-//    public int insertScriptNode(ScriptNode scriptNode);
+    @Update("update tb_script_influence_name set influence1_name = #{influence1Name} , influence2_name = #{influence2Name},influence3_name = #{influence3Name},influence4_name = #{influence4Name} where script_id = #{scriptId}")
+    public void updateScriptInfluenceName(ScriptInfluenceName scriptInfluenceName);
 
-    @Select("select * from tb_script where script_id = #{scriptId}")
+    //    增加剧本节点信息（node）
+    @Insert("insert into tb_script_node (node_id,word,script_id,left_choice_id,right_choice_id) values (#{nodeId},#{word},#{scriptId},#{leftChoiceId},#{rightChoiceId})")
+    public void insertScriptNodeMsg(ScriptNodeMsg scriptNodeMsg);
+
+    //    更新剧本节点信息 (node)
+    @Update("update tb_script_node set word = #{word} where script_id = #{scriptId} AND node_id = #{nodeId}")
+    public void updateScriptNodeMsg(ScriptNodeMsg scriptNodeMsg);
+
+    //    增加剧本选择信息（choice）
+    @Insert("insert into tb_script_choice (choice_id,choice_msg,influence1,influence2,influence3,influence4,jump,script_id) values (#{choiceId},#{choiceMsg},#{influence1},#{influence2},#{influence3},#{influence4},#{jump},#{scriptId})")
+    public void insertScriptChoice(ScriptChoice scriptChoice);
+
+    @Update("update tb_script_choice set choice_msg = #{choiceMsg},influence1 = #{influence1},influence2 = #{influence2},influence3 = #{influence3},influence4 = #{influence4},jump = #{jump} where script_id = #{scriptId}")
+    public void updateScriptChoice(ScriptChoice scriptChoice);
+
+    //    查询剧本状态信息是否存在
+    @Select("select status from tb_script_status where producer_id = #{producerId} AND script_id = #{scriptId}")
+    public Integer selectIfScriptExist(Integer producerId, Integer scriptId);
+
+    //    若为第一次保存剧本 则保存剧本信息
+    @Insert("insert into tb_script_status (script_id,status,producer_id,is_official,is_del) values (#{scriptId},#{status},#{producerId},#{isOfficial},#{isDel})")
+    public void insertScriptStatus(ScriptStatus scriptStatus);
+
+    @Select("select * from tb_script where script_id = #{scriptId} ")
     public ScriptMsg getScriptMsg(Integer scriptId);
 
     @Select("select * from tb_script")
@@ -32,6 +59,9 @@ public interface ScriptDAO {
 
     @Select("select * from tb_script_node where script_id = #{scriptId}")
     public List<ScriptNodeMsg> getScriptNodeMsg(Integer scriptId);
+
+    @Select("SELECT COUNT(*) FROM tb_script_node WHERE script_id = #{scriptId}")
+    public Integer isNodeExist(Integer scriptId);
 
 //    @Select("select * from tb_script_node")
 //    public List<ScriptNodeMsg> getScriptNodeMsg(Integer scriptId);
@@ -55,13 +85,16 @@ public interface ScriptDAO {
     @Select("select * from tb_script_influence_name where script_id = #{scriptId}")
     public ScriptInfluenceName getInfluenceName(Integer scriptId);
 
-//    记录玩家曾经玩过了什么剧本
+    //    记录玩家曾经玩过了什么剧本
     @Insert("insert into user_played_script (user_id,script_id) values (#{userId},#{scriptId})")
-    public void rememberPlayed(Integer userId,Integer scriptId);
+    public void rememberPlayed(Integer userId, Integer scriptId);
 
     @Select("select script_id from user_played_script where user_id = #{userId}")
     public List<Integer> getPlayedScriptId(Integer userId);
 
     @Select("select * from tb_script where script_id = #{scriptId}")
     public ScriptMsg getScriptBypId(Integer scriptId);
+
+    @Select("select user_id from user_played_script where user_id = #{userId} AND script_id = #{scriptId}")
+    public Integer ifPlayedScript(Integer scriptId, Integer userId);
 }
