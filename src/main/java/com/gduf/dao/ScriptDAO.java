@@ -17,7 +17,7 @@ public interface ScriptDAO {
     @Options(useGeneratedKeys = true, keyProperty = "scriptId", keyColumn = "script_id")
     public void insertScript(ScriptMsg scriptMsg);
 
-    @Update("update tb_script set script_name = #{scriptName},script_background = #{scriptBackground},classification = #{classification}")
+    @Update("update tb_script set script_name = #{scriptName},script_background = #{scriptBackground},classification = #{classification} where script_id = #{scriptId}")
     public void updateScript(ScriptMsg scriptMsg);
 
     @Insert("insert into tb_script_influence_name (influence1_name,influence2_name,influence3_name,influence4_name,script_id) values (#{influence1Name},#{influence2Name},#{influence3Name},#{influence4Name},#{scriptId})")
@@ -55,6 +55,12 @@ public interface ScriptDAO {
     @Select("select * from tb_script")
     @Options(useGeneratedKeys = true, keyProperty = "scriptId")
     public List<ScriptMsg> getAllScript();
+
+    @Select("select script_id from tb_script_status where is_official = 1")
+    public List<Integer> getOfficialScriptId();
+
+    @Select("select * from tb_script where script_id = #{scriptId}")
+    public ScriptMsg getScriptById(Integer scriptId);
 
     @Select("select * from tb_script_node where script_id = #{scriptId}")
     public List<ScriptNode> getScriptNode(Integer scriptId);

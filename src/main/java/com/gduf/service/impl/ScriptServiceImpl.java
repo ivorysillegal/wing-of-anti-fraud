@@ -15,6 +15,7 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -145,15 +146,24 @@ public class ScriptServiceImpl implements ScriptService {
     @Override
     public List<ScriptMsg> getScript() {
         List<ScriptMsg> scriptMsg;
-        scriptMsg = redisCache.getCacheList("scripts");
-        if (scriptMsg == null) {
+        scriptMsg = redisCache.getCacheList("officialScripts");
+        if (scriptMsg.isEmpty()) {
+            scriptMsg = new ArrayList<>();
+//            初始化集合怕他报错
             try {
-                scriptMsg = scriptDAO.getAllScript();
+                List<Integer> officialScriptId = scriptDAO.getOfficialScriptId();
+                for (Integer eachOfficialScript : officialScriptId) {
+                    ScriptMsg officialScript = scriptDAO.getScriptById(eachOfficialScript);
+                    scriptMsg.add(officialScript);
+                }
+                if (scriptMsg.isEmpty()){
+                    return null;
+                }
             } catch (Exception e) {
                 return null;
             }
         }
-        redisCache.setCacheList("scripts", scriptMsg);
+        redisCache.setCacheList("officialScripts", scriptMsg,5,TimeUnit.MINUTES);
         return scriptMsg;
     }
 
