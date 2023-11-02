@@ -2,9 +2,12 @@ package com.gduf.service.impl;
 
 import com.gduf.dao.ScriptDAO;
 import com.gduf.pojo.script.ScriptChoice;
+import com.gduf.pojo.script.mapper.ScriptEnd;
+import com.gduf.pojo.script.mapper.ScriptEnds;
 import com.gduf.pojo.script.mapper.ScriptNode;
 import com.gduf.pojo.script.*;
 import com.gduf.pojo.script.ScriptStatus;
+import com.gduf.pojo.script.mapper.ScriptNormalEnd;
 import com.gduf.service.ScriptService;
 import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
@@ -34,12 +37,12 @@ public class ScriptServiceImpl implements ScriptService {
         try {
             if (Objects.isNull(script)) {
 //                如果没有目标剧本 则返回null 则添加新草稿
-                scriptDAO.insertScript(scriptMsg);
                 scriptMsg.setScriptStatus(true);
+//        弃用状态指标
+                scriptDAO.insertScript(scriptMsg);
                 scriptInfluenceName.setScriptId(scriptMsg.getScriptId());
                 scriptDAO.insertScriptInfluenceName(scriptInfluenceName);
             } else {
-//        弃用状态指标
 //                如果有目标剧本 则返回对象 则执行更新操作 （一般不影响剧本状态 即tb_script_status表）
                 scriptDAO.updateScript(scriptMsg);
                 scriptDAO.updateScriptInfluenceName(scriptInfluenceName);
@@ -53,7 +56,7 @@ public class ScriptServiceImpl implements ScriptService {
 
     //    增加剧本节点（每个节点的信息）
     @Override
-    public boolean insertScriptNodes(List<ScriptNode> scriptNodes) {
+    public boolean insertOrUpdateScriptNodes(List<ScriptNode> scriptNodes) {
         for (ScriptNode scriptNode : scriptNodes) {
 //            定义 选项（choice）中的 对应的剧本id
             Integer scriptId = scriptNode.getScriptId();
@@ -67,9 +70,9 @@ public class ScriptServiceImpl implements ScriptService {
 //            当等于0的时候 表示不存在这个剧本 此时需要新增
             if (nodeExist == 0) {
                 //            加入节点及选项信息
-                    scriptDAO.insertScriptNodeMsg(nodeMsg);
-                    scriptDAO.insertScriptChoice(scriptNode.getLeftChoice());
-                    scriptDAO.insertScriptChoice(scriptNode.getRightChoice());
+                scriptDAO.insertScriptNodeMsg(nodeMsg);
+                scriptDAO.insertScriptChoice(scriptNode.getLeftChoice());
+                scriptDAO.insertScriptChoice(scriptNode.getRightChoice());
             } else {
 //                进入else条件的时候 表示已经存在了这个剧本 此时需要更新剧本的信息
                 scriptDAO.updateScriptNodeMsg(nodeMsg);
@@ -81,14 +84,52 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
+    public boolean insertOrUpdateScriptEnds(ScriptEnds scriptEnds) {
+        try {
+            Integer scriptId = scriptEnds.getScriptId();
+            List<ScriptEnd> scriptEndsList = scriptEnds.getScriptEnds();
+//        先对特殊结局进行处理
+            for (ScriptEnd scriptEnd : scriptEndsList) {
+                Integer endId = scriptEnd.getEndId();
+//            如果之前没有记录过这个结局的话 传过来的endId是空的
+                if (endId == null) {
+                    scriptEnd.setScriptId(scriptId);
+//                    手动设置该结局 所属的剧本id
+                    scriptDAO.insertScriptEnd(scriptEnd);
+                } else {
+//            如果传过来的endId不为空 需要做一下判断 看一下是否存在 并且是否属于对应的剧本
+                    if (scriptDAO.selectIfEndExist(endId, scriptId) == 0)
+                        return false;
+//                如果没问题的话 对结局执行更新
+                    scriptDAO.updateScriptEnd(scriptEnd);
+                }
+            }
+//        至此 for循环结束 特殊结局上传完毕
+            ScriptNormalEnd scriptNormalEnd = scriptEnds.getScriptNormalEnd();
+//                同上 手动设置该结局所属的剧本id
+            scriptNormalEnd.setScriptId(scriptId);
+            Integer ifScriptSpecialEndExist = scriptDAO.selectIfScriptNormalEndExist(scriptNormalEnd.getNormalEndId(), scriptNormalEnd.getScriptId());
+//        如果不存在特殊结局 则新增
+            if (ifScriptSpecialEndExist == 0) {
+                scriptDAO.insertScriptNormalEnd(scriptNormalEnd);
+            } else {
+//            如果存在 则更新
+                scriptDAO.updateScriptNormalEnd(scriptNormalEnd);
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public boolean checkScriptStatus(String token, Integer scriptId) {
         try {
             int producerId = decodeToId(token);
             Integer status = scriptDAO.selectIfScriptExist(producerId, scriptId);
             if (!Objects.isNull(status) && status.equals(100)) {
 //                TODO 存在当前剧本时（更新已上架剧本的操作的默认逻辑）TBD
-            }
-            else if (!Objects.isNull(status) && status.equals(120)){
+            } else if (!Objects.isNull(status) && status.equals(120)) {
 //                TODO 存在当前剧本时（更新草稿箱剧本的操作的默认逻辑）TBD
             } else {
 //                进入else语句则表示没有当前的剧本的状态
@@ -177,7 +218,7 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
-    public ScriptEnd getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange) {
+    public ScriptEndSent getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange) {
         String specialEnd;
         String normalEnd;
         try {
@@ -188,8 +229,8 @@ public class ScriptServiceImpl implements ScriptService {
         } catch (Exception e) {
             return null;
         }
-        ScriptEnd scriptEnd = new ScriptEnd(specialEnd, normalEnd);
-        return scriptEnd;
+        ScriptEndSent scriptEndSent = new ScriptEndSent(specialEnd, normalEnd);
+        return scriptEndSent;
     }
 
     //    获取指标的名字

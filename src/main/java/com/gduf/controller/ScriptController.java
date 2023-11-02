@@ -1,10 +1,7 @@
 package com.gduf.controller;
 
-import com.gduf.pojo.script.mapper.Script;
-import com.gduf.pojo.script.mapper.ScriptNode;
-import com.gduf.pojo.script.mapper.ScriptNodes;
+import com.gduf.pojo.script.mapper.*;
 import com.gduf.pojo.script.*;
-import com.gduf.pojo.script.mapper.ScriptMsgWithInfluenceName;
 import com.gduf.service.ScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -32,15 +29,15 @@ public class ScriptController {
             ScriptMsg scriptMsgWithId = scriptService.insertOrUpdateScript(scriptMsg, scriptInfluenceName);
 //             保存剧本信息
             if (Objects.isNull(scriptMsgWithId))
-                return new Result("剧本总体信息保存失败", SCRIPT_SAVE_ERR, null);
+                return new Result("剧本总体信息保存或更新失败", SCRIPT_SAVE_ERR, null);
             boolean isAccessible = scriptService.checkScriptStatus(token, scriptMsgWithId.getScriptId());
 //            确认 保存 或 更新剧本状态
             if (!isAccessible)
-                return new Result("剧本总体信息保存失败", SCRIPT_SAVE_ERR, null);
+                return new Result("剧本总体信息保存或更新失败", SCRIPT_SAVE_ERR, null);
         } catch (Exception e) {
-            return new Result("剧本总体信息保存失败", SCRIPT_SAVE_ERR, null);
+            return new Result("剧本总体信息保存或更新失败", SCRIPT_SAVE_ERR, null);
         }
-        return new Result("剧本总体信息保存成功", SCRIPT_SAVE_OK, null);
+        return new Result("剧本总体信息保存或更新成功", SCRIPT_SAVE_OK, null);
     }
 
     //    保存剧本节点
@@ -49,13 +46,25 @@ public class ScriptController {
         List<ScriptNode> scriptNodes = scriptNodeList.getScriptNodes();
         boolean isInsert = false;
         try {
-            isInsert = scriptService.insertScriptNodes(scriptNodes);
+            isInsert = scriptService.insertOrUpdateScriptNodes(scriptNodes);
         } catch (Exception e) {
-            return new Result("剧本节点保存失败", SCRIPT_NODES_SAVE_ERR, null);
+            return new Result("剧本节点保存或更新失败", SCRIPT_NODES_SAVE_ERR, null);
         }
         if (!isInsert)
-            return new Result("剧本节点保存失败", SCRIPT_NODES_SAVE_ERR, null);
-        else return new Result("剧本节点保存成功", SCRIPT_NODES_SAVE_OK, null);
+            return new Result("剧本节点保存或更新失败", SCRIPT_NODES_SAVE_ERR, null);
+        else return new Result("剧本节点保存或更新成功", SCRIPT_NODES_SAVE_OK, null);
+    }
+
+    @PostMapping("/design/scriptEnds")
+    public Result saveScriptEnd(@RequestBody ScriptEnds scriptEnds) {
+        try {
+            boolean isInsert = scriptService.insertOrUpdateScriptEnds(scriptEnds);
+            if (!isInsert)
+                return new Result("剧本结局保存或更新失败", SCRIPT_ENDS_SAVE_ERR, null);
+        } catch (Exception e) {
+            return new Result("剧本结局保存或更新失败", SCRIPT_ENDS_SAVE_ERR, null);
+        }
+        return new Result("剧本结局保存或更新成功", SCRIPT_ENDS_SAVE_OK, null);
     }
 
     @GetMapping
@@ -106,13 +115,13 @@ public class ScriptController {
         int influence3 = (int) scriptEndValue.get("influence3");
         int influence4 = (int) scriptEndValue.get("influence4");
         ScriptInfluenceChange scriptInfluenceChange = new ScriptInfluenceChange(influence1, influence2, influence3, influence4);
-        ScriptEnd scriptEnd;
+        ScriptEndSent scriptEndSent;
         try {
-            scriptEnd = scriptService.getScriptEnd(scriptId, scriptInfluenceChange);
+            scriptEndSent = scriptService.getScriptEnd(scriptId, scriptInfluenceChange);
         } catch (Exception e) {
             return new Result("读取剧本结局失败", LOAD_SCRIPT_END_ERR, null);
         }
-        return new Result("剧本读取结局成功", LOAD_SCRIPT_END_OK, scriptEnd);
+        return new Result("剧本读取结局成功", LOAD_SCRIPT_END_OK, scriptEndSent);
     }
 
 }

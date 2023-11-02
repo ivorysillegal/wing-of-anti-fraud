@@ -38,6 +38,9 @@ public class Code {
     public static final Integer SCRIPT_NODES_SAVE_OK = 200;
     public static final Integer SCRIPT_NODES_SAVE_ERR = 233;
 
+    public static final Integer SCRIPT_ENDS_SAVE_OK = 200;
+    public static final Integer SCRIPT_ENDS_SAVE_ERR = 234;
+
     public static final Integer PIC_UPLOAD_OK = 200;
     public static final Integer PIC_UPLOAD_ERR = 241;
 

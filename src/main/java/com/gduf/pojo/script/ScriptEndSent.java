@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScriptEnd {
+public class ScriptEndSent {
     private String specialEnd;
     private String normalEnd;
 }

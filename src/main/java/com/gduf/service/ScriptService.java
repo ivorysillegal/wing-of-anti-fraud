@@ -1,5 +1,6 @@
 package com.gduf.service;
 
+import com.gduf.pojo.script.mapper.ScriptEnds;
 import com.gduf.pojo.script.mapper.ScriptNode;
 import com.gduf.pojo.script.*;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +11,9 @@ import java.util.List;
 public interface ScriptService {
     public ScriptMsg insertOrUpdateScript(ScriptMsg scriptMsg,ScriptInfluenceName scriptInfluenceName);
 
-    public boolean insertScriptNodes(List<ScriptNode> scriptNodes);
+    public boolean insertOrUpdateScriptNodes(List<ScriptNode> scriptNodes);
+
+    public boolean insertOrUpdateScriptEnds(ScriptEnds scriptEnds);
 
     public boolean checkScriptStatus(String token,Integer scriptId);
 
@@ -22,7 +25,7 @@ public interface ScriptService {
 
     public List<ScriptNode> getScriptDetail(Integer scriptId);
 
-    public ScriptEnd getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange);
+    public ScriptEndSent getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange);
 
     public ScriptInfluenceName getScriptInfluenceName(Integer scriptId);
 
