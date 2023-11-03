@@ -4,13 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScriptEnds {
-    private Integer scriptId;
-    private List<ScriptEnd> scriptEnd;
-    private ScriptNormalEnd scriptNormalEnd;
+public class ScriptWithEnd {
+    private Script script;
+    private ScriptEnds scriptEnds;
 }

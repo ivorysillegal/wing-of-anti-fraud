@@ -12,6 +12,7 @@ public class ScriptEnd {
 //    这个类是特殊结局的映射类
 //    游玩时传结局到前端的时候不会使用到 因为当时已经在DAO层判断的结局 直接返回对应的字符串
 //    使用时机为 上传结局时 使用此类作为映射类
+//    fork剧本的时候 复制信息
     private Integer endId;
     private Integer scriptId;
     private String endMsg;

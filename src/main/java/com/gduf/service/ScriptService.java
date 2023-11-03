@@ -19,6 +19,8 @@ public interface ScriptService {
 
     public List<ScriptMsg> getScript();
 
+    public List<ScriptMsg> getScriptByClassification(String classification);
+
     public ScriptMsg getScriptMsg(Integer scriptId);
 
     public List<ScriptNode> getScriptNode(Integer scriptId);
@@ -31,4 +33,13 @@ public interface ScriptService {
 
 //    记住用户此次玩过的剧本
     public boolean rememberScript(String token,Integer scriptId);
+
+//    展示用户 草稿箱中的剧本的总体信息
+    public List<ScriptMsg> showMyDesign(String token);
+
+//    将别人的半成品搞过来自己进行加工
+    public boolean forkToRepository(String token,Integer scriptId);
+
+//    申请者发过来 申请审核
+    public boolean commit(String token,Integer scriptId);
 }

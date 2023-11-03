@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.gduf.controller.Code.*;
@@ -81,6 +82,18 @@ public class ScriptController {
         if (scriptMsg != null) {
             return new Result("剧本读取成功", SCRIPT_READ_OK, scriptMsg);
         } else return new Result("剧本读取失败", SCRIPT_READ_ERR, null);
+    }
+
+    @PostMapping("/classification")
+    public Result getScriptById(@RequestBody Map map) {
+        String classification = (String) map.get("classification");
+        List<ScriptMsg> scriptByClassification = scriptService.getScriptByClassification(classification);
+        if (Objects.isNull(scriptByClassification)) {
+            return new Result("输入类型错误 没有这种类型", SCRIPT_READ_ERR, null);
+        } else if (scriptByClassification.isEmpty()) {
+            return new Result("输入类型的剧本数为空", SCRIPT_READ_ERR, null);
+        }
+        return new Result("输入类型剧本读取成功", SCRIPT_READ_OK, scriptByClassification);
     }
 
     @PostMapping("/play")

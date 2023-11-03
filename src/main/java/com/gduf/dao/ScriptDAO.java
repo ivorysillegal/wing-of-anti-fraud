@@ -49,12 +49,12 @@ public interface ScriptDAO {
     @Insert("insert into tb_script_status (script_id,status,producer_id,is_official,is_del) values (#{scriptId},#{status},#{producerId},#{isOfficial},#{isDel})")
     public void insertScriptStatus(ScriptStatus scriptStatus);
 
-    @Select("select * from tb_script where script_id = #{scriptId} ")
-    public ScriptMsg getScriptMsg(Integer scriptId);
-
     @Select("select * from tb_script")
     @Options(useGeneratedKeys = true, keyProperty = "scriptId")
     public List<ScriptMsg> getAllScript();
+
+    @Select("select * from tb_script where classification = #{classification}")
+    public List<ScriptMsg> getScriptMsgByClassification(String classification);
 
     @Select("select script_id from tb_script_status where is_official = 1")
     public List<Integer> getOfficialScriptId();
@@ -83,6 +83,9 @@ public interface ScriptDAO {
     @Select("select count(*) from tb_script_end where end_id = #{endId} AND script_id = #{scriptId}")
     public Integer selectIfEndExist(Integer endId, Integer scriptId);
 
+    @Select("select * from tb_script_end where script_id = #{scriptId}")
+    public List<ScriptEnd> getScriptEndById(Integer scriptId);
+
     //    添加剧本结局
     @Insert("insert into tb_script_end (script_id,end_msg,influence1,influence2,influence3,influence4) values (#{scriptId},#{endMsg},#{influence1},#{influence2},#{influence3},#{influence4})")
     public void insertScriptEnd(ScriptEnd scriptEnd);
@@ -92,6 +95,9 @@ public interface ScriptDAO {
 
     @Select("select count(*) from tb_script_normal_end where normal_end_id = #{normalEndId} AND script_id = #{scriptId}")
     public Integer selectIfScriptNormalEndExist(Integer normalEndId, Integer scriptId);
+
+    @Select("select * from tb_script_normal_end where script_id = #{scriptId}")
+    public ScriptNormalEnd getScriptNormalEndById(Integer scriptId);
 
     @Insert("insert into tb_script_normal_end (script_id,normal_end1,normal_end2,start_value1,end_value1,start_value2,end_value2,start_value3,end_value3,start_value4,end_value4) values (#{scriptId},#{normalEnd1},#{normalEnd2},#{startValue1},#{endValue1},#{startValue2},#{endValue2},#{startValue3},#{endValue3},#{startValue4},#{endValue4})")
     public void insertScriptNormalEnd(ScriptNormalEnd scriptNormalEnd);
@@ -119,9 +125,12 @@ public interface ScriptDAO {
     @Select("select script_id from user_played_script where user_id = #{userId}")
     public List<Integer> getPlayedScriptId(Integer userId);
 
-    @Select("select * from tb_script where script_id = #{scriptId}")
-    public ScriptMsg getScriptBypId(Integer scriptId);
-
     @Select("select user_id from user_played_script where user_id = #{userId} AND script_id = #{scriptId}")
     public Integer ifPlayedScript(Integer scriptId, Integer userId);
+
+    @Select("select script_id from tb_script_status where producer_id = #{producerId} AND status = 120")
+    public List<Integer> getScriptByProducerInRepository(Integer producerId);
+
+    @Insert("insert into script_commit (script_id,user_id) values (#{scriptId},#{userId})")
+    public void insertCommit(Integer scriptId,Integer userId);
 }

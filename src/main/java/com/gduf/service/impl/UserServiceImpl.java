@@ -255,9 +255,7 @@ public class UserServiceImpl implements UserService {
         if (scripts.isEmpty()){
             playedScriptId = scriptDAO.getPlayedScriptId(userId);
             for (Integer eachScriptId : playedScriptId) {
-                ScriptMsg script = scriptDAO.getScriptBypId(eachScriptId);
-                if (scripts == null)
-                    scripts = new ArrayList<>();
+                ScriptMsg script = scriptDAO.getScriptById(eachScriptId);
                 scripts.add(script);
             }
         }
