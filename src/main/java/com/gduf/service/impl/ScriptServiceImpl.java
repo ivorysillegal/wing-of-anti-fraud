@@ -166,15 +166,15 @@ public class ScriptServiceImpl implements ScriptService {
     @Override
     public List<ScriptMsg> getScriptByClassification(String classification) {
         boolean isClassification = checkClassificationLegality(classification);
-        if (isClassification){
+        if (isClassification) {
             List<ScriptMsg> scriptMsgsInClassification = scriptDAO.getScriptMsgByClassification(classification);
             return scriptMsgsInClassification;
         }
         return null;
     }
 
-//    验证是不是真正的 剧本类型
-    private boolean checkClassificationLegality(String classification){
+    //    验证是不是真正的 剧本类型
+    private boolean checkClassificationLegality(String classification) {
         return classification.equals("financialFraud") || classification.equals("telFraud")
                 || classification.equals("overseaFraud") || classification.equals("cult")
                 || classification.equals("pyramidSale") || classification.equals("wireFraud");
@@ -352,21 +352,24 @@ public class ScriptServiceImpl implements ScriptService {
         ArrayList<ScriptNode> scriptNodes = new ArrayList<>();
         for (ScriptNodeMsg nodeMsg : scriptNodeMsg) {
 
+//            TODO 屎山待异常捕获空指针优化
 //            如果nodeMsg（节点信息中）获取到左节点或者是右节点的id是-1的话 就表示来到了结尾
-            if (nodeMsg.getLeftChoiceId().equals(-1)){
-                if (nodeMsg.getRightChoiceId().equals(-1)){
+            if (nodeMsg.getLeftChoiceId().equals(-1)) {
+                if (nodeMsg.getRightChoiceId().equals(-1)) {
 //                    此时 这个节点两边都是空 表示这个节点两边的选项都是通往结局
-                    scriptNodes.add(new ScriptNode(nodeMsg,null,null));
+                    scriptNodes.add(new ScriptNode(nodeMsg, null, null));
 //                    哥们直接传空冲锋
+                    continue;
+//                    这里不continue的话 就会导致两个节点是空的会复制多一次
                 }
 //                左空右不空
                 ScriptChoice rightChoice = scriptDAO.getScriptNodeChoice(scriptId, nodeMsg.getRightChoiceId());
-                scriptNodes.add(new ScriptNode(nodeMsg,null,rightChoice));
+                scriptNodes.add(new ScriptNode(nodeMsg, null, rightChoice));
                 continue;
-            }else if (!nodeMsg.getLeftChoiceId().equals(-1) && nodeMsg.getRightChoiceId().equals(-1)){
+            } else if (!nodeMsg.getLeftChoiceId().equals(-1) && nodeMsg.getRightChoiceId().equals(-1)) {
 //                右空左不空
                 ScriptChoice leftChoice = scriptDAO.getScriptNodeChoice(scriptId, nodeMsg.getLeftChoiceId());
-                scriptNodes.add(new ScriptNode(nodeMsg,leftChoice,null));
+                scriptNodes.add(new ScriptNode(nodeMsg, leftChoice, null));
                 continue;
             }
 //            上面总体上是 分为结局和非结局做了区分 很屎山 可以利用异常处理优化 TBD
@@ -399,8 +402,20 @@ public class ScriptServiceImpl implements ScriptService {
         List<ScriptNode> scriptNodes = scriptWithEnd.getScript().getScriptNodes();
         for (ScriptNode scriptNode : scriptNodes) {
             scriptNode.setScriptId(value);
-            scriptNode.getLeftChoice().setScriptId(value);
-            scriptNode.getRightChoice().setScriptId(value);
+//            这个地方同getScript理 当遍历到涉及结局的节点的时候 rightChoice和leftChoice都是空的
+//            此时getRightChoice出来的结果是null set不了
+
+            try {
+                scriptNode.getRightChoice().setScriptId(value);
+            } catch (NullPointerException e) {
+//                如果此时报空指针 就证明此节点的这个选项通往结局 不需要处理
+            }
+            try {
+                scriptNode.getLeftChoice().setScriptId(value);
+            } catch (NullPointerException e) {
+//             两个语句要分开写 否则当上面的右选项通往结局
+//             下面这个语句的左选项不通往结局的时候 就会遗漏信息
+            }
         }
         scriptWithEnd.getScript().setScriptNodes(scriptNodes);
 
@@ -421,9 +436,28 @@ public class ScriptServiceImpl implements ScriptService {
     private void forkRepository(Integer scriptId, Integer forkUserId, ScriptWithEnd scriptWithEnd) {
 //        剧本节点 选项信息
         for (ScriptNode scriptNode : scriptWithEnd.getScript().getScriptNodes()) {
-            scriptDAO.insertScriptNodeMsg(new ScriptNodeMsg(scriptNode, scriptNode.getLeftChoice().getChoiceId(), scriptNode.getRightChoice().getChoiceId()));
-            scriptDAO.insertScriptChoice(scriptNode.getLeftChoice());
-            scriptDAO.insertScriptChoice(scriptNode.getRightChoice());
+//            当遍历到结局节点的时候 get到的Choice是null的
+//            目的 将其choiceId设置为-1
+//            我将犹如蟒蛇缠绕般使用异常捕获捕获空指针设置id
+            Integer leftChoiceId;
+            Integer rightChoiceId;
+            try {
+                leftChoiceId = scriptNode.getLeftChoice().getChoiceId();
+            } catch (NullPointerException e) {
+                leftChoiceId = -1;
+            }
+            try {
+                rightChoiceId = scriptNode.getRightChoice().getChoiceId();
+            } catch (NullPointerException e) {
+                rightChoiceId = -1;
+            }
+            scriptDAO.insertScriptNodeMsg(new ScriptNodeMsg(scriptNode, leftChoiceId, rightChoiceId));
+//            当id不为-1的时候 正常加入节点
+//            为-1的时候则跑路
+            if (!(leftChoiceId == -1))
+                scriptDAO.insertScriptChoice(scriptNode.getLeftChoice());
+            if (!(rightChoiceId == -1))
+                scriptDAO.insertScriptChoice(scriptNode.getRightChoice());
         }
 
 //        剧本指标信息
