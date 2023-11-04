@@ -26,8 +26,9 @@ public class ScriptController {
     public Result saveScriptMsgInfluence(@RequestHeader String token, @RequestBody ScriptMsgWithInfluenceName scriptMsgWithInfluenceName) {
         ScriptInfluenceName scriptInfluenceName = scriptMsgWithInfluenceName.getScriptInfluenceName();
         ScriptMsg scriptMsg = scriptMsgWithInfluenceName.getScriptMsg();
+        ScriptMsg scriptMsgWithId;
         try {
-            ScriptMsg scriptMsgWithId = scriptService.insertOrUpdateScript(scriptMsg, scriptInfluenceName);
+            scriptMsgWithId = scriptService.insertOrUpdateScript(scriptMsg, scriptInfluenceName);
 //             保存剧本信息
             if (Objects.isNull(scriptMsgWithId))
                 return new Result("剧本总体信息保存或更新失败", SCRIPT_SAVE_ERR, null);
@@ -38,7 +39,7 @@ public class ScriptController {
         } catch (Exception e) {
             return new Result("剧本总体信息保存或更新失败", SCRIPT_SAVE_ERR, null);
         }
-        return new Result("剧本总体信息保存或更新成功", SCRIPT_SAVE_OK, null);
+        return new Result("剧本总体信息保存或更新成功", SCRIPT_SAVE_OK, scriptMsgWithId.getScriptId());
     }
 
     //    保存剧本节点
