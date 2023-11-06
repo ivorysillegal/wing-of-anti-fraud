@@ -39,16 +39,14 @@ public class VoteServiceImpl implements VoteService {
 
     @Override
     public Integer voteAction(Integer voteId, Boolean opinion, String token) {
-        // TODO 结合token 判断用户是否曾经投票过
         try {
             int userId = decodeToId(token);
             Integer isVote = voteDAO.checkIfVote(voteId, userId);
-//                如果不是空的 则证明已经投过票了
+//            如果不是空的 则证明已经投过票了
 //            此次投票操作失败
-            if (!Objects.isNull(isVote))
-                return 0;
+            if (isVote.equals(1)) return 0;
             voteDAO.voteAction(voteId, opinion);
-            voteDAO.insertVote(voteId, userId);
+            voteDAO.insertVote(voteId, userId, opinion);
         } catch (Exception e) {
             return -1;
         }
@@ -128,6 +126,18 @@ public class VoteServiceImpl implements VoteService {
         return voteFirstComments;
     }
 
+    @Override
+    public List<VoteUser> showMyVoted(String token) {
+        List<VoteUser> voteUsers;
+        try {
+            int userId = decodeToId(token);
+            voteUsers = voteDAO.showVoted(userId);
+        } catch (Exception e) {
+            return null;
+        }
+        return voteUsers;
+    }
+
 //    @Override
 //    public TreeNode<VoteSecondComment> showExtraSecondVoteComment(Integer firstVoteCommentId) {
 //        List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(firstVoteCommentId);
@@ -156,7 +166,7 @@ public class VoteServiceImpl implements VoteService {
         try {
             int writerId = decodeToId(token);
             Integer isVote = voteDAO.checkIfVote(voteFirstComment.getVoteId(), writerId);
-            if (isVote.equals(1))
+            if (isVote.equals(0))
                 return 0;
             voteFirstComment.setWriterId(writerId);
             voteDAO.insertFirstComment(voteFirstComment);
@@ -174,7 +184,7 @@ public class VoteServiceImpl implements VoteService {
             Integer voteId = voteDAO.showVoteIdByCommentId(voteSecondComment.getFirstVoteCommentId());
             Integer isVote = voteDAO.checkIfVote(voteId, writerId);
             voteDAO.updateCommentReply(voteSecondComment.getFirstVoteCommentId());
-            if (isVote.equals(1))
+            if (isVote.equals(0))
                 //                如果是空的 则说明没有投过票
 //                没有投过票不得评论
                 return 0;

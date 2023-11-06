@@ -124,5 +124,8 @@ public class Code {
     public static final Integer FORK_REPOSITORY_ERR = 441;
 
     public static final Integer COMMIT_REPOSITORY_OK = 400;
-    public static final Integer COMMIT_REPOSITORY_ERR = 400;
+    public static final Integer COMMIT_REPOSITORY_ERR = 451;
+
+    public static final Integer SHOW_MY_VOTE_OK = 400;
+    public static final Integer SHOW_MY_VOTE_ERR = 461;
 }

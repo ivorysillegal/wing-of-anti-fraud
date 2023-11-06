@@ -27,6 +27,9 @@ public interface VoteService {
 //    获取所有一级评论
     public List<VoteFirstComment> showFirstVoteComment(Integer voteId);
 
+//    获取我曾经投过的投票
+    public List<VoteUser> showMyVoted(String token);
+
 //    获取特定帖子的二级评论
 //    public TreeNode<VoteSecondComment> showExtraSecondVoteComment(Integer firstVoteCommentId);
 

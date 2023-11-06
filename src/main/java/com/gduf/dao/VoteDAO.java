@@ -17,11 +17,11 @@ public interface VoteDAO {
     @Update("update vote_choice set approve = (approve + 1) where vote_id = #{voteId} AND opinion = #{opinion}")
     public void voteAction(Integer voteId, Boolean opinion);
 
-    @Select("select count(*) from vote_user where user_id = #{user_id} AND vote_id = #{voteId}")
+    @Select("select count(*) from vote_user where user_id = #{userId} AND vote_id = #{voteId}")
     public Integer checkIfVote(Integer voteId, Integer userId);
 
-    @Insert("insert into vote_user (vote_id,user_id) values (#{voteId},#{userId})")
-    public void insertVote(Integer voteId, Integer userId);
+    @Insert("insert into vote_user (vote_id,user_id,opinion) values (#{voteId},#{userId},#{opinion})")
+    public void insertVote(Integer voteId, Integer userId,Boolean opinion);
 
     //   手动寻找最新一期的投票
     @Select("select * from tb_vote where term = (select max(term) from tb_vote)")
@@ -32,6 +32,9 @@ public interface VoteDAO {
 
     @Select("select vote_id from vote_comment where vote_comment_id = #{voteCommentId}")
     public Integer showVoteIdByCommentId(Integer voteCommentId);
+
+    @Select("select * from vote_user where user_id = #{userId}")
+    public List<VoteUser> showVoted(Integer userId);
 
     //    寻找一级评论
     @Select("select * from vote_comment where vote_id = #{voteId}")

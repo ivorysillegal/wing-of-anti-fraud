@@ -37,6 +37,14 @@ public class VoteController {
         return new Result("往期投票读取成功", SHOW_VOTE_OK, votes);
     }
 
+    @GetMapping("/voted")
+    public Result showMyVoted(@RequestHeader String token) {
+        List<VoteUser> voteUsers = voteService.showMyVoted(token);
+        if (Objects.isNull(voteUsers))
+            return new Result("读取用户投票记录失败", SHOW_MY_VOTE_ERR, null);
+        return new Result("读取用户投票记录成功", SHOW_MY_VOTE_OK, voteUsers);
+    }
+
     @PostMapping
     public Result voteAction(@RequestBody Map map, @RequestHeader String token) {
         Integer voteId = (Integer) map.get("voteId");
@@ -64,7 +72,7 @@ public class VoteController {
         return new Result("显示二级评论成功 或没有二级评论", SHOW_VOTE_COMMENT_OK, voteSecondComments);
     }
 
-//    显示一级评论
+    //    显示一级评论
     @PostMapping("/comment/first")
     public Result showFirstVoteComments(@RequestBody Map map) {
         Integer voteId = (Integer) map.get("voteId");

@@ -7,11 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VoteFirstComment {
-    private Integer voteCommentId;
-    private String msg;
+public class VoteUser {
+    private Integer userId;
     private Integer voteId;
     private Boolean opinion;
-    private Integer writerId;
-    private Integer reply;
 }
