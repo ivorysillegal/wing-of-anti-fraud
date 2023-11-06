@@ -86,9 +86,9 @@ public class ScriptController {
     }
 
     @PostMapping("/classification")
-    public Result getScriptById(@RequestBody Map map) {
+    public Result getScriptByClassification(@RequestBody Map map) {
         String classification = (String) map.get("classification");
-        List<ScriptMsg> scriptByClassification = scriptService.getScriptByClassification(classification);
+        List<ScriptWithScore> scriptByClassification = scriptService.getScriptByClassification(classification);
         if (Objects.isNull(scriptByClassification)) {
             return new Result("输入类型错误 没有这种类型", SCRIPT_READ_ERR, null);
         } else if (scriptByClassification.isEmpty()) {
@@ -138,4 +138,15 @@ public class ScriptController {
         return new Result("剧本读取结局成功", LOAD_SCRIPT_END_OK, scriptEndSent);
     }
 
+    @PostMapping("/score")
+    public Result scoreScript(@RequestHeader String token, @RequestBody Map map) {
+        Integer score = (Integer) map.get("score");
+        Integer scriptId = (Integer) map.get("scriptId");
+        Integer isScore = scriptService.scoreScript(token, score, scriptId);
+        if (isScore.equals(1))
+            return new Result("投票成功", SCRIPT_SCORE_OK, null);
+        else if (isScore.equals(0))
+            return new Result("已经评过分 评分失败", SCRIPT_SCORE_SCORED, null);
+        return new Result("评分错误", SCRIPT_SCORE_ERR, null);
+    }
 }

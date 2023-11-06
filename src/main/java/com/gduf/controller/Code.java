@@ -128,4 +128,9 @@ public class Code {
 
     public static final Integer SHOW_MY_VOTE_OK = 400;
     public static final Integer SHOW_MY_VOTE_ERR = 461;
+
+    public static final Integer SCRIPT_SCORE_OK = 400;
+    public static final Integer SCRIPT_SCORE_ERR = 471;
+    public static final Integer SCRIPT_SCORE_SCORED = 472;
+
 }

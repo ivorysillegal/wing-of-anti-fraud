@@ -83,6 +83,9 @@ public interface ScriptDAO {
     @Select("select count(*) from tb_script_end where end_id = #{endId} AND script_id = #{scriptId}")
     public Integer selectIfEndExist(Integer endId, Integer scriptId);
 
+    @Select("select script_id from tb_script_status where status = 100")
+    public List<Integer> selectScriptOnline();
+
     @Select("select * from tb_script_end where script_id = #{scriptId}")
     public List<ScriptEnd> getScriptEndById(Integer scriptId);
 
@@ -121,6 +124,15 @@ public interface ScriptDAO {
     //    记录玩家曾经玩过了什么剧本
     @Insert("insert into user_played_script (user_id,script_id) values (#{userId},#{scriptId})")
     public void rememberPlayed(Integer userId, Integer scriptId);
+
+    @Insert("insert into script_user_score (user_id,script_id,score) values (#{userId},#{scriptId},#{score})")
+    public void insertScriptScore(Integer userId,Integer scriptId,Integer score);
+
+    @Select("select count(*) from script_user_score where user_id = #{userId} AND script_id = #{scriptId}")
+    public Integer checkIfScored(Integer userId,Integer scriptId);
+
+    @Select("select score from script_user_score where script_id =  #{scriptId}")
+    public List<Integer> showScore(Integer scriptId);
 
     @Select("select script_id from user_played_script where user_id = #{userId}")
     public List<Integer> getPlayedScriptId(Integer userId);

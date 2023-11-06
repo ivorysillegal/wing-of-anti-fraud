@@ -6,16 +6,14 @@ import com.gduf.pojo.script.mapper.*;
 import com.gduf.pojo.script.*;
 import com.gduf.pojo.script.ScriptStatus;
 import com.gduf.service.ScriptService;
+import com.gduf.task.RefreshScore;
 import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -26,6 +24,9 @@ public class ScriptServiceImpl implements ScriptService {
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private RefreshScore refreshScore;
 
     //    增加剧本 （名称及id及乱七八糟）
     @Override
@@ -164,13 +165,19 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
-    public List<ScriptMsg> getScriptByClassification(String classification) {
+    public List<ScriptWithScore> getScriptByClassification(String classification) {
         boolean isClassification = checkClassificationLegality(classification);
-        if (isClassification) {
-            List<ScriptMsg> scriptMsgsInClassification = scriptDAO.getScriptMsgByClassification(classification);
-            return scriptMsgsInClassification;
+        ArrayList<ScriptWithScore> scriptWithScores = new ArrayList<>();
+        if (!isClassification)
+            return null;
+        List<ScriptMsg> scriptMsgsInClassification = scriptDAO.getScriptMsgByClassification(classification);
+        HashMap<Integer, Integer> eachOnLineScriptScore = refreshScore.getScore();
+        for (ScriptMsg scriptMsg : scriptMsgsInClassification) {
+            Integer score = eachOnLineScriptScore.get(scriptMsg.getScriptId());
+            ScriptWithScore scriptWithScore = new ScriptWithScore(scriptMsg, score);
+            scriptWithScores.add(scriptWithScore);
         }
-        return null;
+        return scriptWithScores;
     }
 
     //    验证是不是真正的 剧本类型
@@ -301,6 +308,22 @@ public class ScriptServiceImpl implements ScriptService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Integer scoreScript(String token, Integer score, Integer scriptId) {
+        int userId;
+        try {
+            userId = decodeToId(token);
+            Integer ifScored = scriptDAO.checkIfScored(userId, scriptId);
+            if (ifScored.equals(1))
+                return 0;
+//            如果有查找到投票记录则说明已经投过票了
+            scriptDAO.insertScriptScore(userId, scriptId, score);
+        } catch (Exception e) {
+            return -1;
+        }
+        return 1;
     }
 
     @Override
