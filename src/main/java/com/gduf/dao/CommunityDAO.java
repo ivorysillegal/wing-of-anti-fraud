@@ -31,6 +31,9 @@ public interface CommunityDAO {
     @Select("select * from tb_post where writer_id = #{writerId}")
     public List<Post> showPostByWriter(Integer writerId);
 
+    @Select("select post_id from post_theme where is_script = 1")
+    public List<Integer> showScriptPostId();
+
     @Select("select post_id from post_theme where is_experience = #{isExperience} OR is_ask = #{isAsk}")
     public List<Integer> showPostIdByTheme(PostTheme postTheme);
 

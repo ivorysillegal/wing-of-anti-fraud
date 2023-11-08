@@ -26,8 +26,13 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public List<Post> showAllPost() {
-        List<Post> posts;
-        posts = communityDAO.showAllPost();
+        List<Post> posts = new ArrayList<>();
+//        社区板块默认展示 不是剧本分享类的 普通帖子
+        List<Integer> commonPostId = communityDAO.showCommonPost();
+        for (Integer id : commonPostId) {
+            Post post = communityDAO.showPostById(id);
+            posts.add(post);
+        }
         return posts;
     }
 
@@ -64,6 +69,17 @@ public class CommunityServiceImpl implements CommunityService {
         List<Post> posts = new ArrayList<>();
         while (postIterator.hasNext()) {
             Post post = communityDAO.showPostById(postIterator.next());
+            posts.add(post);
+        }
+        return posts;
+    }
+
+    @Override
+    public List<Post> showScriptPost() {
+        List<Integer> scriptPostId = communityDAO.showScriptPostId();
+        ArrayList<Post> posts = new ArrayList<>();
+        for (Integer id : scriptPostId) {
+            Post post = communityDAO.showPostById(id);
             posts.add(post);
         }
         return posts;

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.gduf.controller.Code.*;
 
@@ -68,5 +69,14 @@ public class ScriptRepositoryController {
         if (!isUpload)
             return new Result("节点位置信息上传失败", UPLOAD_NODE_POSITION_ERR, null);
         return new Result("节点位置信息上传成功", UPLOAD_NODE_POSITION_OK, null);
+    }
+
+    @PostMapping("/position/get")
+    public Result showNodePosition(@RequestBody Map map) {
+        Integer scriptId = (Integer) map.get("scriptId");
+        ScriptNodePositionList scriptNodePositionList = scriptService.scriptNodePositionList(scriptId);
+        if (Objects.isNull(scriptNodePositionList))
+            return new Result("节点位置信息获取失败",SHOW_NODE_POSITION_ERR,null);
+        return new Result("节点位置信息获取成功",SHOW_NODE_POSITION_OK,scriptNodePositionList);
     }
 }

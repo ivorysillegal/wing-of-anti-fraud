@@ -2,6 +2,7 @@ package com.gduf.service.impl;
 
 import com.gduf.dao.CommunityDAO;
 import com.gduf.dao.ScriptDAO;
+import com.gduf.dao.UserDAO;
 import com.gduf.pojo.community.Post;
 import com.gduf.pojo.community.PostTheme;
 import com.gduf.pojo.community.PostTopic;
@@ -35,6 +36,9 @@ public class ScriptServiceImpl implements ScriptService {
 
     @Autowired
     private CommunityDAO communityDAO;
+
+    @Autowired
+    private UserDAO userDAO;
 
     //    增加剧本 （名称及id及乱七八糟）
     @Override
@@ -146,6 +150,15 @@ public class ScriptServiceImpl implements ScriptService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String getScriptProducer(Integer scriptId) {
+        Integer producerId = scriptDAO.getProducerId(scriptId);
+        if (producerId.equals(0))
+            return "官方制作";
+        String username = userDAO.getUsername(producerId);
+        return username;
     }
 
     @Override
@@ -581,7 +594,8 @@ public class ScriptServiceImpl implements ScriptService {
         int userId = 0;
         try {
             userId = decodeToId(token);
-            scriptDAO.insertCommit(scriptId, userId);
+            scriptDAO.insertCommit(scriptId, userId,new Date());
+            scriptDAO.updateCommitStatus(scriptId);
         } catch (Exception e) {
             return false;
         }
@@ -610,6 +624,12 @@ public class ScriptServiceImpl implements ScriptService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public ScriptNodePositionList scriptNodePositionList(Integer scriptId) {
+        List<ScriptNodePosition> scriptNodePositions = scriptDAO.showNodePosition(scriptId);
+        return new ScriptNodePositionList(scriptId, scriptNodePositions);
     }
 
     private int decodeToId(String token) throws Exception {

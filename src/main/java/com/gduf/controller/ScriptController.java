@@ -6,10 +6,7 @@ import com.gduf.service.ScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static com.gduf.controller.Code.*;
 
@@ -83,6 +80,15 @@ public class ScriptController {
         if (!(Objects.isNull(allScriptOnline)))
             return new Result("剧本读取成功", SCRIPT_READ_OK, allScriptOnline);
         else return new Result("剧本读取失败", SCRIPT_READ_ERR, null);
+    }
+
+    @PostMapping("/producer")
+    public Result showProducer(@RequestBody Map map) {
+        Integer scriptId = (Integer) map.get("scriptId");
+        String scriptProducer = scriptService.getScriptProducer(scriptId);
+        if (Objects.isNull(scriptProducer))
+            return new Result("获取剧本制作者失败", SCRIPT_READ_ERR, null);
+        return new Result("获取剧本制作者成功", SCRIPT_READ_OK, new HashMap<>().put("producer", scriptProducer));
     }
 
     @PostMapping

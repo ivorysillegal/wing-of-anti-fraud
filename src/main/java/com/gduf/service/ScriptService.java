@@ -19,6 +19,9 @@ public interface ScriptService {
 
     public boolean checkScriptStatus(String token, Integer scriptId);
 
+//    获取剧本的制作人
+    public String getScriptProducer(Integer scriptId);
+
 //    获取官方制作的6个剧本
     public List<ScriptMsg> getOfficialScript();
 
@@ -57,4 +60,7 @@ public interface ScriptService {
 
 //    增加 或者 更新 节点在前端页面中的位置
     public boolean insertOrUpdateNodePosition(ScriptNodePositionList scriptNodePositionList);
+
+//    前端获取 发送节点在前端的位置
+    public ScriptNodePositionList scriptNodePositionList(Integer scriptId);
 }

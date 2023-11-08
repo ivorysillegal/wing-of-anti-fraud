@@ -17,6 +17,8 @@ public interface CommunityService {
 
     public List<Post> showPostByTag(PostAbout postAbout);
 
+    public List<Post> showScriptPost();
+
     public boolean insertPost(Post post,String token);
 
     public boolean insertPostAbout(PostAbout postAbout);

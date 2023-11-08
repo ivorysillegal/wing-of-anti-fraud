@@ -40,6 +40,17 @@ public class CommunityController {
         return new Result("获取帖子成功", SHOW_POST_OK, posts);
     }
 
+    @GetMapping("/script")
+    public Result showScriptPost(){
+        List<Post> posts;
+        try {
+            posts = communityService.showScriptPost();
+        }catch (Exception e){
+            return new Result("获取帖子失败", SHOW_POST_ERR, null);
+        }
+        return new Result("获取帖子成功", SHOW_POST_OK, posts);
+    }
+
     //    根据作者找帖子
     @GetMapping("/search")
     public Result searchPostByWriter(@RequestBody Integer writerId) {

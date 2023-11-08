@@ -138,4 +138,13 @@ public class Code {
 
     public static final Integer UPLOAD_NODE_POSITION_OK = 400;
     public static final Integer UPLOAD_NODE_POSITION_ERR = 491;
+
+    public static final Integer SHOW_NODE_POSITION_OK = 500;
+    public static final Integer SHOW_NODE_POSITION_ERR = 501;
+
+    public static final Integer COMMIT_SCRIPT_OK = 900;
+    public static final Integer COMMIT_SCRIPT_ERR = 909;
+
+    public static final Integer COMMITTED_SHOW_OK = 900;
+    public static final Integer COMMITTED_SHOW_ERR = 919;
 }

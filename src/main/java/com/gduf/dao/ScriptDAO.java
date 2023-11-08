@@ -8,6 +8,7 @@ import com.gduf.pojo.script.ScriptStatus;
 import com.gduf.pojo.script.mapper.ScriptNormalEnd;
 import org.apache.ibatis.annotations.*;
 
+import java.util.Date;
 import java.util.List;
 
 @Mapper
@@ -61,6 +62,9 @@ public interface ScriptDAO {
 
     @Select("select * from tb_script where script_id = #{scriptId}")
     public ScriptMsg getScriptById(Integer scriptId);
+
+    @Select("select producer_id from tb_script_status where script_id = #{scriptId}")
+    public Integer getProducerId(Integer scriptId);
 
     @Select("select status from tb_script_status where script_id = #{scriptId}")
     public Integer getScriptStatus(Integer scriptId);
@@ -146,8 +150,14 @@ public interface ScriptDAO {
     @Select("select script_id from tb_script_status where producer_id = #{producerId} AND status = 120")
     public List<Integer> getScriptByProducerInRepository(Integer producerId);
 
-    @Insert("insert into script_commit (script_id,user_id) values (#{scriptId},#{userId})")
-    public void insertCommit(Integer scriptId,Integer userId);
+    @Insert("insert into script_commit (script_id,user_id,commit_date) values (#{scriptId},#{userId},#{commitDate})")
+    public void insertCommit(Integer scriptId, Integer userId, Date commitDate);
+
+    @Update("update tb_script set script_status = 140 where script_id = #{scriptId}")
+    public void updateCommitStatus(Integer scriptId);
+
+    @Update("update tb_script_status set status = 100 where script_id = #{scriptId}")
+    public void onlineScript(Integer scriptId);
 
     @Select("select count(*)  from script_node_position where script_id = #{scriptId} AND node_id = #{nodeId}")
     public Integer checkIfNodePositionExist(Integer scriptId,Integer nodeId);
@@ -157,4 +167,7 @@ public interface ScriptDAO {
 
     @Update("update script_node_position set x = #{x},y = #{y} where script_id = #{scriptId} AND node_id = #{nodeId}")
     public void updateNodePosition(ScriptNodePosition scriptNodePosition);
+
+    @Select("select * from script_node_position where script_id = #{scriptId}")
+    public List<ScriptNodePosition> showNodePosition(Integer scriptId);
 }
