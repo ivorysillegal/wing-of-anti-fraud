@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class ScriptMsg {
     private Integer scriptId;
     private String scriptName;
-    private Boolean scriptStatus;
+    private Integer scriptStatus;
     private String scriptBackground;
     private String classification;
 }

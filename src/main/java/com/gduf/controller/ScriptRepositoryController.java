@@ -1,8 +1,10 @@
 package com.gduf.controller;
 
 import com.gduf.pojo.script.ScriptMsg;
+import com.gduf.pojo.script.mapper.ScriptNodePositionList;
 import com.gduf.service.ScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +19,9 @@ public class ScriptRepositoryController {
     @Autowired
     private ScriptService scriptService;
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @GetMapping
     public Result getMyDesign(@RequestHeader String token) {
         List<ScriptMsg> scriptMsgs = scriptService.showMyDesign(token);
@@ -25,12 +30,19 @@ public class ScriptRepositoryController {
         return new Result("展示草稿箱中的剧本总体信息成功", SHOW_REPOSITORY_OK, scriptMsgs);
     }
 
-//    @PostMapping
-//    public Result shareMyDesign() {
-//
-//    }
+    @PostMapping("/share")
+    public Result shareMyDesign(@RequestHeader String token, @RequestBody Map map) {
+        Integer scriptId = (Integer) map.get("scriptId");
+        boolean isInsert = scriptService.insertScriptPost(token, scriptId);
+//        TODO 将所有的分享的剧本信息（分享的版本） 存入mongoDB
+//        现在先放入redis
+        if (!isInsert)
+            return new Result("分享剧本失败", SHARE_REPOSITORY_ERR, null);
+//        返回被fork的剧本的id
+        return new Result("分享剧本成功", SHARE_REPOSITORY_OK, scriptId);
+    }
 
-//    fork别人的剧本下来
+    //    fork别人的剧本下来
     @PostMapping("/fork")
     public Result forkOtherDesign(@RequestHeader String token, @RequestBody Map map) {
         Integer scriptId = (Integer) map.get("scriptId");
@@ -49,4 +61,12 @@ public class ScriptRepositoryController {
         return new Result("提交审核成功", COMMIT_REPOSITORY_OK, null);
     }
 
+    @PostMapping("/position")
+    public Result updateNodePosition(@RequestBody ScriptNodePositionList scriptNodePositionList) {
+//    public Result updateNodePosition(@RequestBody LinkedHashMap scriptNodePositionList) {
+        boolean isUpload = scriptService.insertOrUpdateNodePosition(scriptNodePositionList);
+        if (!isUpload)
+            return new Result("节点位置信息上传失败", UPLOAD_NODE_POSITION_ERR, null);
+        return new Result("节点位置信息上传成功", UPLOAD_NODE_POSITION_OK, null);
+    }
 }

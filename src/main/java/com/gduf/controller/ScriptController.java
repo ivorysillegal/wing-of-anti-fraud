@@ -69,7 +69,7 @@ public class ScriptController {
         return new Result("剧本结局保存或更新成功", SCRIPT_ENDS_SAVE_OK, null);
     }
 
-    @GetMapping
+    @GetMapping("/node")
     public Result getScript(@PathVariable Integer scriptId) {
         List<ScriptNode> scriptNode = scriptService.getScriptNode(scriptId);
         if (scriptNode != null)
@@ -77,12 +77,20 @@ public class ScriptController {
         else return new Result("剧本节点读取失败", SCRIPT_READ_ERR, null);
     }
 
+    @GetMapping
+    public Result showAllScript() {
+        List<ScriptWithScore> allScriptOnline = scriptService.getAllScriptOnline();
+        if (!(Objects.isNull(allScriptOnline)))
+            return new Result("剧本读取成功", SCRIPT_READ_OK, allScriptOnline);
+        else return new Result("剧本读取失败", SCRIPT_READ_ERR, null);
+    }
+
     @PostMapping
-    public Result showScript() {
-        List<ScriptMsg> scriptMsg = scriptService.getScript();
-        if (scriptMsg != null) {
+    public Result showOfficialScript() {
+        List<ScriptMsg> scriptMsg = scriptService.getOfficialScript();
+        if (!Objects.isNull(scriptMsg))
             return new Result("剧本读取成功", SCRIPT_READ_OK, scriptMsg);
-        } else return new Result("剧本读取失败", SCRIPT_READ_ERR, null);
+        else return new Result("剧本读取失败", SCRIPT_READ_ERR, null);
     }
 
     @PostMapping("/classification")

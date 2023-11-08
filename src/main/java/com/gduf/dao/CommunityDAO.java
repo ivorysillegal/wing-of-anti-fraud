@@ -4,10 +4,7 @@ import com.gduf.pojo.community.Comment;
 import com.gduf.pojo.community.Post;
 import com.gduf.pojo.community.PostTheme;
 import com.gduf.pojo.community.PostTopic;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -15,9 +12,10 @@ import java.util.List;
 public interface CommunityDAO {
 
     @Insert("insert into tb_post (title,article,create_time,writer_id) values (#{title},#{article},#{createTime},#{writerId})")
+    @Options(useGeneratedKeys = true, keyProperty = "postId")
     public void insertPost(Post post);
 
-    @Insert("insert into post_theme (post_id,is_experience,is_ask) values (#{postId},#{isExperience},#{isAsk})")
+    @Insert("insert into post_theme (post_id,is_experience,is_ask,is_script) values (#{postId},#{isExperience},#{isAsk},#{isScript})")
     public void insertPostTheme(PostTheme postTheme);
 
     @Insert("insert into post_topic (post_id,is_tel_fraud,is_cult,is_wire_fraud,is_financial_fraud,is_oversea_fraud,is_pyramid_sale) values (#{postId},#{isTelFraud},#{isCult},#{isWireFraud},#{isFinancialFraud},#{isOverseaFraud},#{isPyramidSale})")
@@ -25,6 +23,10 @@ public interface CommunityDAO {
 
     @Select("select * from tb_post")
     public List<Post> showAllPost();
+
+//    @Select("select count (*) from post_theme where is_script = #{isScript}")
+    @Select("SELECT post_id FROM post_theme WHERE is_script <> 1")
+    public List<Integer> showCommonPost();
 
     @Select("select * from tb_post where writer_id = #{writerId}")
     public List<Post> showPostByWriter(Integer writerId);

@@ -1,6 +1,10 @@
 package com.gduf.service.impl;
 
+import com.gduf.dao.CommunityDAO;
 import com.gduf.dao.ScriptDAO;
+import com.gduf.pojo.community.Post;
+import com.gduf.pojo.community.PostTheme;
+import com.gduf.pojo.community.PostTopic;
 import com.gduf.pojo.script.ScriptChoice;
 import com.gduf.pojo.script.mapper.*;
 import com.gduf.pojo.script.*;
@@ -13,6 +17,7 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -28,6 +33,9 @@ public class ScriptServiceImpl implements ScriptService {
     @Autowired
     private RefreshScore refreshScore;
 
+    @Autowired
+    private CommunityDAO communityDAO;
+
     //    增加剧本 （名称及id及乱七八糟）
     @Override
     public ScriptMsg insertOrUpdateScript(ScriptMsg scriptMsg, ScriptInfluenceName scriptInfluenceName) {
@@ -36,8 +44,8 @@ public class ScriptServiceImpl implements ScriptService {
         try {
             if (Objects.isNull(script)) {
 //                如果没有目标剧本 则返回null 则添加新草稿
-                scriptMsg.setScriptStatus(true);
-//        弃用状态指标
+//                设置剧本草稿箱状态
+                scriptMsg.setScriptStatus(120);
                 scriptDAO.insertScript(scriptMsg);
                 scriptInfluenceName.setScriptId(scriptMsg.getScriptId());
                 scriptDAO.insertScriptInfluenceName(scriptInfluenceName);
@@ -141,7 +149,7 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
-    public List<ScriptMsg> getScript() {
+    public List<ScriptMsg> getOfficialScript() {
         List<ScriptMsg> scriptMsg;
         scriptMsg = redisCache.getCacheList("officialScripts");
         if (scriptMsg.isEmpty()) {
@@ -162,6 +170,20 @@ public class ScriptServiceImpl implements ScriptService {
         }
         redisCache.setCacheList("officialScripts", scriptMsg, 5, TimeUnit.MINUTES);
         return scriptMsg;
+    }
+
+    @Override
+    public List<ScriptWithScore> getAllScriptOnline() {
+        List<Integer> onlineScriptId = scriptDAO.selectScriptOnline();
+        HashMap<Integer, Integer> eachOnLineScriptScore = refreshScore.getScore();
+        ArrayList<ScriptWithScore> scriptWithScores = new ArrayList<>();
+        for (Integer id : onlineScriptId) {
+            ScriptMsg scriptById = scriptDAO.getScriptById(id);
+            Integer score = eachOnLineScriptScore.get(id);
+            ScriptWithScore scriptWithScore = new ScriptWithScore(scriptById, score);
+            scriptWithScores.add(scriptWithScore);
+        }
+        return scriptWithScores;
     }
 
     @Override
@@ -194,6 +216,8 @@ public class ScriptServiceImpl implements ScriptService {
         if (scriptMsg == null) {
             try {
                 scriptMsg = scriptDAO.getScriptById(scriptId);
+                Integer scriptStatus = scriptDAO.getScriptStatus(scriptMsg.getScriptId());
+                scriptMsg.setScriptStatus(scriptStatus);
             } catch (Exception e) {
                 return null;
             }
@@ -221,8 +245,10 @@ public class ScriptServiceImpl implements ScriptService {
     public List<ScriptNode> getScriptDetail(Integer scriptId) {
         List<ScriptNode> list = new LinkedList<>();
         List<ScriptNodeMsg> scriptNodeMsg = scriptDAO.getScriptNodeMsg(scriptId);
-//        对每一个选择 获取左右所产生的结果 （去到 tb_script_node_choice 中查数据）
-
+//        如果空的 没有节点也直接返回 （草稿箱中的剧本就会出现这种情况）
+        if (scriptNodeMsg.size() == 0) {
+            return null;
+        }
         list = redisCache.getCacheList("scriptDetailIn" + scriptId);
         if (list.isEmpty()) {
 
@@ -233,9 +259,9 @@ public class ScriptServiceImpl implements ScriptService {
 //            leftChoice 和 rightChoice 其实是null
 //            进入到下方的映射类构造方法时 也是以null传进去的
 //            传过去的时候 同样是null
-
 //            但莫名其妙就跑起来了笑死我了
 
+//        对每一个选择 获取左右所产生的结果 （去到 tb_script_node_choice 中查数据）
             for (ScriptNodeMsg nodeMsg : scriptNodeMsg) {
 
 //            获取左节点的详细信息
@@ -285,7 +311,9 @@ public class ScriptServiceImpl implements ScriptService {
                 return null;
             }
         }
-        redisCache.setCacheObject("scriptInfluenceName" + scriptId, scriptInfluenceName, 5, TimeUnit.MINUTES);
+//        补充一个非空判断 如果不是空的才存进去
+        if (!Objects.isNull(scriptInfluenceName))
+            redisCache.setCacheObject("scriptInfluenceName" + scriptId, scriptInfluenceName, 5, TimeUnit.MINUTES);
         return scriptInfluenceName;
     }
 
@@ -342,6 +370,58 @@ public class ScriptServiceImpl implements ScriptService {
             return null;
         }
         return scriptMsgs;
+    }
+
+    @Override
+    public boolean insertScriptPost(String token, Integer scriptId) {
+        try {
+            int userId = decodeToId(token);
+            ScriptMsg scriptMsg = scriptDAO.getScriptById(scriptId);
+            ScriptInfluenceName influenceName = scriptDAO.getInfluenceName(scriptMsg.getScriptId());
+            String main = scriptMsgToPost(scriptMsg, influenceName);
+
+            Post post = new Post(scriptMsg.getScriptName(), main, userId);
+            communityDAO.insertPost(post);
+            Integer postId = post.getPostId();
+
+            PostTheme postTheme = new PostTheme(1);
+            postTheme.setPostId(postId);
+            communityDAO.insertPostTheme(postTheme);
+
+            PostTopic postTopic = new PostTopic();
+            postTopic.setPostId(postId);
+            communityDAO.insertPostTopic(postTopic);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    //    此方法包装剧本信息 成为帖子格式
+    private String scriptMsgToPost(ScriptMsg scriptMsg, ScriptInfluenceName influenceName) throws IllegalAccessException {
+        String main = "";
+        main += "背景设定：" + scriptMsg.getScriptBackground() + '\n';
+        main += "指标设定：" + '\n';
+        main = insertInfluenceName(influenceName, main);
+        return main;
+    }
+
+    //    此方法利用反射根据指标数量动态渲染
+    private String insertInfluenceName(ScriptInfluenceName scriptInfluenceName, String main) throws IllegalAccessException {
+        Class<? extends ScriptInfluenceName> clazz = scriptInfluenceName.getClass();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        int i = 1;
+        for (Field declaredField : declaredFields) {
+            declaredField.setAccessible(true);
+            Class<?> type = declaredField.getType();
+//            如果是字符串类型的 代表已经获取到了指标的名字 （对应的映射类中只有指标名字的数据类型为字符串）
+            if (type.equals(String.class) && declaredField.get(scriptInfluenceName) != null) {
+//                如果获取到的值 不是空的话 加入字符串当中
+                System.out.println("指标" + i + "：" + declaredField.get(scriptInfluenceName));
+                main += "指标" + (i++) + ":" + declaredField.get(scriptInfluenceName) + '\n';
+            }
+        }
+        return main;
     }
 
     @Override
@@ -502,6 +582,30 @@ public class ScriptServiceImpl implements ScriptService {
         try {
             userId = decodeToId(token);
             scriptDAO.insertCommit(scriptId, userId);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean insertOrUpdateNodePosition(ScriptNodePositionList scriptNodePositionList) {
+        Integer scriptId = scriptNodePositionList.getScriptId();
+        try {
+            List<ScriptNodePosition> scriptNodePositions = scriptNodePositionList.getScriptNodePositions();
+            for (ScriptNodePosition scriptNodePosition : scriptNodePositions) {
+                Integer nodeId = scriptNodePosition.getNodeId();
+                scriptNodePosition.setScriptId(scriptId);
+                Integer isExist = scriptDAO.checkIfNodePositionExist(scriptId, nodeId);
+//        如果等于0的话 则表明之前没有存过此节点的位置
+//            执行新增操作
+                if (isExist.equals(0))
+                    scriptDAO.insertNodePosition(scriptNodePosition);
+//            如果找到的话 则说明曾经存储过
+//            执行更新操作
+                else if (isExist.equals(1))
+                    scriptDAO.updateNodePosition(scriptNodePosition);
+            }
         } catch (Exception e) {
             return false;
         }

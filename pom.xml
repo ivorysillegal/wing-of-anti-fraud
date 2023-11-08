@@ -78,7 +78,11 @@
 			<version>3.7.0</version>
 		</dependency>
 
-
+		<!--集成mongodb-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
 
 		<!--fastjson依赖-->
 		<dependency>

@@ -133,4 +133,9 @@ public class Code {
     public static final Integer SCRIPT_SCORE_ERR = 471;
     public static final Integer SCRIPT_SCORE_SCORED = 472;
 
+    public static final Integer SHARE_REPOSITORY_OK = 400;
+    public static final Integer SHARE_REPOSITORY_ERR = 481;
+
+    public static final Integer UPLOAD_NODE_POSITION_OK = 400;
+    public static final Integer UPLOAD_NODE_POSITION_ERR = 491;
 }

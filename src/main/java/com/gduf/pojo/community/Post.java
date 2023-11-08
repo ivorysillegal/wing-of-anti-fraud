@@ -28,4 +28,12 @@ public class Post {
         this.article = article;
         this.createTime = new Date();
     }
+
+
+    public Post(String title, String article,Integer writerId) {
+        this.title = title;
+        this.article = article;
+        this.writerId = writerId;
+        this.createTime = new Date();
+    }
 }

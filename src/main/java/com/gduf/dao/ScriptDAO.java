@@ -62,6 +62,9 @@ public interface ScriptDAO {
     @Select("select * from tb_script where script_id = #{scriptId}")
     public ScriptMsg getScriptById(Integer scriptId);
 
+    @Select("select status from tb_script_status where script_id = #{scriptId}")
+    public Integer getScriptStatus(Integer scriptId);
+
     @Select("select * from tb_script_node where script_id = #{scriptId}")
     public List<ScriptNode> getScriptNode(Integer scriptId);
 
@@ -145,4 +148,13 @@ public interface ScriptDAO {
 
     @Insert("insert into script_commit (script_id,user_id) values (#{scriptId},#{userId})")
     public void insertCommit(Integer scriptId,Integer userId);
+
+    @Select("select count(*)  from script_node_position where script_id = #{scriptId} AND node_id = #{nodeId}")
+    public Integer checkIfNodePositionExist(Integer scriptId,Integer nodeId);
+
+    @Insert("insert into script_node_position (script_id,node_id,x,y) values (#{scriptId},#{nodeId},#{x},#{y})")
+    public void insertNodePosition(ScriptNodePosition scriptNodePosition);
+
+    @Update("update script_node_position set x = #{x},y = #{y} where script_id = #{scriptId} AND node_id = #{nodeId}")
+    public void updateNodePosition(ScriptNodePosition scriptNodePosition);
 }

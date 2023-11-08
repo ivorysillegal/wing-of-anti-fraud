@@ -28,7 +28,11 @@ spring:
           ssl:
             enable: true
           port: 465
-
+  data:
+    mongodb:
+      host: 127.0.0.1
+      database: script
+#      port: 27017
 spring mvc:
   hiddenmethod:
     filter:
