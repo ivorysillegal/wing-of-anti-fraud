@@ -4,7 +4,6 @@ import com.gduf.pojo.script.ScriptMsg;
 import com.gduf.pojo.script.mapper.ScriptNodePositionList;
 import com.gduf.service.ScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,8 +19,6 @@ public class ScriptRepositoryController {
     @Autowired
     private ScriptService scriptService;
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
 
     @GetMapping
     public Result getMyDesign(@RequestHeader String token) {
@@ -35,10 +32,12 @@ public class ScriptRepositoryController {
     public Result shareMyDesign(@RequestHeader String token, @RequestBody Map map) {
         Integer scriptId = (Integer) map.get("scriptId");
         boolean isInsert = scriptService.insertScriptPost(token, scriptId);
-//        TODO 将所有的分享的剧本信息（分享的版本） 存入mongoDB
+        boolean isInsertFollower = scriptService.insertScriptFollower(scriptId);
 //        现在先放入redis
         if (!isInsert)
             return new Result("分享剧本失败", SHARE_REPOSITORY_ERR, null);
+        if (!isInsertFollower)
+            return new Result("制作剧本副本失败", SHARE_REPOSITORY_ERR, null);
 //        返回被fork的剧本的id
         return new Result("分享剧本成功", SHARE_REPOSITORY_OK, scriptId);
     }
@@ -76,7 +75,16 @@ public class ScriptRepositoryController {
         Integer scriptId = (Integer) map.get("scriptId");
         ScriptNodePositionList scriptNodePositionList = scriptService.scriptNodePositionList(scriptId);
         if (Objects.isNull(scriptNodePositionList))
-            return new Result("节点位置信息获取失败",SHOW_NODE_POSITION_ERR,null);
-        return new Result("节点位置信息获取成功",SHOW_NODE_POSITION_OK,scriptNodePositionList);
+            return new Result("节点位置信息获取失败", SHOW_NODE_POSITION_ERR, null);
+        return new Result("节点位置信息获取成功", SHOW_NODE_POSITION_OK, scriptNodePositionList);
+    }
+
+    @DeleteMapping()
+    public Result delMyDesign(@RequestBody Map map) {
+        Integer scriptId = (Integer) map.get("scriptId");
+        boolean isDel = scriptService.delRepository(scriptId);
+        if (isDel)
+            return new Result("剧本删除成功", DEL_REPOSITORY_OK, null);
+        return new Result("剧本删除失败", DEL_REPOSITORY_ERR, null);
     }
 }

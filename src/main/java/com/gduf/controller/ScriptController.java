@@ -66,13 +66,13 @@ public class ScriptController {
         return new Result("剧本结局保存或更新成功", SCRIPT_ENDS_SAVE_OK, null);
     }
 
-    @GetMapping("/node")
-    public Result getScript(@PathVariable Integer scriptId) {
-        List<ScriptNode> scriptNode = scriptService.getScriptNode(scriptId);
-        if (scriptNode != null)
-            return new Result("剧本节点读取成功", SCRIPT_READ_OK, scriptNode);
-        else return new Result("剧本节点读取失败", SCRIPT_READ_ERR, null);
-    }
+//    @GetMapping("/node")
+//    public Result getScript(@PathVariable Integer scriptId) {
+//        List<ScriptNode> scriptNode = scriptService.getScriptNode(scriptId);
+//        if (scriptNode != null)
+//            return new Result("剧本节点读取成功", SCRIPT_READ_OK, scriptNode);
+//        else return new Result("剧本节点读取失败", SCRIPT_READ_ERR, null);
+//    }
 
     @GetMapping
     public Result showAllScript() {
@@ -88,7 +88,7 @@ public class ScriptController {
         String scriptProducer = scriptService.getScriptProducer(scriptId);
         if (Objects.isNull(scriptProducer))
             return new Result("获取剧本制作者失败", SCRIPT_READ_ERR, null);
-        return new Result("获取剧本制作者成功", SCRIPT_READ_OK, new HashMap<>().put("producer", scriptProducer));
+        return new Result("获取剧本制作者成功", SCRIPT_READ_OK, scriptProducer);
     }
 
     @PostMapping
@@ -111,15 +111,23 @@ public class ScriptController {
         return new Result("输入类型剧本读取成功", SCRIPT_READ_OK, scriptByClassification);
     }
 
+
     @PostMapping("/play")
-    public Result loadScript(@RequestHeader String token, @RequestBody LinkedHashMap scriptValue) {
-        int scriptId = (int) scriptValue.get("scriptId");
-        Script script;
+    public Result loadScript(@RequestHeader String token, @RequestBody Map map) {
+        int scriptId = (int) map.get("scriptId");
+        Integer scriptStatus = (Integer) map.get("scriptStatus");
+//        如果获取过来的scriptStatus的值是空的话 就表明要玩的是上线的剧本
+//        如果不是空 就只是要玩草稿箱中的剧本而已
+        Boolean isOnline = Objects.isNull(scriptStatus);
+        Script script = new Script();
         try {
-            boolean isRemember = scriptService.rememberScript(token, scriptId);
-            script = mergeScript(scriptId);
-            if (!isRemember) {
-                return new Result("记录游玩操作失败", LOAD_SCRIPT_ERR, null);
+            if (isOnline){
+                boolean isRemember = scriptService.rememberScript(token, scriptId);
+                script = mergeScript(scriptId,true);
+                if (!isRemember)
+                    return new Result("记录游玩操作失败", LOAD_SCRIPT_ERR, null);
+            }else {
+                script = mergeScript(scriptId, false);
             }
         } catch (Exception e) {
             return new Result("读取剧本失败", LOAD_SCRIPT_ERR, null);
@@ -127,10 +135,10 @@ public class ScriptController {
         return new Result("读取剧本成功", LOAD_SCRIPT_OK, script);
     }
 
-    private Script mergeScript(Integer scriptId) {
-        List<ScriptNode> scriptDetail = scriptService.getScriptDetail(scriptId);
-        ScriptMsg scriptMsg = scriptService.getScriptMsg(scriptId);
-        ScriptInfluenceName scriptInfluenceName = scriptService.getScriptInfluenceName(scriptId);
+    private Script mergeScript(Integer scriptId,Boolean isOnline) {
+        List<ScriptNode> scriptDetail = scriptService.getScriptDetail(scriptId,isOnline);
+        ScriptMsg scriptMsg = scriptService.getScriptMsg(scriptId,isOnline);
+        ScriptInfluenceName scriptInfluenceName = scriptService.getScriptInfluenceName(scriptId,isOnline);
         Script script = new Script(scriptMsg, scriptDetail, scriptInfluenceName);
         return script;
     }

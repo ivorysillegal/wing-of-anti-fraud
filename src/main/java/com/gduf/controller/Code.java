@@ -142,6 +142,9 @@ public class Code {
     public static final Integer SHOW_NODE_POSITION_OK = 500;
     public static final Integer SHOW_NODE_POSITION_ERR = 501;
 
+    public static final Integer DEL_REPOSITORY_OK = 500;
+    public static final Integer DEL_REPOSITORY_ERR = 511;
+
     public static final Integer COMMIT_SCRIPT_OK = 900;
     public static final Integer COMMIT_SCRIPT_ERR = 909;
 

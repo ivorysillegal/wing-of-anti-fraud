@@ -223,10 +223,11 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
-    public ScriptMsg getScriptMsg(Integer scriptId) {
-        ScriptMsg scriptMsg;
-        scriptMsg = redisCache.getCacheObject("scriptMsgIn" + scriptId);
-        if (scriptMsg == null) {
+    public ScriptMsg getScriptMsg(Integer scriptId, Boolean isOnline) {
+        ScriptMsg scriptMsg = null;
+        if (isOnline)
+            scriptMsg = redisCache.getCacheObject("scriptMsgIn" + scriptId);
+        if (!isOnline || Objects.isNull(scriptMsg)) {
             try {
                 scriptMsg = scriptDAO.getScriptById(scriptId);
                 Integer scriptStatus = scriptDAO.getScriptStatus(scriptMsg.getScriptId());
@@ -235,10 +236,12 @@ public class ScriptServiceImpl implements ScriptService {
                 return null;
             }
         }
-        redisCache.setCacheObject("scriptMsgIn" + scriptId, scriptMsg, 5, TimeUnit.MINUTES);
+        if (isOnline)
+            redisCache.setCacheObject("scriptMsgIn" + scriptId, scriptMsg, 5, TimeUnit.MINUTES);
         return scriptMsg;
     }
 
+    //    弃用获取节点方法
     @Override
     public List<ScriptNode> getScriptNode(Integer scriptId) {
         List<ScriptNode> scriptNode;
@@ -255,15 +258,17 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
-    public List<ScriptNode> getScriptDetail(Integer scriptId) {
+    public List<ScriptNode> getScriptDetail(Integer scriptId, Boolean isOnline) {
         List<ScriptNode> list = new LinkedList<>();
         List<ScriptNodeMsg> scriptNodeMsg = scriptDAO.getScriptNodeMsg(scriptId);
 //        如果空的 没有节点也直接返回 （草稿箱中的剧本就会出现这种情况）
-        if (scriptNodeMsg.size() == 0) {
+        if (scriptNodeMsg.size() == 0)
             return null;
-        }
-        list = redisCache.getCacheList("scriptDetailIn" + scriptId);
-        if (list.isEmpty()) {
+        if (isOnline)
+            list = redisCache.getCacheList("scriptDetailIn" + scriptId);
+//        进了下面的这个 isEmpty语句 表示从redis中拿不到
+//        或者是未上线（草稿箱中的剧本）
+        if (list.isEmpty())
 
 //            这里其实有一个bug
 //            scriptDAO.getScriptNodeChoice() 这个语句没有做非空判断
@@ -286,12 +291,13 @@ public class ScriptServiceImpl implements ScriptService {
                 ScriptChoice rightChoice = scriptDAO.getScriptNodeChoice(scriptId, rightChoiceId);
 
 //                获取完成 封装到包装类中
-                ScriptNode scriptNode = new ScriptNode(scriptId, nodeMsg.getWord(), nodeMsg.getNodeId(), leftChoice, rightChoice);
+                ScriptNode scriptNode = new ScriptNode(nodeMsg.getNodeId(), nodeMsg.getWord(), scriptId, leftChoice, rightChoice);
 
                 list.add(scriptNode);
             }
-        }
-        redisCache.setCacheList("scriptDetailIn" + scriptId, list, 5, TimeUnit.MINUTES);
+//        如果是上架的剧本 就将他的数据存到redis中
+        if (isOnline)
+            redisCache.setCacheList("scriptDetailIn" + scriptId, list, 5, TimeUnit.MINUTES);
         return list;
 //        至此为止 这个链表中包含了所有节点及其相关的信息
     }
@@ -312,21 +318,25 @@ public class ScriptServiceImpl implements ScriptService {
         return scriptEndSent;
     }
 
-    //    获取指标的名字
     @Override
-    public ScriptInfluenceName getScriptInfluenceName(Integer scriptId) {
-        ScriptInfluenceName scriptInfluenceName;
-        scriptInfluenceName = redisCache.getCacheObject("scriptInfluenceName" + scriptId);
-        if (Objects.isNull(scriptInfluenceName)) {
+    //    获取指标的名字
+    public ScriptInfluenceName getScriptInfluenceName(Integer scriptId, Boolean isOnline) {
+        ScriptInfluenceName scriptInfluenceName = null;
+//        如果游玩的是 已经上线的剧本 则从redis里面查是否有 对应的信息
+//        如果没有再查表
+        if (isOnline)
+            scriptInfluenceName = redisCache.getCacheObject("scriptInfluenceName" + scriptId);
+//        不然会报错 values must not be null
+        //        补充一个非空判断 如果不是空的才存进去
+        if (!Objects.isNull(scriptInfluenceName))
+            redisCache.setCacheObject("scriptInfluenceName" + scriptId, scriptInfluenceName, 5, TimeUnit.MINUTES);
+        if (!isOnline || Objects.isNull(scriptInfluenceName)) {
             try {
                 scriptInfluenceName = scriptDAO.getInfluenceName(scriptId);
             } catch (Exception e) {
                 return null;
             }
         }
-//        补充一个非空判断 如果不是空的才存进去
-        if (!Objects.isNull(scriptInfluenceName))
-            redisCache.setCacheObject("scriptInfluenceName" + scriptId, scriptInfluenceName, 5, TimeUnit.MINUTES);
         return scriptInfluenceName;
     }
 
@@ -376,6 +386,10 @@ public class ScriptServiceImpl implements ScriptService {
             scriptMsgs = new ArrayList<>();
             List<Integer> scriptRepository = scriptDAO.getScriptByProducerInRepository(producerId);
             for (Integer eachScript : scriptRepository) {
+//                看看这个剧本是否被删除 如果删了就不渲染了
+                Integer ifDel = scriptDAO.checkIfDel(eachScript);
+                if (ifDel.equals(1))
+                    continue;
                 ScriptMsg script = scriptDAO.getScriptById(eachScript);
                 scriptMsgs.add(script);
             }
@@ -410,6 +424,18 @@ public class ScriptServiceImpl implements ScriptService {
         return true;
     }
 
+    @Override
+    public boolean insertScriptFollower(Integer scriptId) {
+        ScriptWithEnd script = getScript(scriptId);
+        //            这里的script是 复制之前的 原来的剧本的标识 利用它找到整个对象
+        Integer formalProducerId = scriptDAO.getProducerId(scriptId);
+        String username = userDAO.getUsername(formalProducerId);
+
+
+        redisCache.setCacheObject("script" + scriptId, new ScriptWithProducer(script, username));
+        return true;
+    }
+
     //    此方法包装剧本信息 成为帖子格式
     private String scriptMsgToPost(ScriptMsg scriptMsg, ScriptInfluenceName influenceName) throws IllegalAccessException {
         String main = "";
@@ -441,8 +467,11 @@ public class ScriptServiceImpl implements ScriptService {
     public boolean forkToRepository(String token, Integer scriptId) {
         try {
             int forkUserId = decodeToId(token);
-            ScriptWithEnd scriptWithEnd = getScript(scriptId);
-//            这里的script是 复制之前的 原来的剧本的标识 利用它找到整个对象
+            ScriptWithProducer scriptWithProducer = new ScriptWithProducer();
+            scriptWithProducer = redisCache.getCacheObject("script" + scriptId);
+            ScriptWithEnd scriptWithEnd = scriptWithProducer.getScriptWithEnd();
+
+//            TODO 这个地方可以返回共创人
             //    这个方法主要是清空得到的对象中残留的scriptId 其实可以直接使用反射来做。。但是不太好
             ScriptWithEnd scriptClear = setScriptId(scriptWithEnd, null);
             //        剧本总体信息
@@ -594,7 +623,7 @@ public class ScriptServiceImpl implements ScriptService {
         int userId = 0;
         try {
             userId = decodeToId(token);
-            scriptDAO.insertCommit(scriptId, userId,new Date());
+            scriptDAO.insertCommit(scriptId, userId, new Date());
             scriptDAO.updateCommitStatus(scriptId);
         } catch (Exception e) {
             return false;
@@ -630,6 +659,17 @@ public class ScriptServiceImpl implements ScriptService {
     public ScriptNodePositionList scriptNodePositionList(Integer scriptId) {
         List<ScriptNodePosition> scriptNodePositions = scriptDAO.showNodePosition(scriptId);
         return new ScriptNodePositionList(scriptId, scriptNodePositions);
+    }
+
+    @Override
+    public boolean delRepository(Integer scriptId) {
+        try {
+//            玩家在草稿箱删除自己的剧本的时候 默认是逻辑删除 不会真正删除节点 省事
+            scriptDAO.logicalDelScript(scriptId);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     private int decodeToId(String token) throws Exception {

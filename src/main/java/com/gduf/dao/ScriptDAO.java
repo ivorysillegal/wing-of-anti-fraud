@@ -69,6 +69,12 @@ public interface ScriptDAO {
     @Select("select status from tb_script_status where script_id = #{scriptId}")
     public Integer getScriptStatus(Integer scriptId);
 
+    @Select("select count(*) from tb_script_status where script_id = #{scriptId} AND is_del = 1")
+    public Integer checkIfDel(Integer scriptId);
+
+    @Update("update tb_script_status set is_del = 1 where script_id = #{scriptId}")
+    public void logicalDelScript(Integer scriptId);
+
     @Select("select * from tb_script_node where script_id = #{scriptId}")
     public List<ScriptNode> getScriptNode(Integer scriptId);
 
@@ -133,10 +139,10 @@ public interface ScriptDAO {
     public void rememberPlayed(Integer userId, Integer scriptId);
 
     @Insert("insert into script_user_score (user_id,script_id,score) values (#{userId},#{scriptId},#{score})")
-    public void insertScriptScore(Integer userId,Integer scriptId,Integer score);
+    public void insertScriptScore(Integer userId, Integer scriptId, Integer score);
 
     @Select("select count(*) from script_user_score where user_id = #{userId} AND script_id = #{scriptId}")
-    public Integer checkIfScored(Integer userId,Integer scriptId);
+    public Integer checkIfScored(Integer userId, Integer scriptId);
 
     @Select("select score from script_user_score where script_id =  #{scriptId}")
     public List<Integer> showScore(Integer scriptId);
@@ -160,7 +166,7 @@ public interface ScriptDAO {
     public void onlineScript(Integer scriptId);
 
     @Select("select count(*)  from script_node_position where script_id = #{scriptId} AND node_id = #{nodeId}")
-    public Integer checkIfNodePositionExist(Integer scriptId,Integer nodeId);
+    public Integer checkIfNodePositionExist(Integer scriptId, Integer nodeId);
 
     @Insert("insert into script_node_position (script_id,node_id,x,y) values (#{scriptId},#{nodeId},#{x},#{y})")
     public void insertNodePosition(ScriptNodePosition scriptNodePosition);

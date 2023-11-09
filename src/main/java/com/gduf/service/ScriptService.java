@@ -30,15 +30,15 @@ public interface ScriptService {
 
     public List<ScriptWithScore> getScriptByClassification(String classification);
 
-    public ScriptMsg getScriptMsg(Integer scriptId);
+    public ScriptMsg getScriptMsg(Integer scriptId,Boolean isOnline);
 
     public List<ScriptNode> getScriptNode(Integer scriptId);
 
-    public List<ScriptNode> getScriptDetail(Integer scriptId);
+    public List<ScriptNode> getScriptDetail(Integer scriptId,Boolean isOnline);
 
     public ScriptEndSent getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange);
 
-    public ScriptInfluenceName getScriptInfluenceName(Integer scriptId);
+    public ScriptInfluenceName getScriptInfluenceName(Integer scriptId,Boolean isOnline);
 
     //    记住用户此次玩过的剧本
     public boolean rememberScript(String token, Integer scriptId);
@@ -52,6 +52,9 @@ public interface ScriptService {
     //    将自己的半成品剧本分享到社区(作为帖子)
     public boolean insertScriptPost(String token,Integer scriptId);
 
+//    根据剧本id获取到对应的剧本后 将剧本存入redis中 之后fork就直接从redis中拿
+    public boolean insertScriptFollower(Integer scriptId);
+
     //    将别人的半成品搞过来自己进行加工
     public boolean forkToRepository(String token, Integer scriptId);
 
@@ -63,4 +66,7 @@ public interface ScriptService {
 
 //    前端获取 发送节点在前端的位置
     public ScriptNodePositionList scriptNodePositionList(Integer scriptId);
+
+//    删除对应草稿箱的剧本（逻辑删除 不渲染）
+    public boolean delRepository(Integer scriptId);
 }
