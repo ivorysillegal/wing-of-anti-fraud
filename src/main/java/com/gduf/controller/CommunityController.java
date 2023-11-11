@@ -174,7 +174,6 @@ public class CommunityController {
         return new Result("查看帖子主要内容成功", SHOW_POST_MAIN_OK, postWithComments);
     }
 
-
     public User decode(String token) throws Exception {
         Claims claims = JwtUtil.parseJWT(token);
         String userId = claims.getSubject();

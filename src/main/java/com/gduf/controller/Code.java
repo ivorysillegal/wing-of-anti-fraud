@@ -23,11 +23,11 @@ public class Code {
     public static final Integer SEND_CAPTCHA_OK = 210;
     public static final Integer SEND_CAPTCHA_ERR = 211;
 
-    public static final Integer SHOW_PASSWORD_QUESTION_OK = 200;
-    public static final Integer SHOW_PASSWORD_QUESTION_ERR = 221;
+    public static final Integer EMAIL_CODE_SEND_OK = 200;
+    public static final Integer EMAIL_CODE_SEND_ERR = 221;
 
-    public static final Integer PASSWORD_SEND_OK = 200;
-    public static final Integer PASSWORD_SEND_ERR = 221;
+    public static final Integer RESET_PASSWORD_OK = 200;
+    public static final Integer RESET_PASSWORD_ERR = 221;
 
     public static final Integer SCRIPT_READ_OK = 200;
     public static final Integer SCRIPT_READ_ERR = 231;
@@ -144,6 +144,12 @@ public class Code {
 
     public static final Integer DEL_REPOSITORY_OK = 500;
     public static final Integer DEL_REPOSITORY_ERR = 511;
+
+    public static final Integer LOAD_USER_OK = 500;
+    public static final Integer LOAD_USER_ERR = 521;
+
+    public static final Integer LOAD_USER_DAN_OK = 500;
+    public static final Integer LOAD_USER_DAN_ERR = 531;
 
     public static final Integer COMMIT_SCRIPT_OK = 900;
     public static final Integer COMMIT_SCRIPT_ERR = 909;

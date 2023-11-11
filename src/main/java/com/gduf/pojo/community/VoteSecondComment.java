@@ -14,4 +14,6 @@ public class VoteSecondComment {
     private Boolean opinion;
     private Integer writerId;
     private Integer firstVoteCommentId;
+    private String username;
+    private String pic;
 }

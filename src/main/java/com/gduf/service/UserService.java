@@ -21,9 +21,15 @@ public interface UserService {
 
     boolean updateUser(UserValue userValue, String token);
 
-    void sendMsg(String to, String subject, String context, String code);
+//    void sendMsg(String to, String subject, String context, String code);
 
-    boolean verifyAccount(String username, String beforePassword, String afterPassword);
+    boolean userInitialization(String email,String code);
+
+    boolean resetPasswordCode(String email,String code);
+
+    boolean resetPassword(String token,String passwordReset);
+
+    boolean verifyAccount(String token, String beforePassword, String afterPassword);
 
     UserWithValue showUser(Integer userId);
 

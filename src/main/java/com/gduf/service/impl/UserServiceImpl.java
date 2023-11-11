@@ -54,9 +54,9 @@ public class UserServiceImpl implements UserService {
         User user = userDAO.getByUsername(username);
         if (user != null) {
 //            if (!user.getPassword().equals(JwtUtil.createJWT(password))) {
-            if (!user.getPassword().equals(password)) {
+            if (!user.getPassword().equals(password))
                 return null;
-            }
+
             Integer userId = user.getUserId();
 //        生成token
             String jwt = JwtUtil.createJWT(String.valueOf(userId));
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
         try {
             User newUser = new User(username, password);
             userDAO.insertBasic(newUser);
-            userDAO.initializationUserValue(newUser.getUserId());
+            userDAO.initializationUserValue(newUser.getUserId(), email);
 //            上面这一行 暂且没用
 //            创建用户个人信息 补充默认信息
         } catch (Exception e) {
@@ -95,9 +95,9 @@ public class UserServiceImpl implements UserService {
             } else {
                 userId = decodeToId(token);
             }
-            if (userDAO.getValueById(userId) == null) {
-                userDAO.initializationUserValue(userId);
-            }
+//            if (userDAO.getValueById(userId) == null) {
+//                userDAO.initializationUserValue(userId);
+//            }
             userDAO.updatePic(userId, base64ImageData);
         } catch (Exception e) {
             return false;
@@ -123,9 +123,8 @@ public class UserServiceImpl implements UserService {
     public boolean updateUser(UserValue userValue, String token) {
         try {
             User user = decode(token);
-            if (Objects.isNull(userDAO.getValueById(user.getUserId())))
-                userDAO.initializationUserValue(user.getUserId());
-
+//            if (Objects.isNull(userDAO.getValueById(user.getUserId())))
+//                userDAO.initializationUserValue(user.getUserId());
             userDAO.UpdateUserValue(userValue.getSign(), userValue.getAge(), userValue.getGender(), user.getUserId());
         } catch (Exception e) {
             return false;
@@ -148,8 +147,9 @@ public class UserServiceImpl implements UserService {
     }
 
     //    发送邮件
-    @Override
-    public void sendMsg(String to, String subject, String context, String code) {
+//    @Override
+//    public void sendMsg(String to, String subject, String context, String code) {
+    private void sendMsg(String to, String subject, String context, String code) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setFrom(from);
         mailMessage.setTo(to);
@@ -160,17 +160,54 @@ public class UserServiceImpl implements UserService {
         redisCache.setCacheObject(to, code, 5, TimeUnit.MINUTES);
     }
 
+    @Override
+    public boolean userInitialization(String email, String code) {
+        try {
+            String subject = "反诈通注册验证码";
+            String context = "欢迎使用反诈通，登录验证码为: " + code + ",五分钟内有效，请妥善保管!";
+            sendMsg(email, subject, context, code);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean resetPasswordCode(String email, String code) {
+        try {
+            String subject = "反诈通重置密码 注册码";
+            String context = "欢迎使用反诈通，重置密码验证码为: " + code + ",五分钟内有效，请妥善保管!";
+            sendMsg(email, subject, context, code);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean resetPassword(String token, String passwordReset) {
+        int userId;
+        try {
+            userId = decodeToId(token);
+            userDAO.resetPassword(userId, passwordReset);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
     //    重置密码
     @Override
-    public boolean verifyAccount(String username, String beforePassword, String afterPassword) {
-        User user = userDAO.getByUsername(username);
-        if (!Objects.isNull(user)) {
-            if (user.getPassword().equals(beforePassword)) {
-                userDAO.updatePassword(afterPassword, username);
-                return true;
-            }
+    public boolean verifyAccount(String token, String beforePassword, String afterPassword) {
+        try {
+            User user = decode(token);
+            if (!Objects.isNull(user))
+                if (user.getPassword().equals(beforePassword))
+                    userDAO.updatePassword(afterPassword, user.getUserId());
+        } catch (Exception e) {
+            return false;
         }
-        return false;
+        return true;
     }
 
     //    展示个人详细信息
@@ -252,7 +289,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         scripts = redisCache.getCacheList("userPlayedScripts" + userId);
-        if (scripts.isEmpty()){
+        if (scripts.isEmpty()) {
             playedScriptId = scriptDAO.getPlayedScriptId(userId);
             for (Integer eachScriptId : playedScriptId) {
                 ScriptMsg script = scriptDAO.getScriptById(eachScriptId);

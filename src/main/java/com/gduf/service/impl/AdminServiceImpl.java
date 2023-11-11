@@ -54,6 +54,7 @@ public class AdminServiceImpl implements AdminService {
         if (scriptCommits.isEmpty()) {
             scriptCommits = adminDAO.showAllScriptCommit();
         }
+//      TODO 如果表script_status是空的话 这个地方会报redis values must not be null
         redisCache.setCacheList("scriptCommit", scriptCommits, 10, TimeUnit.MINUTES);
 
 //        获取对应审核状态的剧本

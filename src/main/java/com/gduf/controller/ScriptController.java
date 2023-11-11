@@ -151,13 +151,13 @@ public class ScriptController {
         int influence3 = (int) scriptEndValue.get("influence3");
         int influence4 = (int) scriptEndValue.get("influence4");
         ScriptInfluenceChange scriptInfluenceChange = new ScriptInfluenceChange(influence1, influence2, influence3, influence4);
-        ScriptEndSent scriptEndSent;
+        String scriptEnd;
         try {
-            scriptEndSent = scriptService.getScriptEnd(scriptId, scriptInfluenceChange);
+            scriptEnd = scriptService.getScriptEnd(scriptId, scriptInfluenceChange);
         } catch (Exception e) {
             return new Result("读取剧本结局失败", LOAD_SCRIPT_END_ERR, null);
         }
-        return new Result("剧本读取结局成功", LOAD_SCRIPT_END_OK, scriptEndSent);
+        return new Result("剧本读取结局成功", LOAD_SCRIPT_END_OK, scriptEnd);
     }
 
     @PostMapping("/score")

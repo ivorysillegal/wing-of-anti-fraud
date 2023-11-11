@@ -36,7 +36,7 @@ public interface ScriptService {
 
     public List<ScriptNode> getScriptDetail(Integer scriptId,Boolean isOnline);
 
-    public ScriptEndSent getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange);
+    public String getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange);
 
     public ScriptInfluenceName getScriptInfluenceName(Integer scriptId,Boolean isOnline);
 

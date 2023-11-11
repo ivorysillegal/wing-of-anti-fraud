@@ -1,10 +1,12 @@
 package com.gduf.service.impl;
 
+import com.gduf.dao.UserDAO;
 import com.gduf.dao.VoteDAO;
 import com.gduf.pojo.community.*;
 import com.gduf.pojo.user.User;
 import com.gduf.service.VoteService;
-import com.gduf.util.*;
+import com.gduf.util.JwtUtil;
+import com.gduf.util.RedisCache;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
+
+import static com.gduf.controller.Code.DEFAULT_PIC;
 
 @Service
 public class VoteServiceImpl implements VoteService {
@@ -21,6 +24,8 @@ public class VoteServiceImpl implements VoteService {
     private VoteDAO voteDAO;
     @Autowired
     private RedisCache redisCache;
+    @Autowired
+    private UserDAO userDAO;
 
     @Override
     public VoteWithChoice showVoteByTerm(Integer term) {
@@ -118,12 +123,26 @@ public class VoteServiceImpl implements VoteService {
     @Override
     public List<VoteFirstComment> showFirstVoteComment(Integer voteId) {
         List<VoteFirstComment> voteFirstComments;
+        ArrayList<VoteFirstComment> retFirstComments;
         try {
             voteFirstComments = voteDAO.showFirstVoteCommentById(voteId);
+            retFirstComments = new ArrayList<>();
+            for (VoteFirstComment voteFirstComment : voteFirstComments) {
+                Integer userId = voteFirstComment.getWriterId();
+
+                String username = userDAO.getUsername(userId);
+                String pic = userDAO.getPic(userId);
+
+                if (Objects.isNull(pic))
+                    pic = DEFAULT_PIC;
+                voteFirstComment.setUsername(username);
+                voteFirstComment.setPic(pic);
+                retFirstComments.add(voteFirstComment);
+            }
         } catch (Exception e) {
             return null;
         }
-        return voteFirstComments;
+        return retFirstComments;
     }
 
     @Override
@@ -152,12 +171,22 @@ public class VoteServiceImpl implements VoteService {
         //        获取特定一级评论的所有二级评论 集成集合
 //        List<TreeNode<VoteSecondComment>> voteSecondCommentsNodes = new ArrayList<>();
         List<VoteSecondComment> voteSecondComments = voteDAO.showSecondCommentByFirstId(firstVoteCommentId);
+        ArrayList<VoteSecondComment> retComments = new ArrayList<>();
+        for (VoteSecondComment voteSecondComment : voteSecondComments) {
+            String username = userDAO.getUsername(voteSecondComment.getWriterId());
+            String pic = userDAO.getPic(voteSecondComment.getWriterId());
+            if (Objects.isNull(pic))
+                pic = DEFAULT_PIC;
+            voteSecondComment.setUsername(username);
+            voteSecondComment.setPic(pic);
+            retComments.add(voteSecondComment);
+        }
+        return retComments;
 //        将每一个二级评论全部组织 初始化成一个节点
 //        for (VoteSecondComment voteSecondComment : voteSecondComments) {
 //            TreeNode<VoteSecondComment> voteSecondCommentsNode = new TreeNode<>(voteSecondComment);
 //            voteSecondCommentsNodes.add(voteSecondCommentsNode);
 //        }
-        return voteSecondComments;
 //        return TreeUtils.findParent(voteSecondCommentsNodes);
     }
 

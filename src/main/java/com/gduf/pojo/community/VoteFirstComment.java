@@ -14,4 +14,6 @@ public class VoteFirstComment {
     private Boolean opinion;
     private Integer writerId;
     private Integer reply;
+    private String username;
+    private String pic;
 }

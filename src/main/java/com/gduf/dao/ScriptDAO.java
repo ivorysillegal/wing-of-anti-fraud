@@ -24,7 +24,7 @@ public interface ScriptDAO {
     @Insert("insert into tb_script_influence_name (influence1_name,influence2_name,influence3_name,influence4_name,script_id) values (#{influence1Name},#{influence2Name},#{influence3Name},#{influence4Name},#{scriptId})")
     public void insertScriptInfluenceName(ScriptInfluenceName scriptInfluenceName);
 
-    @Update("update tb_script_influence_name set influence1_name = #{influence1Name} , influence2_name = #{influence2Name},influence3_name = #{influence3Name},influence4_name = #{influence4Name} where script_id = #{scriptId}")
+    @Update("update tb_script_influence_name set influence1_name = #{influence1Name} , influence2_name = #{influence2Name},influence3_name = #{influence3Name},influence4_name = #{influence4Name} where influence_name_id = #{influenceNameId}")
     public void updateScriptInfluenceName(ScriptInfluenceName scriptInfluenceName);
 
     //    增加剧本节点信息（node）
@@ -39,7 +39,7 @@ public interface ScriptDAO {
     @Insert("insert into tb_script_choice (choice_id,choice_msg,influence1,influence2,influence3,influence4,jump,script_id) values (#{choiceId},#{choiceMsg},#{influence1},#{influence2},#{influence3},#{influence4},#{jump},#{scriptId})")
     public void insertScriptChoice(ScriptChoice scriptChoice);
 
-    @Update("update tb_script_choice set choice_msg = #{choiceMsg},influence1 = #{influence1},influence2 = #{influence2},influence3 = #{influence3},influence4 = #{influence4},jump = #{jump} where script_id = #{scriptId}")
+    @Update("update tb_script_choice set choice_msg = #{choiceMsg},influence1 = #{influence1},influence2 = #{influence2},influence3 = #{influence3},influence4 = #{influence4},jump = #{jump} where script_id = #{scriptId} AND choice_id = #{choiceId}")
     public void updateScriptChoice(ScriptChoice scriptChoice);
 
     //    查询剧本状态信息是否存在
@@ -81,8 +81,11 @@ public interface ScriptDAO {
     @Select("select * from tb_script_node where script_id = #{scriptId}")
     public List<ScriptNodeMsg> getScriptNodeMsg(Integer scriptId);
 
-    @Select("SELECT COUNT(*) FROM tb_script_node WHERE script_id = #{scriptId}")
-    public Integer isNodeExist(Integer scriptId);
+    @Select("SELECT COUNT(*) FROM tb_script_node WHERE script_id = #{scriptId} AND node_id = #{nodeId}")
+    public Integer isNodeExist(Integer scriptId,Integer nodeId);
+
+    @Select("select count(*) from tb_script_choice where script_id = #{scriptId} AND choice_id = #{choiceId}")
+    public Integer isChoiceExist(Integer scriptId,Integer choiceId);
 
 //    @Select("select * from tb_script_node")
 //    public List<ScriptNodeMsg> getScriptNodeMsg(Integer scriptId);
@@ -106,7 +109,7 @@ public interface ScriptDAO {
     @Insert("insert into tb_script_end (script_id,end_msg,influence1,influence2,influence3,influence4) values (#{scriptId},#{endMsg},#{influence1},#{influence2},#{influence3},#{influence4})")
     public void insertScriptEnd(ScriptEnd scriptEnd);
 
-    @Update("update tb_script_end set end_msg = #{endMsg},influence1 = #{influence1},influence2 = #{influence2}, influence3 = #{influence3},influence4 = #{influence4}")
+    @Update("update tb_script_end set end_msg = #{endMsg},influence1 = #{influence1},influence2 = #{influence2}, influence3 = #{influence3},influence4 = #{influence4} where end_id = #{endId} AND script_id = #{scriptId}")
     public void updateScriptEnd(ScriptEnd scriptEnd);
 
     @Select("select count(*) from tb_script_normal_end where normal_end_id = #{normalEndId} AND script_id = #{scriptId}")
@@ -118,7 +121,7 @@ public interface ScriptDAO {
     @Insert("insert into tb_script_normal_end (script_id,normal_end1,normal_end2,start_value1,end_value1,start_value2,end_value2,start_value3,end_value3,start_value4,end_value4) values (#{scriptId},#{normalEnd1},#{normalEnd2},#{startValue1},#{endValue1},#{startValue2},#{endValue2},#{startValue3},#{endValue3},#{startValue4},#{endValue4})")
     public void insertScriptNormalEnd(ScriptNormalEnd scriptNormalEnd);
 
-    @Update("update tb_script_normal_end set normal_end1 = #{normalEnd1},normal_end2 = #{normalEnd2} ,start_value1 = #{startValue1},end_value1 =#{endValue1},start_value2 = #{startValue2},end_value2 =#{endValue2},start_value3 = #{startValue3},end_value3 =#{endValue3},start_value4 = #{startValue4},end_value4 =#{endValue4}")
+    @Update("update tb_script_normal_end set normal_end1 = #{normalEnd1},normal_end2 = #{normalEnd2} ,start_value1 = #{startValue1},end_value1 =#{endValue1},start_value2 = #{startValue2},end_value2 =#{endValue2},start_value3 = #{startValue3},end_value3 =#{endValue3},start_value4 = #{startValue4},end_value4 =#{endValue4} where normal_end_id = #{normalEndId} AND script_id = #{scriptId}")
     public void updateScriptNormalEnd(ScriptNormalEnd scriptNormalEnd);
 
     //    剧本游玩的时候 指标没了或者满了 剧本提前结束 判断触发什么特殊的结局
@@ -159,6 +162,7 @@ public interface ScriptDAO {
     @Insert("insert into script_commit (script_id,user_id,commit_date) values (#{scriptId},#{userId},#{commitDate})")
     public void insertCommit(Integer scriptId, Integer userId, Date commitDate);
 
+//    更新140状态 为审核中
     @Update("update tb_script set script_status = 140 where script_id = #{scriptId}")
     public void updateCommitStatus(Integer scriptId);
 

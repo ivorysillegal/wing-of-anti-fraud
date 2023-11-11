@@ -70,27 +70,35 @@ public class ScriptServiceImpl implements ScriptService {
         for (ScriptNode scriptNode : scriptNodes) {
 //            定义 选项（choice）中的 对应的剧本id
             Integer scriptId = scriptNode.getScriptId();
+            Integer nodeId = scriptNode.getNodeId();
             scriptNode.getRightChoice().setScriptId(scriptId);
             scriptNode.getLeftChoice().setScriptId(scriptId);
 //            构造映射对象
             Integer leftChoiceId = scriptNode.getLeftChoice().getChoiceId();
             Integer rightChoiceId = scriptNode.getRightChoice().getChoiceId();
             ScriptNodeMsg nodeMsg = new ScriptNodeMsg(scriptNode, leftChoiceId, rightChoiceId);
-            Integer nodeExist = scriptDAO.isNodeExist(scriptId);
-//            当等于0的时候 表示不存在这个剧本 此时需要新增
-            if (nodeExist == 0) {
-                //            加入节点及选项信息
+            Integer nodeExist = scriptDAO.isNodeExist(scriptId, nodeId);
+//            当等于0的时候 表示不存在这个节点 此时需要新增
+            if (nodeExist.equals(0)) {
+//            加入节点及选项信息
                 scriptDAO.insertScriptNodeMsg(nodeMsg);
-                scriptDAO.insertScriptChoice(scriptNode.getLeftChoice());
-                scriptDAO.insertScriptChoice(scriptNode.getRightChoice());
             } else {
 //                进入else条件的时候 表示已经存在了这个剧本 此时需要更新剧本的信息
                 scriptDAO.updateScriptNodeMsg(nodeMsg);
-                scriptDAO.updateScriptChoice(scriptNode.getLeftChoice());
-                scriptDAO.updateScriptChoice(scriptNode.getRightChoice());
             }
+            updateChoice(scriptId, scriptNode.getLeftChoice());
+            updateChoice(scriptId, scriptNode.getRightChoice());
         }
         return true;
+    }
+
+    private void updateChoice(Integer scriptId, ScriptChoice scriptChoice) {
+//        判断选项是否存在 如果存在则更新 不存在则新增
+        Integer isChoiceExist = scriptDAO.isChoiceExist(scriptId, scriptChoice.getChoiceId());
+        if (isChoiceExist.equals(0))
+            scriptDAO.insertScriptChoice(scriptChoice);
+        else
+            scriptDAO.updateScriptChoice(scriptChoice);
     }
 
     @Override
@@ -118,9 +126,12 @@ public class ScriptServiceImpl implements ScriptService {
             ScriptNormalEnd scriptNormalEnd = scriptEnds.getScriptNormalEnd();
 //                同上 手动设置该结局所属的剧本id
             scriptNormalEnd.setScriptId(scriptId);
-            Integer ifScriptSpecialEndExist = scriptDAO.selectIfScriptNormalEndExist(scriptNormalEnd.getNormalEndId(), scriptNormalEnd.getScriptId());
-//        如果不存在特殊结局 则新增
-            if (ifScriptSpecialEndExist == 0) {
+            Integer ifScriptSpecialEndExist = 0;
+//            判断有没有normalid 如果没有的话 就代表新增
+            if (!Objects.isNull(scriptNormalEnd.getNormalEndId()))
+                ifScriptSpecialEndExist = scriptDAO.selectIfScriptNormalEndExist(scriptNormalEnd.getNormalEndId(), scriptNormalEnd.getScriptId());
+//        如果不存在普通结局 则新增
+            if (ifScriptSpecialEndExist.equals(0)) {
                 scriptDAO.insertScriptNormalEnd(scriptNormalEnd);
             } else {
 //            如果存在 则更新
@@ -208,6 +219,9 @@ public class ScriptServiceImpl implements ScriptService {
         List<ScriptMsg> scriptMsgsInClassification = scriptDAO.getScriptMsgByClassification(classification);
         HashMap<Integer, Integer> eachOnLineScriptScore = refreshScore.getScore();
         for (ScriptMsg scriptMsg : scriptMsgsInClassification) {
+            Integer scriptStatus = scriptDAO.getScriptStatus(scriptMsg.getScriptId());
+            if (scriptStatus.equals(120))
+                continue;
             Integer score = eachOnLineScriptScore.get(scriptMsg.getScriptId());
             ScriptWithScore scriptWithScore = new ScriptWithScore(scriptMsg, score);
             scriptWithScores.add(scriptWithScore);
@@ -303,19 +317,20 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
-    public ScriptEndSent getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange) {
+    public String getScriptEnd(Integer scriptId, ScriptInfluenceChange scriptInfluenceChange) {
         String specialEnd;
         String normalEnd;
         try {
-//            scriptSpecialEnd = scriptDAO.getScriptSpecialEnd(scriptId,scriptInfluence);
             specialEnd = scriptDAO.getScriptSpecialEnd(scriptId, scriptInfluenceChange.getInfluence1(), scriptInfluenceChange.getInfluence2(), scriptInfluenceChange.getInfluence3(), scriptInfluenceChange.getInfluence4());
-//            scriptStoryEnd = scriptDAO.getScriptStoryEnd(scriptInfluence, scriptId);
-            normalEnd = scriptDAO.getScriptNormalEnd(scriptInfluenceChange.getInfluence1(), scriptInfluenceChange.getInfluence2(), scriptInfluenceChange.getInfluence3(), scriptInfluenceChange.getInfluence4(), scriptId);
+            if (Objects.isNull(specialEnd)) {
+                normalEnd = scriptDAO.getScriptNormalEnd(scriptInfluenceChange.getInfluence1(), scriptInfluenceChange.getInfluence2(), scriptInfluenceChange.getInfluence3(), scriptInfluenceChange.getInfluence4(), scriptId);
+                return normalEnd;
+            }
+            return specialEnd;
         } catch (Exception e) {
             return null;
         }
-        ScriptEndSent scriptEndSent = new ScriptEndSent(specialEnd, normalEnd);
-        return scriptEndSent;
+
     }
 
     @Override
@@ -391,6 +406,7 @@ public class ScriptServiceImpl implements ScriptService {
                 if (ifDel.equals(1))
                     continue;
                 ScriptMsg script = scriptDAO.getScriptById(eachScript);
+                script.setScriptStatus(scriptDAO.getScriptStatus(eachScript));
                 scriptMsgs.add(script);
             }
         } catch (Exception e) {

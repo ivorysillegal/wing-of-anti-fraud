@@ -1,6 +1,7 @@
 package com.gduf.service.impl;
 
 import com.gduf.dao.CommunityDAO;
+import com.gduf.dao.UserDAO;
 import com.gduf.pojo.community.*;
 import com.gduf.pojo.user.User;
 import com.gduf.service.CommunityService;
@@ -14,12 +15,18 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+
+import static com.gduf.controller.Code.DEFAULT_PIC;
 
 @Service
 public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
     private CommunityDAO communityDAO;
+
+    @Autowired
+    private UserDAO userDAO;
 
     @Autowired
     private RedisCache redisCache;
@@ -40,7 +47,18 @@ public class CommunityServiceImpl implements CommunityService {
     public PostWithComments showPostById(Integer postId) {
         Post post = communityDAO.showPostById(postId);
         List<Comment> comments = communityDAO.showEachPostComment(postId);
-        return new PostWithComments(post, comments);
+        ArrayList<Comment> retComments = new ArrayList<>();
+        for (Comment comment : comments) {
+            Integer userId = comment.getUserId();
+            String username = userDAO.getUsername(userId);
+            String pic = userDAO.getPic(userId);
+            if (Objects.isNull(pic))
+                pic = DEFAULT_PIC;;
+            comment.setPic(pic);
+            comment.setUserName(username);
+            retComments.add(comment);
+        }
+        return new PostWithComments(post, retComments);
     }
 
     @Override

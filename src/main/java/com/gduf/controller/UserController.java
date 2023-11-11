@@ -34,24 +34,20 @@ public class UserController {
     public Result sendMsg(@RequestBody Map emailCode) {
         String email = (String) emailCode.get("email");
         String usage = (String) emailCode.get("usage");
-        String subject;
         String code = ValidateCodeUtils.generateValidateCode(4).toString();
-        String context;
         // 获取邮箱账号
-        try {
-            if (usage.equals("register")) {
-                subject = "反诈通注册验证码";
-                context = "欢迎使用反诈通，登录验证码为: " + code + ",五分钟内有效，请妥善保管!";
-                userService.sendMsg(email, subject, context, code);
-            } else if (usage.equals("passwordForgotten")) {
-                subject = "反诈通重置密码 注册码";
-                context = "欢迎使用反诈通，重置密码验证码为: " + code + ",五分钟内有效，请妥善保管!";
-                userService.sendMsg(email, subject, context, code);
-            }
-        } catch (Exception e) {
-            return new Result("验证码发送失败", 201, null);
+        boolean isInitialization = true;
+        boolean isRest = true;
+        if (usage.equals("register")) {
+            isInitialization = userService.userInitialization(email, code);
+        } else if (usage.equals("passwordForgotten")) {
+            isRest = userService.resetPasswordCode(email, code);
+        } else
+            return new Result("？？？？", EMAIL_CODE_SEND_ERR, null);
+        if (!isRest || !isInitialization) {
+            return new Result("验证码发送失败", EMAIL_CODE_SEND_ERR, null);
         }
-        return new Result("验证码发送成功", 200, code);
+        return new Result("验证码发送成功", EMAIL_CODE_SEND_OK, code);
     }
 
     @PostMapping("/login")
@@ -83,15 +79,23 @@ public class UserController {
             return new Result("用户名重复 请重试！", REGISTER_REPEAT_NAME, null);
     }
 
+
+    @PostMapping("/reset/email")
+    public Result forgotPassword(@RequestHeader String token, @RequestBody Map map) {
+        String passwordReset = (String) map.get("passwordReset");
+        boolean isReset = userService.resetPassword(token, passwordReset);
+        if (!isReset)
+            return new Result("重置密码失败", RESET_PASSWORD_ERR, null);
+        return new Result("重置密码成功", RESET_PASSWORD_OK, null);
+    }
+
     //    重置密码
-    @PostMapping("update_password")
-    public Result passwordForgotten(@RequestBody Map map) {
-        String username = (String) map.get("username");
+    @PostMapping("/reset")
+    public Result resetPassword(@RequestHeader String token,@RequestBody Map map) {
         String beforePassword = (String) map.get("beforePassword");
         String afterPassword = (String) map.get("afterPassword");
-        if (!userService.verifyAccount(username, beforePassword, afterPassword)) {
+        if (userService.verifyAccount(token, beforePassword, afterPassword))
             return new Result("密码修改成功", UPDATE_PASSWORD_OK, null);
-        }
         return new Result("密码修改失败", UPDATE_PASSWORD_ERR, null);
     }
 

@@ -79,7 +79,7 @@ public class ScriptRepositoryController {
         return new Result("节点位置信息获取成功", SHOW_NODE_POSITION_OK, scriptNodePositionList);
     }
 
-    @DeleteMapping()
+    @PostMapping("/del")
     public Result delMyDesign(@RequestBody Map map) {
         Integer scriptId = (Integer) map.get("scriptId");
         boolean isDel = scriptService.delRepository(scriptId);
