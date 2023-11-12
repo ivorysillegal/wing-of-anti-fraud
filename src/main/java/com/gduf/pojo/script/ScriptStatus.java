@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.gduf.controller.Code.SCRIPT_STATUS_CHECKING;
+import static com.gduf.controller.Code.SCRIPT_STATUS_REPOSITORY;
 
 @Data
 @AllArgsConstructor
@@ -22,6 +22,6 @@ public class ScriptStatus {
         this.producerId = producerId;
         this.isOfficial = false;
         this.isDel = false;
-        this.status = SCRIPT_STATUS_CHECKING;
+        this.status = SCRIPT_STATUS_REPOSITORY;
     }
 }

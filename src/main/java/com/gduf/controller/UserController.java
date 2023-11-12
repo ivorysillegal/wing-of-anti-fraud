@@ -31,7 +31,7 @@ public class UserController {
 
     //    发送验证码
     @PostMapping("/sendMsg")
-    public Result sendMsg(@RequestBody Map emailCode) {
+    public Result sendEmail(@RequestBody Map emailCode) {
         String email = (String) emailCode.get("email");
         String usage = (String) emailCode.get("usage");
         String code = ValidateCodeUtils.generateValidateCode(4).toString();

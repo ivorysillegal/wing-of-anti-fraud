@@ -1,6 +1,7 @@
 package com.gduf.controller;
 
 import com.gduf.pojo.script.ScriptMsg;
+import com.gduf.pojo.script.mapper.ScriptEnds;
 import com.gduf.pojo.script.mapper.ScriptNodePositionList;
 import com.gduf.service.ScriptService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,5 +87,16 @@ public class ScriptRepositoryController {
         if (isDel)
             return new Result("剧本删除成功", DEL_REPOSITORY_OK, null);
         return new Result("剧本删除失败", DEL_REPOSITORY_ERR, null);
+    }
+
+    @PostMapping("/get")
+    public Result getMyRepositoryEnds(@RequestBody Map map) {
+        Integer scriptId = (Integer) map.get("scriptId");
+        ScriptEnds scriptEnds = scriptService.showRepositoryEnds(scriptId);
+        if (Objects.isNull(scriptEnds))
+            return new Result("获取草稿箱剧本结局失败 或所获取的剧本非草稿箱状态", LOAD_REPOSITORY_ENDS_ERR, null);
+        if (Objects.isNull(scriptEnds.getScriptNormalEnd()) || scriptEnds.getScriptEnd().isEmpty())
+            return new Result("草稿箱中没有对应的结局信息", LOAD_REPOSITORY_ENDS_OK, scriptEnds);
+        return new Result("获取草稿箱剧本结局成功", LOAD_REPOSITORY_ENDS_OK, scriptEnds);
     }
 }

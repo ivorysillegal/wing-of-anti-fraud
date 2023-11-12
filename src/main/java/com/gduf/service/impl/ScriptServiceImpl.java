@@ -22,6 +22,8 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.gduf.controller.Code.SCRIPT_STATUS_REPOSITORY;
+
 @Service
 public class ScriptServiceImpl implements ScriptService {
 
@@ -686,6 +688,24 @@ public class ScriptServiceImpl implements ScriptService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public ScriptEnds showRepositoryEnds(Integer scriptId) {
+//        确认是否草稿箱中的剧本
+        Integer scriptStatus = scriptDAO.getScriptStatus(scriptId);
+        if (!scriptStatus.equals(SCRIPT_STATUS_REPOSITORY))
+            return null;
+        ScriptNormalEnd scriptNormalEnd;
+        List<ScriptEnd> scriptEndList;
+        try {
+            scriptEndList = scriptDAO.getScriptEndById(scriptId);
+            scriptNormalEnd = scriptDAO.getScriptNormalEndById(scriptId);
+        } catch (Exception e) {
+            return null;
+        }
+        ScriptEnds scriptEnds = new ScriptEnds(scriptId, scriptEndList, scriptNormalEnd);
+        return scriptEnds;
     }
 
     private int decodeToId(String token) throws Exception {

@@ -10,4 +10,6 @@ public interface QuestionService {
     public List<Question> getQuestion();
 
     public List<Question> showQuestionInClassification(String classification);
+
+    public List<Question> getCompetitionQuestionsByDan(String dan);
 }

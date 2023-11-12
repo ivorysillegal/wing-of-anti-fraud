@@ -18,4 +18,6 @@ public interface QuestionDAO {
     @Select("select * from tb_question where classification = #{classification} order by rand() limit 4")
     public List<Question> showQuestionByClassification(String classification);
 
+    @Select("select * from tb_question order by rand() limit #{limit}")
+    public List<Question> randomGetQuestionByDan(Integer limit);
 }
