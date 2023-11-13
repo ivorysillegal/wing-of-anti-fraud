@@ -34,7 +34,7 @@ import static com.gduf.controller.Code.MATCH_TASK_NAME_PREFIX;
 
 @Component
 @Slf4j
-@ServerEndpoint(value = "/game/match/{userId}")
+@ServerEndpoint(value = "/competition}")
 public class ChatWebsocket {
 
     private Session session;
@@ -117,8 +117,6 @@ public class ChatWebsocket {
             cancelMatch(jsonObject);
         } else if (type == MessageTypeEnum.PLAY_GAME) {
             toPlay(jsonObject);
-        } else if (type == MessageTypeEnum.OPPONENT_COMMIT_ANSWER) {
-
         } else if (type == MessageTypeEnum.GAME_OVER) {
             gameover(jsonObject);
         } else {
@@ -319,13 +317,18 @@ public class ChatWebsocket {
 //            存入此次对战中的当前玩家 对方 题目
 //            一个GameMatchInfo就代表一个玩家的对象
 
-//            新增 存入此次pk中对方的用户名
+//            新增 存入此次pk中对方的用户名 头像
             UserWithValue userWithValue = userService.showUser(Integer.parseInt(userId));
             String username = userWithValue.getUser().getUsername();
+            String userPic = userWithValue.getUserValue().getPic();
             gameMatchInfo.setSelfUsername(username);
+            gameMatchInfo.setSelfPicAvatar(userPic);
+
             UserWithValue receiverValue = userService.showUser(Integer.parseInt(receiver));
             String receiverUsername = receiverValue.getUser().getUsername();
             gameMatchInfo.setOpponentUsername(receiverUsername);
+            String opponentPic = userWithValue.getUserValue().getPic();
+            gameMatchInfo.setOpponentPicAvatar(opponentPic);
 
             messageReply.setCode(MessageCode.SUCCESS.getCode());
             messageReply.setDesc(MessageCode.SUCCESS.getDesc());
@@ -383,11 +386,13 @@ public class ChatWebsocket {
 //        (由答题方 执行)
         log.info("ChatWebsocket toPlay 用户更新对局信息开始 userId: {}, message: {}", userId, jsonObject.toJSONString());
 
-        MessageReply<UserMatchInfo> messageReply = new MessageReply<>();
+//        MessageReply<UserMatchInfo> messageReply = new MessageReply<>();
+        MessageReply<ScoreSelectedInfo> messageReply = new MessageReply<>();
 //        返回的信息类型
 
 //        下面的这个思路就是 从房间中找到对方 并且发送自己的分数更新信息给他
-        ChatMessage<UserMatchInfo> result = new ChatMessage<>();
+//        ChatMessage<UserMatchInfo> result = new ChatMessage<>();
+        ChatMessage<ScoreSelectedInfo> result = new ChatMessage<>();
         result.setSender(userId);
         String receiver = matchCacheUtil.getUserFromRoom(userId);
 //        从房间中找出对面的对手是谁 发信息给他
@@ -398,7 +403,9 @@ public class ChatWebsocket {
 //        设置消息的发送方 和 接收方 以及消息类型 (游戏中)
 
 //        获取新的得分 并且重新赋值给当前的user   (当前的user就是得分的那个)
-        Integer newScore = jsonObject.getInteger("data");
+        UserMatchChoice userMatchChoice = jsonObject.getObject("data",UserMatchChoice.class);
+        Integer newScore = userMatchChoice.getUserScore();
+        Integer userSelectedAnswerIndex = userMatchChoice.getUserSelectedAnswerIndex();
         UserMatchInfo userMatchInfo = new UserMatchInfo();
         userMatchInfo.setUserId(userId);
         userMatchInfo.setScore(newScore);
@@ -409,7 +416,9 @@ public class ChatWebsocket {
         matchCacheUtil.setUserMatchInfo(userId, JSON.toJSONString(userMatchInfo));
 
 //        设置响应数据的类型
-        result.setData(userMatchInfo);
+//        更新 同时发送对面所选的选项
+        result.setData(new ScoreSelectedInfo(userMatchInfo,userSelectedAnswerIndex));
+//        result.setData(userMatchInfo);
         messageReply.setCode(MessageCode.SUCCESS.getCode());
         messageReply.setDesc(MessageCode.SUCCESS.getDesc());
         messageReply.setChatMessage(result);
@@ -418,30 +427,6 @@ public class ChatWebsocket {
         sendMessageAll(messageReply);
 
         log.info("ChatWebsocket toPlay 用户更新对局信息结束 userId: {}, userMatchInfo: {}", userId, JSON.toJSONString(userMatchInfo));
-    }
-
-
-    /**
-     * 对方提交答案
-     */
-    private void opponentCommitAnswer(JSONObject jsonObject) {
-
-//        TODO 是否可以把这个请求融入toPlay里面呢 可以设置一个新的类 然后将数据放入里面 就不会打扰到原先的userMatchInfo及其用法
-        log.info("ChatWebsocket opponentCommitAnswer 对方用户提交答案 userId: {}, message: {}", userId, jsonObject.toJSONString());
-        MessageReply<Integer> messageReply = new MessageReply<>();
-        ChatMessage<Integer> result = new ChatMessage<>();
-        result.setSender(userId);
-        String receiver = matchCacheUtil.getUserFromRoom(userId);
-        Set<String> set = new HashSet<>();
-        set.add(receiver);
-        result.setReceivers(set);
-        result.setType(MessageTypeEnum.OPPONENT_COMMIT_ANSWER);
-        Integer opponentSelectedIndex = jsonObject.getInteger("data");
-
-        UserMatchChoice userMatchChoice = new UserMatchChoice();
-        userMatchChoice.setUserId(userId);
-        userMatchChoice.setChoice(opponentSelectedIndex);
-
     }
 
     /**

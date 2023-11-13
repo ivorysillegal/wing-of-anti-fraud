@@ -15,6 +15,10 @@ public class GameMatchInfo {
     private UserMatchInfo selfInfo;
     private UserMatchInfo opponentInfo;
     private List<Question> questions;
+//    用户名
     private String selfUsername;
     private String opponentUsername;
+//    头像
+    private String selfPicAvatar;
+    private String opponentPicAvatar;
 }

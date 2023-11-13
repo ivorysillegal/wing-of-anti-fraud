@@ -3,18 +3,18 @@ var userId = null;
 var opponentUserId = null; // 对战中对面用户的id
 var questionList = null;
 var currentQuestionIndex = 0;  // 当前问题的索引
-var selectedAnswerIndex = null;  // 用户每一题所选择的答案
+var userSelectedAnswerIndex = null;  // 用户每一题所选择的答案
 var opponentSelectedAnswerIndex = null;  // 对战中对方选择每一题的答案
 var rightAnswerIndex = 0;
 var userScore = 0; // 当前用户的分数
 var opponentScore = 0; // 对面对战用户的分数
 var selfUsername = null;
 var opponentUsername = null;
+var selfPicAvatar = null;
+var opponentPicAvatar = null;
 
 var isUserSelect = false;
 var isOpponentSelect = false; // 判断对面的用户是否有选择过
-
-// TODO 新增属性记录 对方玩家选了什么 （无论正确还是错误）同样是丰富userMatchInfo类
 
 //强制关闭浏览器  调用websocket.close（）,进行正常关闭
 window.onunload = function () {
@@ -59,34 +59,26 @@ function connect() {
             // selfInfo是自己的信息
             // selfInfo则代表的是GameMatchInfo中selfInfo的属性
             userId = selfInfo.userId;
+            selfUsername = gameMatchInfo.selfUsername;
+            selfPicAvatar = gameMatchInfo.selfPicAvatar;
             let opponentInfo = gameMatchInfo.opponentInfo;
             // opponentInfo则是对面的信息
-            // 获取到对面用户的id
+            // 获取到对面用户的id 头像 名字
             opponentUserId = opponentInfo.userId;
-
-            // 获取到对战双方的名字
-            selfUsername = gameMatchInfo.selfUsername;
             opponentUsername = gameMatchInfo.opponentUsername;
+            opponentPicAvatar = gameMatchInfo.opponentPicAvatar
         }
 
-
-        // TODO 这里的type也需要增加 （枚举类中增加） 此状态表示对面提交答案了
         // 根据当前玩家是否提交 如果当前玩家也提交了的话 渲染对面选择
         // 如果当前用户未提交 等待直至提交了 再渲染
-
-        if (type === "OPPONENT_COMMIT_ANSWER") {
-
-            isOpponentSelect = true;
-        }
-
 
         // 如果接收到的是 对战中的信息 代表此时已经对面已经回答 如果答对了需要更新分数信息
         if (type === "PLAY_GAME") {
             let data = chatMessage.data;
-            // data.userId
-            // 这里还有一个userId的属性 这个属性指的是对面的用户id
+            // 这个data目前表示的是scoreSelectedInfo的匿名对象
+            opponentSelectedAnswerIndex = data.userSelectedAnswerIndex;
             // 更新对面用户的分数
-            opponentScore = data.score;
+            opponentScore = data.userMatchInfo.score;
             isOpponentSelect = true;
             // 更新完分数了 这时候需要重新渲染出下一题 依次进行循环
         }
@@ -194,7 +186,7 @@ function displayQuestion(question) {
         radio.value = option;
 // 添加事件监听器，当选择变化时更新变量
         radio.addEventListener('change', function () {
-            selectedAnswerIndex = radio.getAttribute("data-index");
+            userSelectedAnswerIndex = radio.getAttribute("data-index");
         });
         index++;
         label.appendChild(radio);
@@ -207,8 +199,6 @@ function displayQuestion(question) {
 // function userInPlay(){
 // 这里的question是对应的问题的编号
 function commitAnswer(question) {
-    isUserSelect = true;
-    // 这里标记当前用户已经选择了
     var chatMessage = {};
     var sender = userId;
     var type = "PLAY_GAME";
@@ -218,20 +208,25 @@ function commitAnswer(question) {
     if (isRight)
         userScore += 50;
     // userScore是玩家的积分 TODO 根据玩家所耗时间来决定积分的加多少
-    var data = userScore;
+    // 发送玩家的新得分以及自己的选项
+    var data = {
+        userScore: userScore,
+        userSelectedAnswerIndex: userSelectedAnswerIndex
+    }
     chatMessage.sender = sender;
     chatMessage.data = data;
     chatMessage.type = type;
-    // console.log("用户:" + sender + "更新分数为" + data);
     console.log("用户:" + sender + "更新分数为" + data);
     socket.send(JSON.stringify(chatMessage));
+    isUserSelect = true;
+    // 这里标记当前用户已经选择了
 
 }
 
 // 判断题目提交的答案是否正确
 function checkAnswer(question) {
     // 如果他们两个相等的话 就代表是答对的
-    if (rightAnswerIndex === selectedAnswerIndex)
+    if (rightAnswerIndex === UserSelectedAnswerIndex)
         return true;
     return false;
 }
