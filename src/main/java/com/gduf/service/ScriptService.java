@@ -1,10 +1,7 @@
 package com.gduf.service;
 
-import com.gduf.pojo.script.mapper.ScriptEnds;
-import com.gduf.pojo.script.mapper.ScriptNode;
+import com.gduf.pojo.script.mapper.*;
 import com.gduf.pojo.script.*;
-import com.gduf.pojo.script.mapper.ScriptNodePositionList;
-import com.gduf.pojo.script.mapper.ScriptWithScore;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -15,7 +12,9 @@ public interface ScriptService {
 
     public boolean insertOrUpdateScriptNodes(List<ScriptNode> scriptNodes);
 
-    public boolean insertOrUpdateScriptEnds(ScriptEnds scriptEnds);
+    public Integer insertOrUpdateScriptEnds(ScriptSpecialEnd scriptSpecialEnd);
+
+    public Integer insertOrUpdateScriptNormalEnds(ScriptEnds scriptEnds);
 
     public boolean checkScriptStatus(String token, Integer scriptId);
 
@@ -72,4 +71,7 @@ public interface ScriptService {
 
     //    展示出草稿箱中的所有结局
     public ScriptEnds showRepositoryEnds(Integer scriptId);
+
+//    删除剧本的特殊结局
+    public boolean delRepositorySpecialEnd(Integer endId);
 }

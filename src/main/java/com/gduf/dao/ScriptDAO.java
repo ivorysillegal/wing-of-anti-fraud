@@ -32,7 +32,7 @@ public interface ScriptDAO {
     public void insertScriptNodeMsg(ScriptNodeMsg scriptNodeMsg);
 
     //    更新剧本节点信息 (node)
-    @Update("update tb_script_node set word = #{word} where script_id = #{scriptId} AND node_id = #{nodeId}")
+    @Update("update tb_script_node set word = #{word}, left_choice_id = #{leftChoiceId}, right_choice_id = #{rightChoiceId} where script_id = #{scriptId} AND node_id = #{nodeId}")
     public void updateScriptNodeMsg(ScriptNodeMsg scriptNodeMsg);
 
     //    增加剧本选择信息（choice）
@@ -68,6 +68,9 @@ public interface ScriptDAO {
 
     @Select("select status from tb_script_status where script_id = #{scriptId}")
     public Integer getScriptStatus(Integer scriptId);
+
+    @Select("select script_id from tb_script_end where end_id = #{endId}")
+    public Integer getScriptIdByEndId(Integer endId);
 
     @Select("select count(*) from tb_script_status where script_id = #{scriptId} AND is_del = 1")
     public Integer checkIfDel(Integer scriptId);
@@ -107,25 +110,32 @@ public interface ScriptDAO {
 
     //    添加剧本结局
     @Insert("insert into tb_script_end (script_id,end_msg,influence1,influence2,influence3,influence4) values (#{scriptId},#{endMsg},#{influence1},#{influence2},#{influence3},#{influence4})")
+    @Options(useGeneratedKeys = true, keyProperty = "endId", keyColumn = "end_id")
     public void insertScriptEnd(ScriptEnd scriptEnd);
 
-    @Update("update tb_script_end set end_msg = #{endMsg},influence1 = #{influence1},influence2 = #{influence2}, influence3 = #{influence3},influence4 = #{influence4} where end_id = #{endId} AND script_id = #{scriptId}")
+    @Update("update tb_script_end set end_msg = #{endMsg},influence1 = #{influence1},influence2 = #{influence2}, influence3 = #{influence3},influence4 = #{influence4} where end_id = #{endId}")
     public void updateScriptEnd(ScriptEnd scriptEnd);
 
-    @Select("select count(*) from tb_script_normal_end where normal_end_id = #{normalEndId} AND script_id = #{scriptId}")
+    @Select("select count(*) from tb_script_normal_end where script_id = #{scriptId}")
     public Integer selectIfScriptNormalEndExist(Integer normalEndId, Integer scriptId);
 
     @Select("select * from tb_script_normal_end where script_id = #{scriptId}")
     public ScriptNormalEnd getScriptNormalEndById(Integer scriptId);
 
     @Insert("insert into tb_script_normal_end (script_id,normal_end1,normal_end2,start_value1,end_value1,start_value2,end_value2,start_value3,end_value3,start_value4,end_value4) values (#{scriptId},#{normalEnd1},#{normalEnd2},#{startValue1},#{endValue1},#{startValue2},#{endValue2},#{startValue3},#{endValue3},#{startValue4},#{endValue4})")
+    @Options(useGeneratedKeys = true, keyProperty = "normalEndId", keyColumn = "normal_end_id")
     public void insertScriptNormalEnd(ScriptNormalEnd scriptNormalEnd);
 
-    @Update("update tb_script_normal_end set normal_end1 = #{normalEnd1},normal_end2 = #{normalEnd2} ,start_value1 = #{startValue1},end_value1 =#{endValue1},start_value2 = #{startValue2},end_value2 =#{endValue2},start_value3 = #{startValue3},end_value3 =#{endValue3},start_value4 = #{startValue4},end_value4 =#{endValue4} where normal_end_id = #{normalEndId} AND script_id = #{scriptId}")
+    @Update("update tb_script_normal_end set normal_end1 = #{normalEnd1},normal_end2 = #{normalEnd2} ,start_value1 = #{startValue1},end_value1 =#{endValue1},start_value2 = #{startValue2},end_value2 =#{endValue2},start_value3 = #{startValue3},end_value3 =#{endValue3},start_value4 = #{startValue4},end_value4 =#{endValue4} where normal_end_id = #{normalEndId}")
     public void updateScriptNormalEnd(ScriptNormalEnd scriptNormalEnd);
 
     //    剧本游玩的时候 指标没了或者满了 剧本提前结束 判断触发什么特殊的结局
-    @Select("SELECT end_msg FROM tb_script_end WHERE influence1 = #{influence1} OR influence2 = #{influence2} OR influence3 = #{influence3} OR influence4 = #{influence4} ORDER BY end_id DESC LIMIT 1")
+    @Select("SELECT end_msg \n" +
+            "FROM tb_script_end \n" +
+            "WHERE (influence1 = #{influence1} OR influence2 = #{influence2} OR influence3 = #{influence3} OR influence4 = #{influence4}) \n" +
+            "  AND script_id = #{scriptId}\n" +
+            "ORDER BY end_id DESC \n" +
+            "LIMIT 1;\n")
 //    public String getScriptSpecialEnd(Integer scriptId,ScriptInfluence scriptInfluence);
     public String getScriptSpecialEnd(Integer scriptId, Integer influence1, Integer influence2, Integer influence3, Integer influence4);
 
@@ -180,4 +190,7 @@ public interface ScriptDAO {
 
     @Select("select * from script_node_position where script_id = #{scriptId}")
     public List<ScriptNodePosition> showNodePosition(Integer scriptId);
+
+    @Delete("delete from tb_script_end where end_id = #{endId}")
+    public void delSpecialEnd(Integer endId);
 }

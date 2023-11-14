@@ -96,7 +96,16 @@ public class ScriptRepositoryController {
         if (Objects.isNull(scriptEnds))
             return new Result("获取草稿箱剧本结局失败 或所获取的剧本非草稿箱状态", LOAD_REPOSITORY_ENDS_ERR, null);
         if (Objects.isNull(scriptEnds.getScriptNormalEnd()) || scriptEnds.getScriptEnd().isEmpty())
-            return new Result("草稿箱中没有对应的结局信息", LOAD_REPOSITORY_ENDS_OK, scriptEnds);
+            return new Result("草稿箱中没有对应的完整结局信息", LOAD_REPOSITORY_ENDS_OK, scriptEnds);
         return new Result("获取草稿箱剧本结局成功", LOAD_REPOSITORY_ENDS_OK, scriptEnds);
+    }
+
+    @PostMapping("/end/del")
+    public Result delMyRepositoryEnds(@RequestBody Map map) {
+        Integer endId = (Integer) map.get("endId");
+        boolean isDel = scriptService.delRepositorySpecialEnd(endId);
+        if (isDel)
+            return new Result("删除草稿箱剧本结局成功", DEL_REPOSITORY_SPECIAL_END_OK, null);
+        return new Result("删除草稿箱剧本结局失败", DEL_REPOSITORY_SPECIAL_END_ERR, null);
     }
 }

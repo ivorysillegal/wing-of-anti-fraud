@@ -2,6 +2,7 @@ package com.gduf.ws.websocket;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.gduf.config.GetHttpSessionConfig;
 import com.gduf.pojo.user.UserWithValue;
 import com.gduf.pojo.wikipedia.Question;
 import com.gduf.service.CompetitionService;
@@ -34,7 +35,8 @@ import static com.gduf.controller.Code.MATCH_TASK_NAME_PREFIX;
 
 @Component
 @Slf4j
-@ServerEndpoint(value = "/competition}")
+//@ServerEndpoint(value = "/competition}"
+@ServerEndpoint(value = "/competition", configurator = GetHttpSessionConfig.class)
 public class ChatWebsocket {
 
     private Session session;
@@ -403,7 +405,7 @@ public class ChatWebsocket {
 //        设置消息的发送方 和 接收方 以及消息类型 (游戏中)
 
 //        获取新的得分 并且重新赋值给当前的user   (当前的user就是得分的那个)
-        UserMatchChoice userMatchChoice = jsonObject.getObject("data",UserMatchChoice.class);
+        UserMatchChoice userMatchChoice = jsonObject.getObject("data", UserMatchChoice.class);
         Integer newScore = userMatchChoice.getUserScore();
         Integer userSelectedAnswerIndex = userMatchChoice.getUserSelectedAnswerIndex();
         UserMatchInfo userMatchInfo = new UserMatchInfo();
@@ -417,7 +419,7 @@ public class ChatWebsocket {
 
 //        设置响应数据的类型
 //        更新 同时发送对面所选的选项
-        result.setData(new ScoreSelectedInfo(userMatchInfo,userSelectedAnswerIndex));
+        result.setData(new ScoreSelectedInfo(userMatchInfo, userSelectedAnswerIndex));
 //        result.setData(userMatchInfo);
         messageReply.setCode(MessageCode.SUCCESS.getCode());
         messageReply.setDesc(MessageCode.SUCCESS.getDesc());

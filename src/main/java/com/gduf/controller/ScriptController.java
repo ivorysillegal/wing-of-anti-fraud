@@ -55,15 +55,29 @@ public class ScriptController {
     }
 
     @PostMapping("/design/scriptEnds")
-    public Result saveScriptEnd(@RequestBody ScriptEnds scriptEnds) {
+    public Result saveScriptEnd(@RequestBody ScriptSpecialEnd scriptSpecialEnd) {
+        Integer endId;
         try {
-            boolean isInsert = scriptService.insertOrUpdateScriptEnds(scriptEnds);
-            if (!isInsert)
+            endId = scriptService.insertOrUpdateScriptEnds(scriptSpecialEnd);
+            if (Objects.isNull(endId))
                 return new Result("剧本结局保存或更新失败", SCRIPT_ENDS_SAVE_ERR, null);
         } catch (Exception e) {
             return new Result("剧本结局保存或更新失败", SCRIPT_ENDS_SAVE_ERR, null);
         }
-        return new Result("剧本结局保存或更新成功", SCRIPT_ENDS_SAVE_OK, null);
+        return new Result("剧本结局保存或更新成功", SCRIPT_ENDS_SAVE_OK, endId);
+    }
+
+    @PostMapping("/design/scriptNormalEnds")
+    public Result saveScriptNormalEnd(@RequestBody ScriptEnds scriptEnds) {
+        Integer normalEndId;
+        try {
+            normalEndId = scriptService.insertOrUpdateScriptNormalEnds(scriptEnds);
+            if (Objects.isNull(normalEndId))
+                return new Result("剧本结局保存或更新失败", SCRIPT_ENDS_SAVE_ERR, null);
+        } catch (Exception e) {
+            return new Result("剧本结局保存或更新失败", SCRIPT_ENDS_SAVE_ERR, null);
+        }
+        return new Result("剧本结局保存或更新成功", SCRIPT_ENDS_SAVE_OK, normalEndId);
     }
 
 //    @GetMapping("/node")
@@ -111,7 +125,6 @@ public class ScriptController {
         return new Result("输入类型剧本读取成功", SCRIPT_READ_OK, scriptByClassification);
     }
 
-
     @PostMapping("/play")
     public Result loadScript(@RequestHeader String token, @RequestBody Map map) {
         int scriptId = (int) map.get("scriptId");
@@ -121,12 +134,12 @@ public class ScriptController {
         Boolean isOnline = Objects.isNull(scriptStatus);
         Script script = new Script();
         try {
-            if (isOnline){
+            if (isOnline) {
                 boolean isRemember = scriptService.rememberScript(token, scriptId);
-                script = mergeScript(scriptId,true);
+                script = mergeScript(scriptId, true);
                 if (!isRemember)
                     return new Result("记录游玩操作失败", LOAD_SCRIPT_ERR, null);
-            }else {
+            } else {
                 script = mergeScript(scriptId, false);
             }
         } catch (Exception e) {
@@ -135,21 +148,21 @@ public class ScriptController {
         return new Result("读取剧本成功", LOAD_SCRIPT_OK, script);
     }
 
-    private Script mergeScript(Integer scriptId,Boolean isOnline) {
-        List<ScriptNode> scriptDetail = scriptService.getScriptDetail(scriptId,isOnline);
-        ScriptMsg scriptMsg = scriptService.getScriptMsg(scriptId,isOnline);
-        ScriptInfluenceName scriptInfluenceName = scriptService.getScriptInfluenceName(scriptId,isOnline);
+    private Script mergeScript(Integer scriptId, Boolean isOnline) {
+        List<ScriptNode> scriptDetail = scriptService.getScriptDetail(scriptId, isOnline);
+        ScriptMsg scriptMsg = scriptService.getScriptMsg(scriptId, isOnline);
+        ScriptInfluenceName scriptInfluenceName = scriptService.getScriptInfluenceName(scriptId, isOnline);
         Script script = new Script(scriptMsg, scriptDetail, scriptInfluenceName);
         return script;
     }
 
     @PostMapping("/play/end")
-    public Result loadEnd(@RequestBody LinkedHashMap scriptEndValue) {
-        int scriptId = (int) scriptEndValue.get("scriptId");
-        int influence1 = (int) scriptEndValue.get("influence1");
-        int influence2 = (int) scriptEndValue.get("influence2");
-        int influence3 = (int) scriptEndValue.get("influence3");
-        int influence4 = (int) scriptEndValue.get("influence4");
+    public Result loadEnd(@RequestBody Map scriptEndValue) {
+        int scriptId = (Integer) scriptEndValue.get("scriptId");
+        Integer influence1 = (Integer) scriptEndValue.get("influence1");
+        Integer influence2 = (Integer) scriptEndValue.get("influence2");
+        Integer influence3 = (Integer) scriptEndValue.get("influence3");
+        Integer influence4 = (Integer) scriptEndValue.get("influence4");
         ScriptInfluenceChange scriptInfluenceChange = new ScriptInfluenceChange(influence1, influence2, influence3, influence4);
         String scriptEnd;
         try {

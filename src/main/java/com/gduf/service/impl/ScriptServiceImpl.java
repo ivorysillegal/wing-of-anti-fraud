@@ -70,14 +70,27 @@ public class ScriptServiceImpl implements ScriptService {
     @Override
     public boolean insertOrUpdateScriptNodes(List<ScriptNode> scriptNodes) {
         for (ScriptNode scriptNode : scriptNodes) {
-//            定义 选项（choice）中的 对应的剧本id
             Integer scriptId = scriptNode.getScriptId();
             Integer nodeId = scriptNode.getNodeId();
-            scriptNode.getRightChoice().setScriptId(scriptId);
-            scriptNode.getLeftChoice().setScriptId(scriptId);
 //            构造映射对象
-            Integer leftChoiceId = scriptNode.getLeftChoice().getChoiceId();
-            Integer rightChoiceId = scriptNode.getRightChoice().getChoiceId();
+            Integer leftChoiceId;
+            Integer rightChoiceId;
+//                定义 选项（choice）中的 对应的剧本id
+            scriptNode.getLeftChoice().setScriptId(scriptId);
+            scriptNode.getRightChoice().setScriptId(scriptId);
+//            如果是结尾节点的话 getLeftChoice并不是空的 但是get到的choiceId是null的
+            leftChoiceId = scriptNode.getLeftChoice().getChoiceId();
+            rightChoiceId = scriptNode.getRightChoice().getChoiceId();
+
+            if (Objects.isNull(leftChoiceId)) {
+                scriptNode.getLeftChoice().setChoiceId(-1);
+                leftChoiceId = -1;
+            }
+            if (Objects.isNull(rightChoiceId)) {
+                scriptNode.getRightChoice().setChoiceId(-1);
+                rightChoiceId = -1;
+            }
+//            如果上传遇到结局id的时候 这里会将其id设置为-1
             ScriptNodeMsg nodeMsg = new ScriptNodeMsg(scriptNode, leftChoiceId, rightChoiceId);
             Integer nodeExist = scriptDAO.isNodeExist(scriptId, nodeId);
 //            当等于0的时候 表示不存在这个节点 此时需要新增
@@ -86,8 +99,11 @@ public class ScriptServiceImpl implements ScriptService {
                 scriptDAO.insertScriptNodeMsg(nodeMsg);
             } else {
 //                进入else条件的时候 表示已经存在了这个剧本 此时需要更新剧本的信息
+//                如果是结尾节点的话 需要一同更新结尾节点的choiceId为-1
                 scriptDAO.updateScriptNodeMsg(nodeMsg);
             }
+//            trycatch包裹 如果这个节点是结尾节点的话 是会报NullPointerException的
+//            因为结尾节点压根没有leftChoice或rightChoice
             updateChoice(scriptId, scriptNode.getLeftChoice());
             updateChoice(scriptId, scriptNode.getRightChoice());
         }
@@ -95,6 +111,10 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     private void updateChoice(Integer scriptId, ScriptChoice scriptChoice) {
+        Integer choiceId = scriptChoice.getChoiceId();
+        if (choiceId.equals(-1))
+            return;
+//        如果是结尾节点则跳过新增的环节 (结尾节点不需要新增选项)
 //        判断选项是否存在 如果存在则更新 不存在则新增
         Integer isChoiceExist = scriptDAO.isChoiceExist(scriptId, scriptChoice.getChoiceId());
         if (isChoiceExist.equals(0))
@@ -104,45 +124,53 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
-    public boolean insertOrUpdateScriptEnds(ScriptEnds scriptEnds) {
+    public Integer insertOrUpdateScriptEnds(ScriptSpecialEnd scriptSpecialEnd) {
+        ScriptEnd scriptEnd;
         try {
-            Integer scriptId = scriptEnds.getScriptId();
-            List<ScriptEnd> scriptEndsList = scriptEnds.getScriptEnd();
-//        先对特殊结局进行处理
-            for (ScriptEnd scriptEnd : scriptEndsList) {
-                Integer endId = scriptEnd.getEndId();
+            scriptEnd = scriptSpecialEnd.getScriptEnd();
+            Integer scriptId = scriptSpecialEnd.getScriptId();
+            Integer endId = scriptEnd.getEndId();
 //            如果之前没有记录过这个结局的话 传过来的endId是空的
-                if (endId == null) {
-                    scriptEnd.setScriptId(scriptId);
+            if (endId == null) {
+                scriptEnd.setScriptId(scriptId);
 //                    手动设置该结局 所属的剧本id
-                    scriptDAO.insertScriptEnd(scriptEnd);
-                } else {
+                scriptDAO.insertScriptEnd(scriptEnd);
+            } else {
 //            如果传过来的endId不为空 需要做一下判断 看一下是否存在 并且是否属于对应的剧本
-                    if (scriptDAO.selectIfEndExist(endId, scriptId) == 0)
-                        return false;
+                if (scriptDAO.selectIfEndExist(endId, scriptId) == 0)
+                    return null;
 //                如果没问题的话 对结局执行更新
-                    scriptDAO.updateScriptEnd(scriptEnd);
-                }
+                scriptDAO.updateScriptEnd(scriptEnd);
             }
 //        至此 for循环结束 特殊结局上传完毕
-            ScriptNormalEnd scriptNormalEnd = scriptEnds.getScriptNormalEnd();
-//                同上 手动设置该结局所属的剧本id
-            scriptNormalEnd.setScriptId(scriptId);
-            Integer ifScriptSpecialEndExist = 0;
-//            判断有没有normalid 如果没有的话 就代表新增
-            if (!Objects.isNull(scriptNormalEnd.getNormalEndId()))
-                ifScriptSpecialEndExist = scriptDAO.selectIfScriptNormalEndExist(scriptNormalEnd.getNormalEndId(), scriptNormalEnd.getScriptId());
+        } catch (Exception e) {
+            return null;
+        }
+        return scriptEnd.getEndId();
+    }
+
+    @Override
+    public Integer insertOrUpdateScriptNormalEnds(ScriptEnds scriptEnds) {
+        ScriptNormalEnd scriptNormalEnd = scriptEnds.getScriptNormalEnd();
+        scriptNormalEnd.setScriptId(scriptEnds.getScriptId());
+        try {
+            if (!scriptNormalEnd.isEmpty()) {
+                Integer ifScriptNormalEndExist = 0;
+                if (!Objects.isNull(scriptNormalEnd.getNormalEndId()))
+                    //            判断有没有normalid 如果没有的话 就代表新增
+                    ifScriptNormalEndExist = scriptDAO.selectIfScriptNormalEndExist(scriptNormalEnd.getNormalEndId(), scriptNormalEnd.getScriptId());
+                if (ifScriptNormalEndExist.equals(0)) {
 //        如果不存在普通结局 则新增
-            if (ifScriptSpecialEndExist.equals(0)) {
-                scriptDAO.insertScriptNormalEnd(scriptNormalEnd);
-            } else {
+                    scriptDAO.insertScriptNormalEnd(scriptNormalEnd);
+                } else {
 //            如果存在 则更新
-                scriptDAO.updateScriptNormalEnd(scriptNormalEnd);
+                    scriptDAO.updateScriptNormalEnd(scriptNormalEnd);
+                }
             }
         } catch (Exception e) {
-            return false;
+            return null;
         }
-        return true;
+        return scriptNormalEnd.getNormalEndId();
     }
 
     @Override
@@ -706,6 +734,20 @@ public class ScriptServiceImpl implements ScriptService {
         }
         ScriptEnds scriptEnds = new ScriptEnds(scriptId, scriptEndList, scriptNormalEnd);
         return scriptEnds;
+    }
+
+    @Override
+    public boolean delRepositorySpecialEnd(Integer endId) {
+        Integer scriptId = scriptDAO.getScriptIdByEndId(endId);
+        Integer scriptStatus = scriptDAO.getScriptStatus(scriptId);
+        if (!scriptStatus.equals(SCRIPT_STATUS_REPOSITORY))
+            return false;
+        try {
+            scriptDAO.delSpecialEnd(endId);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     private int decodeToId(String token) throws Exception {

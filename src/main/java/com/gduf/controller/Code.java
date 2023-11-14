@@ -166,6 +166,9 @@ public class Code {
     public static final Integer LOAD_USER_DAN_OK = 500;
     public static final Integer LOAD_USER_DAN_ERR = 531;
 
+    public static final Integer DEL_REPOSITORY_SPECIAL_END_OK = 500;
+    public static final Integer DEL_REPOSITORY_SPECIAL_END_ERR = 551;
+
     public static final Integer COMMIT_SCRIPT_OK = 900;
     public static final Integer COMMIT_SCRIPT_ERR = 909;
 
