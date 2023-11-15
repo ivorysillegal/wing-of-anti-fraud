@@ -2,7 +2,6 @@ package com.gduf.ws.websocket;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.gduf.config.GetHttpSessionConfig;
 import com.gduf.pojo.user.UserWithValue;
 import com.gduf.pojo.wikipedia.Question;
 import com.gduf.service.CompetitionService;
@@ -35,8 +34,8 @@ import static com.gduf.controller.Code.MATCH_TASK_NAME_PREFIX;
 
 @Component
 @Slf4j
-//@ServerEndpoint(value = "/competition}"
-@ServerEndpoint(value = "/competition", configurator = GetHttpSessionConfig.class)
+//@ServerEndpoint(value = "/competition")
+@ServerEndpoint(value = "/competition/{userId}")
 public class ChatWebsocket {
 
     private Session session;
@@ -49,26 +48,45 @@ public class ChatWebsocket {
 
     static Condition matchCond = lock.newCondition();
 
-    @Autowired
-    private QuestionService questionService;
+//    @Autowired
+//    private QuestionService questionService;
+//
+//    @Autowired
+//    private CompetitionService competitionService;
+//
+//    @Autowired
+//    private UserService userService;
+
+    static QuestionService questionService;
+
+    static CompetitionService competitionService;
+
+    static UserService userService;
 
     @Autowired
-    private CompetitionService competitionService;
+    public void setQuestionService(QuestionService questionService) {
+        ChatWebsocket.questionService = questionService;
+    }
 
     @Autowired
-    private UserService userService;
+    public void setQuestionService(CompetitionService competitionService) {
+        ChatWebsocket.competitionService = competitionService;
+    }
+
+    @Autowired
+    public void setQuestionService(UserService userService) {
+        ChatWebsocket.userService = userService;
+    }
 
     @Autowired
     public void setMatchCacheUtil(MatchCacheUtil matchCacheUtil) {
         ChatWebsocket.matchCacheUtil = matchCacheUtil;
     }
 
-
     @OnOpen
     public void onOpen(@PathParam("userId") String userId, Session session) {
-
+        System.out.println(session);
         log.info("ChatWebsocket open 有新连接加入 userId: {}", userId);
-
         this.userId = userId;
         this.session = session;
         matchCacheUtil.addClient(userId, this);
@@ -255,13 +273,13 @@ public class ChatWebsocket {
 //                    从room中获取对手的对象 这个receiver是对手的id
 //                    可以在这里下手脚 加一个while循环 判断直至找到相同段位的用户为止
 //                    TODO 直接在setUserMatchRoom那块 加入玩家的段位信息 需要改动工具类
-                    String userDan = competitionService.showPlayersDan(Integer.parseInt(userId));
+                    String userDan = competitionService.showPlayersExtraDan(Integer.parseInt(userId));
                     while (true) {
                         receiver = matchCacheUtil.getUserInMatchRandom(userId);
 //                        这里必须把判空放在上面 否则如果是队列中没有人在匹配 却给receiver调用了Integer.parseInt(receiver)方法 会报空指针
                         if (Objects.isNull(receiver))
                             break;
-                        else if (userDan.equals(competitionService.showPlayersDan(Integer.parseInt(receiver))))
+                        else if (userDan.equals(competitionService.showPlayersExtraDan(Integer.parseInt(receiver))))
                             break;
                     }
                     if (receiver != null) {
@@ -293,6 +311,8 @@ public class ChatWebsocket {
                     lock.unlock();
                 }
             }
+
+            log.info("已找到玩家 双方分别为" + userId + "和" + receiver);
 
             UserMatchInfo senderInfo = new UserMatchInfo();
             UserMatchInfo receiverInfo = new UserMatchInfo();

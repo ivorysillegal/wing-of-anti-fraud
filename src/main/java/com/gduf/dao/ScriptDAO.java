@@ -1,6 +1,7 @@
 package com.gduf.dao;
 
 import com.gduf.pojo.script.ScriptChoice;
+import com.gduf.pojo.script.commit.ScriptCommit;
 import com.gduf.pojo.script.mapper.ScriptEnd;
 import com.gduf.pojo.script.mapper.ScriptNode;
 import com.gduf.pojo.script.*;
@@ -166,18 +167,21 @@ public interface ScriptDAO {
     @Select("select user_id from user_played_script where user_id = #{userId} AND script_id = #{scriptId}")
     public Integer ifPlayedScript(Integer scriptId, Integer userId);
 
-    @Select("select script_id from tb_script_status where producer_id = #{producerId} AND status = 120")
+    @Select("select script_id from tb_script_status where producer_id = #{producerId}")
     public List<Integer> getScriptByProducerInRepository(Integer producerId);
 
     @Insert("insert into script_commit (script_id,user_id,commit_date) values (#{scriptId},#{userId},#{commitDate})")
     public void insertCommit(Integer scriptId, Integer userId, Date commitDate);
 
 //    更新140状态 为审核中
-    @Update("update tb_script set script_status = 140 where script_id = #{scriptId}")
+    @Update("update tb_script_status set status = 140 where script_id = #{scriptId}")
     public void updateCommitStatus(Integer scriptId);
 
     @Update("update tb_script_status set status = 100 where script_id = #{scriptId}")
     public void onlineScript(Integer scriptId);
+
+    @Update("update tb_script_status set status = 130 where script_id = #{scriptId}")
+    public void rollBackScript(Integer scriptId);
 
     @Select("select count(*)  from script_node_position where script_id = #{scriptId} AND node_id = #{nodeId}")
     public Integer checkIfNodePositionExist(Integer scriptId, Integer nodeId);
@@ -193,4 +197,13 @@ public interface ScriptDAO {
 
     @Delete("delete from tb_script_end where end_id = #{endId}")
     public void delSpecialEnd(Integer endId);
+
+    @Select("select * from script_commit where user_id = #{userId}")
+    public List<ScriptCommit> getUserCommit(Integer userId);
+
+    @Delete("delete from tb_script_node where script_id = #{scriptId} AND node_id = #{nodeId}")
+    public void delNode(Integer scriptId,Integer nodeId);
+
+    @Update("update tb_script set classification = #{classification} where script_id = #{scriptId}")
+    Integer updateScriptClassification(Integer scriptId,String classification);
 }

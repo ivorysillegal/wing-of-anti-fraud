@@ -6,11 +6,13 @@ import com.gduf.pojo.competition.UserStar;
 import com.gduf.service.CompetitionService;
 import com.gduf.util.JwtUtil;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class CompetitionServiceImpl implements CompetitionService {
 
@@ -42,8 +44,29 @@ public class CompetitionServiceImpl implements CompetitionService {
         String userDan = null;
         if (!Objects.isNull(userStars))
             userDan = calculate(userStars);
-        else
+        else {
+            competitionDAO.initializationUserStar(userId);
             return "青铜 0 星";
+        }
+        return userDan;
+    }
+
+    @Override
+    public String showPlayersExtraDan(Integer userId) {
+        Integer userStars;
+        String userDan = null;
+        try {
+            userStars = competitionDAO.showUserStar(userId);
+        } catch (Exception e) {
+            log.info("为什么呢" + e);
+            return null;
+        }
+        if (!Objects.isNull(userStars))
+            userDan = calculateExtraDan(userStars);
+        else {
+            competitionDAO.initializationUserStar(userId);
+            return "bronze";
+        }
         return userDan;
     }
 
@@ -67,6 +90,21 @@ public class CompetitionServiceImpl implements CompetitionService {
             return false;
         }
         return true;
+    }
+
+    private String calculateExtraDan(Integer score) {
+        if (between(0, 1, score))
+            return "bronze";
+        else if (between(2, 5, score))
+            return "silver";
+        else if (between(5, 10, score))
+            return "gold";
+        else if (between(10, 17, score))
+            return "platinum";
+        else if (score >= 18)
+            return "king";
+        else
+            return null;
     }
 
     private String calculate(Integer score) {

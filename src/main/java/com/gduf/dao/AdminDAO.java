@@ -1,7 +1,6 @@
 package com.gduf.dao;
 
 import com.gduf.pojo.script.commit.ScriptCommit;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -16,8 +15,8 @@ public interface AdminDAO {
     @Update("update script_commit set commit_status = -1 where commit_id = #{commitId}")
     public void rollBackCommit(Integer scriptId);
 
-    @Insert("insert into script_commit commit_msg values #{commitMsg} where commit_id = #{commitId}")
-    public void insertRollBackMsg(String commitMsg,Integer commitId);
+    @Update("update script_commit set commit_msg = #{commitMsg} where commit_id = #{commitId}")
+    public void updateCommitMsg(String commitMsg,Integer commitId);
 
     @Select("select * from script_commit")
     public List<ScriptCommit> showAllScriptCommit();

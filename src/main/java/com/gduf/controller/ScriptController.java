@@ -3,6 +3,7 @@ package com.gduf.controller;
 import com.gduf.pojo.script.mapper.*;
 import com.gduf.pojo.script.*;
 import com.gduf.service.ScriptService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,7 @@ import static com.gduf.controller.Code.*;
 
 @RestController
 @CrossOrigin
+@Slf4j
 @RequestMapping("/script")
 public class ScriptController {
 
@@ -183,5 +185,15 @@ public class ScriptController {
         else if (isScore.equals(0))
             return new Result("已经评过分 评分失败", SCRIPT_SCORE_SCORED, null);
         return new Result("评分错误", SCRIPT_SCORE_ERR, null);
+    }
+
+    @PostMapping("/node/del")
+    public Result delScriptNode(@RequestHeader String token,@RequestBody Map map){
+        Integer nodeId = (Integer) map.get("nodeId");
+        Integer scriptId = (Integer) map.get("scriptId");
+        boolean isDel = scriptService.delExtraNode(scriptId, nodeId);
+        if (isDel)
+            return new Result("节点删除成功",DEL_NODE_OK,null);
+        return new Result("节点删除失败",DEL_NODE_ERR,null);
     }
 }

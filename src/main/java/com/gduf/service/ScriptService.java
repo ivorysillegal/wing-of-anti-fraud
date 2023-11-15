@@ -1,5 +1,6 @@
 package com.gduf.service;
 
+import com.gduf.pojo.script.commit.ScriptCommit;
 import com.gduf.pojo.script.mapper.*;
 import com.gduf.pojo.script.*;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +52,7 @@ public interface ScriptService {
     //    将自己的半成品剧本分享到社区(作为帖子)
     public boolean insertScriptPost(String token, Integer scriptId);
 
-    //    根据剧本id获取到对应的剧本后 将剧本存入redis中 之后fork就直接从redis中拿
+    //    根据剧本id获取到对应的剧本后 将剧本存入mongodb中 之后fork就直接从redis中拿
     public boolean insertScriptFollower(Integer scriptId);
 
     //    将别人的半成品搞过来自己进行加工
@@ -74,4 +75,13 @@ public interface ScriptService {
 
 //    删除剧本的特殊结局
     public boolean delRepositorySpecialEnd(Integer endId);
+
+//    获取用户的审核记录
+    public List<ScriptCommit> getUserCommitRecord(String token);
+
+//    删除特定的剧本中特定的节点
+    public boolean delExtraNode(Integer scriptId,Integer nodeId);
+
+//    通过剧本id 改变剧本类别
+    public boolean modifyScriptClassification(Integer scriptId,String classification);
 }

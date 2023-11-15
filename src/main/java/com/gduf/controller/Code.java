@@ -157,6 +157,9 @@ public class Code {
     public static final Integer DEL_REPOSITORY_OK = 500;
     public static final Integer DEL_REPOSITORY_ERR = 511;
 
+    public static final Integer DEL_NODE_OK = 500;
+    public static final Integer DEL_NODE_ERR = 511;
+
     public static final Integer LOAD_REPOSITORY_ENDS_OK = 500;
     public static final Integer LOAD_REPOSITORY_ENDS_ERR = 541;
 
@@ -168,6 +171,12 @@ public class Code {
 
     public static final Integer DEL_REPOSITORY_SPECIAL_END_OK = 500;
     public static final Integer DEL_REPOSITORY_SPECIAL_END_ERR = 551;
+
+    public static final Integer USER_COMMIT_SHOW_OK = 500;
+    public static final Integer USER_COMMIT_SHOW_ERR = 561;
+
+    public static final Integer UPDATE_SCRIPT_CLASSIFICATION_OK = 500;
+    public static final Integer UPDATE_SCRIPT_CLASSIFICATION_ERR = 571;
 
     public static final Integer COMMIT_SCRIPT_OK = 900;
     public static final Integer COMMIT_SCRIPT_ERR = 909;

@@ -11,6 +11,8 @@ public interface CompetitionService {
 
     public String showPlayersDan(Integer userId);
 
+    public String showPlayersExtraDan(Integer userId);
+
     //    获取用户的星数
     public UserStar showStars(String token);
 

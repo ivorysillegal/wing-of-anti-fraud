@@ -7,6 +7,7 @@ import com.gduf.pojo.community.Post;
 import com.gduf.pojo.community.PostTheme;
 import com.gduf.pojo.community.PostTopic;
 import com.gduf.pojo.script.ScriptChoice;
+import com.gduf.pojo.script.commit.ScriptCommit;
 import com.gduf.pojo.script.mapper.*;
 import com.gduf.pojo.script.*;
 import com.gduf.pojo.script.ScriptStatus;
@@ -15,6 +16,7 @@ import com.gduf.task.RefreshScore;
 import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
 import io.jsonwebtoken.Claims;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.gduf.controller.Code.SCRIPT_STATUS_REPOSITORY;
 
+@Slf4j
 @Service
 public class ScriptServiceImpl implements ScriptService {
 
@@ -391,6 +394,9 @@ public class ScriptServiceImpl implements ScriptService {
         int userId;
         try {
             userId = decodeToId(token);
+//            如果调用此方法的是管理员用户 则代表是在审核中 不需要记录游玩操作
+            if (userId == 0)
+                return true;
             Integer ifPlayed = scriptDAO.ifPlayedScript(scriptId, userId);
 //            如果不是空的（如果在数据库有查到游玩记录）
 //            直接返回
@@ -745,6 +751,44 @@ public class ScriptServiceImpl implements ScriptService {
         try {
             scriptDAO.delSpecialEnd(endId);
         } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public List<ScriptCommit> getUserCommitRecord(String token) {
+        List<ScriptCommit> userCommit;
+        try {
+            int userId = decodeToId(token);
+            userCommit = scriptDAO.getUserCommit(userId);
+            if (Objects.isNull(userCommit))
+                return new ArrayList<>();
+//            将审核记录异常状态和空的状态区分开来
+//            异常 返回null
+//            空则 返回分配空间后的列表
+        } catch (Exception e) {
+            return null;
+        }
+        return userCommit;
+    }
+
+    @Override
+    public boolean delExtraNode(Integer scriptId, Integer nodeId) {
+        try {
+            scriptDAO.delNode(scriptId, nodeId);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean modifyScriptClassification(Integer scriptId,String classification) {
+        try {
+            scriptDAO.updateScriptClassification(scriptId,classification);
+        }catch (Exception e){
+            log.info("修改剧本类型错误");
             return false;
         }
         return true;

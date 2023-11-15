@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -38,8 +37,9 @@ public class AdminServiceImpl implements AdminService {
             } else {
 //            若不通过审核 打回剧本状态 写评语
                 adminDAO.rollBackCommit(commitId);
-                adminDAO.insertRollBackMsg(commitMsg, commitId);
+                scriptDAO.rollBackScript(scriptId);
             }
+            adminDAO.updateCommitMsg(commitMsg, commitId);
         } catch (Exception e) {
             return false;
         }
@@ -50,12 +50,11 @@ public class AdminServiceImpl implements AdminService {
     public List<ScriptCommit> showCommitScript(Integer scriptStatus) {
         //        io查数据 redis缓存加效率
         List<ScriptCommit> scriptCommits = new ArrayList<>();
-        scriptCommits = redisCache.getCacheList("scriptCommit");
+//        scriptCommits = redisCache.getCacheList("scriptCommit");
         if (scriptCommits.isEmpty()) {
             scriptCommits = adminDAO.showAllScriptCommit();
         }
-//      TODO 如果表script_status是空的话 这个地方会报redis values must not be null
-        redisCache.setCacheList("scriptCommit", scriptCommits, 10, TimeUnit.MINUTES);
+//        redisCache.setCacheList("scriptCommit", scriptCommits, 10, TimeUnit.MINUTES);
 
 //        获取对应审核状态的剧本
         List<ScriptCommit> commits = retainAccordStatus(scriptCommits, scriptStatus);

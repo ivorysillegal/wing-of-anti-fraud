@@ -1,6 +1,7 @@
 package com.gduf.controller;
 
 import com.gduf.pojo.script.ScriptMsg;
+import com.gduf.pojo.script.commit.ScriptCommit;
 import com.gduf.pojo.script.mapper.ScriptEnds;
 import com.gduf.pojo.script.mapper.ScriptNodePositionList;
 import com.gduf.service.ScriptService;
@@ -34,7 +35,6 @@ public class ScriptRepositoryController {
         Integer scriptId = (Integer) map.get("scriptId");
         boolean isInsert = scriptService.insertScriptPost(token, scriptId);
         boolean isInsertFollower = scriptService.insertScriptFollower(scriptId);
-//        现在先放入redis
         if (!isInsert)
             return new Result("分享剧本失败", SHARE_REPOSITORY_ERR, null);
         if (!isInsertFollower)
@@ -107,5 +107,25 @@ public class ScriptRepositoryController {
         if (isDel)
             return new Result("删除草稿箱剧本结局成功", DEL_REPOSITORY_SPECIAL_END_OK, null);
         return new Result("删除草稿箱剧本结局失败", DEL_REPOSITORY_SPECIAL_END_ERR, null);
+    }
+
+    @PostMapping("/record")
+    public Result showUserCommitRecord(@RequestHeader String token) {
+        List<ScriptCommit> scriptCommits = scriptService.getUserCommitRecord(token);
+        if (Objects.isNull(scriptCommits))
+            return new Result("展示草稿箱记录失败", USER_COMMIT_SHOW_ERR, null);
+        if (scriptCommits.isEmpty())
+            return new Result("草稿箱审核记录为空", USER_COMMIT_SHOW_OK, scriptCommits);
+        return new Result("展示草稿箱审核记录成功", USER_COMMIT_SHOW_OK, scriptCommits);
+    }
+
+    @PostMapping("/classification/modify")
+    public Result modifyScriptClassification(@RequestBody Map map) {
+        Integer scriptId = (Integer) map.get("scriptId");
+        String classification = (String) map.get("classification");
+        boolean isModify = scriptService.modifyScriptClassification(scriptId, classification);
+        if (isModify)
+            return new Result("修改剧本类型成功", UPDATE_SCRIPT_CLASSIFICATION_OK, null);
+        return new Result("修改剧本类型失败", UPDATE_SCRIPT_CLASSIFICATION_ERR, null);
     }
 }
