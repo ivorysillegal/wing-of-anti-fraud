@@ -15,9 +15,14 @@ import com.gduf.service.ScriptService;
 import com.gduf.task.RefreshScore;
 import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
+import com.mongodb.client.result.UpdateResult;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -44,6 +49,9 @@ public class ScriptServiceImpl implements ScriptService {
 
     @Autowired
     private UserDAO userDAO;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     //    增加剧本 （名称及id及乱七八糟）
     @Override
@@ -479,13 +487,20 @@ public class ScriptServiceImpl implements ScriptService {
     @Override
     public boolean insertScriptFollower(Integer scriptId) {
         ScriptWithEnd script = getScript(scriptId);
-        //            这里的script是 复制之前的 原来的剧本的标识 利用它找到整个对象
-        Integer formalProducerId = scriptDAO.getProducerId(scriptId);
-        String username = userDAO.getUsername(formalProducerId);
-
-
-        redisCache.setCacheObject("script" + scriptId, new ScriptWithProducer(script, username));
+//            这里的script是 复制之前的 原来的剧本的标识 利用它找到整个对象
+        upsertScript(script,scriptId);
+//        将分享剧本的数据由redis迁移至mongodb
+//        redisCache.setCacheObject("script" + scriptId, new ScriptWithProducer(script, username));
         return true;
+    }
+
+    public void upsertScript(ScriptWithEnd script, Integer scriptId) {
+        WholeScript wholeScript = new WholeScript(script, scriptId);
+        Query query = new Query(Criteria.where("scriptId").is(scriptId));
+        Update update = new Update().set("wholeScript", wholeScript);
+        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, WholeScript.class);
+        if (updateResult.getModifiedCount() == 0)
+            mongoTemplate.insert(wholeScript);
     }
 
     //    此方法包装剧本信息 成为帖子格式
@@ -519,9 +534,11 @@ public class ScriptServiceImpl implements ScriptService {
     public boolean forkToRepository(String token, Integer scriptId) {
         try {
             int forkUserId = decodeToId(token);
-            ScriptWithProducer scriptWithProducer = new ScriptWithProducer();
-            scriptWithProducer = redisCache.getCacheObject("script" + scriptId);
-            ScriptWithEnd scriptWithEnd = scriptWithProducer.getScriptWithEnd();
+//            由redis迁移至mongodb
+            Query query = new Query(Criteria.where("scriptId").is(scriptId));
+            List<WholeScript> wholeScripts = mongoTemplate.find(query, WholeScript.class);
+            WholeScript wholeScript = wholeScripts.get(0);
+            ScriptWithEnd scriptWithEnd = wholeScript.getScriptWithEnd();
 
 //            TODO 这个地方可以返回共创人
             //    这个方法主要是清空得到的对象中残留的scriptId 其实可以直接使用反射来做。。但是不太好
@@ -784,10 +801,10 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
-    public boolean modifyScriptClassification(Integer scriptId,String classification) {
+    public boolean modifyScriptClassification(Integer scriptId, String classification) {
         try {
-            scriptDAO.updateScriptClassification(scriptId,classification);
-        }catch (Exception e){
+            scriptDAO.updateScriptClassification(scriptId, classification);
+        } catch (Exception e) {
             log.info("修改剧本类型错误");
             return false;
         }
