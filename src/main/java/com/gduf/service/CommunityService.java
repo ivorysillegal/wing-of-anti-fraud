@@ -3,6 +3,7 @@ package com.gduf.service;
 import com.gduf.pojo.community.Post;
 import com.gduf.pojo.community.PostAbout;
 import com.gduf.pojo.community.PostWithComments;
+import com.gduf.pojo.community.ScriptPost;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface CommunityService {
 
     public List<Post> showPostByTag(PostAbout postAbout);
 
-    public List<Post> showScriptPost();
+    public List<ScriptPost> showScriptPost();
 
     public boolean insertPost(Post post,String token);
 

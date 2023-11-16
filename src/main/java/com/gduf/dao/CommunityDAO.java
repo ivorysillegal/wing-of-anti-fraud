@@ -15,6 +15,12 @@ public interface CommunityDAO {
     @Options(useGeneratedKeys = true, keyProperty = "postId")
     public void insertPost(Post post);
 
+    @Insert("insert into script_post_id (post_id,script_id) values (#{postId},#{scriptId})")
+    public void insertScriptPostRecord(Integer postId,Integer scriptId);
+
+    @Select("select script_id from script_post_id where post_id = #{postId}")
+    public Integer showScriptPostRecord(Integer postId);
+
     @Insert("insert into post_theme (post_id,is_experience,is_ask,is_script) values (#{postId},#{isExperience},#{isAsk},#{isScript})")
     public void insertPostTheme(PostTheme postTheme);
 

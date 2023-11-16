@@ -1,13 +1,17 @@
 package com.gduf.controller;
 
+import com.gduf.pojo.script.ScriptInfluenceChange;
+import com.gduf.pojo.script.ScriptInfluenceName;
+import com.gduf.pojo.script.ScriptMsg;
 import com.gduf.pojo.script.mapper.*;
-import com.gduf.pojo.script.*;
 import com.gduf.service.ScriptService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.gduf.controller.Code.*;
 
@@ -181,19 +185,19 @@ public class ScriptController {
         Integer scriptId = (Integer) map.get("scriptId");
         Integer isScore = scriptService.scoreScript(token, score, scriptId);
         if (isScore.equals(1))
-            return new Result("投票成功", SCRIPT_SCORE_OK, null);
+            return new Result("评分成功", SCRIPT_SCORE_OK, null);
         else if (isScore.equals(0))
             return new Result("已经评过分 评分失败", SCRIPT_SCORE_SCORED, null);
         return new Result("评分错误", SCRIPT_SCORE_ERR, null);
     }
 
     @PostMapping("/node/del")
-    public Result delScriptNode(@RequestHeader String token,@RequestBody Map map){
+    public Result delScriptNode(@RequestHeader String token, @RequestBody Map map) {
         Integer nodeId = (Integer) map.get("nodeId");
         Integer scriptId = (Integer) map.get("scriptId");
         boolean isDel = scriptService.delExtraNode(scriptId, nodeId);
         if (isDel)
-            return new Result("节点删除成功",DEL_NODE_OK,null);
-        return new Result("节点删除失败",DEL_NODE_ERR,null);
+            return new Result("节点删除成功", DEL_NODE_OK, null);
+        return new Result("节点删除失败", DEL_NODE_ERR, null);
     }
 }

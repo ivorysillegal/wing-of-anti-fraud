@@ -10,10 +10,7 @@ import com.gduf.service.UserService;
 import com.gduf.ws.entity.*;
 import com.gduf.ws.error.GameServerError;
 import com.gduf.ws.exception.GameServerException;
-import com.gduf.ws.utils.MatchCacheUtil;
-import com.gduf.ws.utils.MessageCode;
-import com.gduf.ws.utils.MessageTypeEnum;
-import com.gduf.ws.utils.StatusEnum;
+import com.gduf.ws.utils.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +19,7 @@ import org.springframework.stereotype.Component;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,20 +42,13 @@ public class ChatWebsocket {
 
     static Condition matchCond = lock.newCondition();
 
-//    @Autowired
-//    private QuestionService questionService;
-//
-//    @Autowired
-//    private CompetitionService competitionService;
-//
-//    @Autowired
-//    private UserService userService;
-
     static QuestionService questionService;
 
     static CompetitionService competitionService;
 
     static UserService userService;
+
+    static AnswerSituationUtil answerSituationUtil;
 
     @Autowired
     public void setQuestionService(QuestionService questionService) {
@@ -81,6 +68,11 @@ public class ChatWebsocket {
     @Autowired
     public void setMatchCacheUtil(MatchCacheUtil matchCacheUtil) {
         ChatWebsocket.matchCacheUtil = matchCacheUtil;
+    }
+
+    @Autowired
+    public void setAnswerSituationUtil(AnswerSituationUtil answerSituationUtil){
+        ChatWebsocket.answerSituationUtil = answerSituationUtil;
     }
 
     @OnOpen
@@ -348,8 +340,8 @@ public class ChatWebsocket {
 
             UserWithValue receiverValue = userService.showUser(Integer.parseInt(receiver));
             String receiverUsername = receiverValue.getUser().getUsername();
+            String opponentPic = receiverValue.getUserValue().getPic();
             gameMatchInfo.setOpponentUsername(receiverUsername);
-            String opponentPic = userWithValue.getUserValue().getPic();
             gameMatchInfo.setOpponentPicAvatar(opponentPic);
 
             messageReply.setCode(MessageCode.SUCCESS.getCode());
@@ -364,8 +356,9 @@ public class ChatWebsocket {
             messageReply.setChatMessage(result);
             sendMessageAll(messageReply);
 
-            gameMatchInfo.setSelfInfo(receiverInfo);
-            gameMatchInfo.setOpponentInfo(senderInfo);
+//            自己的传给自己的 对面的传给对面的
+            gameMatchInfo.setSelfInfo(senderInfo);
+            gameMatchInfo.setOpponentInfo(receiverInfo);
 
             result.setData(gameMatchInfo);
             set.clear();
@@ -427,7 +420,12 @@ public class ChatWebsocket {
 //        获取新的得分 并且重新赋值给当前的user   (当前的user就是得分的那个)
         UserMatchChoice userMatchChoice = jsonObject.getObject("data", UserMatchChoice.class);
         Integer newScore = userMatchChoice.getUserScore();
-        Integer userSelectedAnswerIndex = userMatchChoice.getUserSelectedAnswerIndex();
+        String userSelectedAnswer = userMatchChoice.getUserSelectedAnswer();
+
+//        获取answerSituation对象 此对象中是所有正在游戏中的用户的回答信息 暂时存在这里
+//        TODO 迁移到redis中
+        answerSituationUtil.addAnswer(userId,userSelectedAnswer);
+
         UserMatchInfo userMatchInfo = new UserMatchInfo();
         userMatchInfo.setUserId(userId);
         userMatchInfo.setScore(newScore);
@@ -439,7 +437,7 @@ public class ChatWebsocket {
 
 //        设置响应数据的类型
 //        更新 同时发送对面所选的选项
-        result.setData(new ScoreSelectedInfo(userMatchInfo, userSelectedAnswerIndex));
+        result.setData(new ScoreSelectedInfo(userMatchInfo, userSelectedAnswer));
 //        result.setData(userMatchInfo);
         messageReply.setCode(MessageCode.SUCCESS.getCode());
         messageReply.setDesc(MessageCode.SUCCESS.getDesc());
@@ -459,10 +457,10 @@ public class ChatWebsocket {
         log.info("ChatWebsocket gameover 用户对局结束 userId: {}, message: {}", userId, jsonObject.toJSONString());
 
 //        设置响应数据类型
-        MessageReply<UserMatchInfo> messageReply = new MessageReply<>();
+        MessageReply<AnswerSituation> messageReply = new MessageReply<>();
 
 //        设置响应数据 改变玩家的状态
-        ChatMessage<UserMatchInfo> result = new ChatMessage<>();
+        ChatMessage<AnswerSituation> result = new ChatMessage<>();
         result.setSender(userId);
         String receiver = matchCacheUtil.getUserFromRoom(userId);
         result.setType(MessageTypeEnum.GAME_OVER);
@@ -483,8 +481,8 @@ public class ChatWebsocket {
                 }
 
 //                获取对战后的对战信息
-                String userMatchInfo = matchCacheUtil.getUserMatchInfo(userId);
-                result.setData(JSON.parseObject(userMatchInfo, UserMatchInfo.class));
+                AnswerSituation selfAnswer = answerSituationUtil.getAnswer(userId);
+                result.setData(selfAnswer);
 //                设置完结后的返回信息
                 messageReply.setChatMessage(result);
                 Set<String> set = new HashSet<>();
@@ -492,8 +490,8 @@ public class ChatWebsocket {
                 result.setReceivers(set);
                 sendMessageAll(messageReply);
 
-                String receiverMatchInfo = matchCacheUtil.getUserMatchInfo(receiver);
-                result.setData(JSON.parseObject(receiverMatchInfo, UserMatchInfo.class));
+                AnswerSituation opponentAnswer = answerSituationUtil.getAnswer(receiver);
+                result.setData(opponentAnswer);
                 messageReply.setChatMessage(result);
                 set.clear();
                 set.add(userId);
@@ -503,6 +501,10 @@ public class ChatWebsocket {
 //                移除属于游戏中的游戏信息
                 matchCacheUtil.removeUserMatchInfo(userId);
                 matchCacheUtil.removeUserFromRoom(userId);
+
+//                移除属于这一次的游戏选择信息
+                answerSituationUtil.removeAnswer(userId);
+                answerSituationUtil.removeAnswer(receiver);
             }
         } finally {
             lock.unlock();

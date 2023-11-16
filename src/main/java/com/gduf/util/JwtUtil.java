@@ -89,18 +89,7 @@ public class JwtUtil {
     }
 
     public static void main(String[] args) throws Exception {
-//        String token = "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjYWM2ZDVhZi1mNjVlLTQ0MDAtYjcxMi0zYWEwOGIyOTIwYjQiLCJzdWIiOiJzZyIsImlzcyI6InNnIiwiaWF0IjoxNjM4MTA2NzEyLCJleHAiOjE2MzgxMTAzMTJ9.JVsSbkP94wuczb4QryQbAke3ysBDIL5ou8fWsbt_ebg";
-//        Claims claims = parseJWT(token);
-//        System.out.println(claims);
-//        String jwt = createJWT("0");
-//        System.out.println(jwt);
-//        Claims x = parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhMzJkYTM2ZTYxY2I0MjJiOTc3NmY5ODJmNTk5Njg4ZCIsInN1YiI6IjAiLCJpc3MiOiJzZyIsImlhdCI6MTY5NzYzODg1OH0.5-zD7hDvC-iCWyqMyNMlmdF8XTkBx8HvuQ8NtyUD5F8");
-//        System.out.println(x.getSubject());
-//        System.out.println(parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhMzJkYTM2ZTYxY2I0MjJiOTc3NmY5ODJmNTk5Njg4ZCIsInN1YiI6IjAiLCJpc3MiOiJzZyIsImlhdCI6MTY5NzYzODg1OH0.5-zD7hDvC-iCWyqMyNMlmdF8XTkBx8HvuQ8NtyUD5F8"));
-//        System.out.println(createJWT("2"));
-//        System.out.println(parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI3MzFmMWIyZjgxMTA0NjAwODgyZTNkOGNiZTg5NzM2MCIsInN1YiI6IjIiLCJpc3MiOiJzZyIsImlhdCI6MTY5ODI5NzMxM30.OuRRp77ZEvq1pKrHMQWrBxrwIySmvVXCH8Iah101fy4"));
-//        System.out.println(parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI0MTQyNTg1OTU2YzU0YzFjYmI0YzY4YWJhNjdiY2ExOCIsInN1YiI6IjIiLCJpc3MiOiJzZyIsImlhdCI6MTY5ODMxODI5NX0.9MXAGV42SWYKN6iJ4oNzmaGVsMKbmg3KF05qandUn64"));
-        System.out.println(parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJhMzJkYTM2ZTYxY2I0MjJiOTc3NmY5ODJmNTk5Njg4ZCIsInN1YiI6IjAiLCJpc3MiOiJzZyIsImlhdCI6MTY5NzYzODg1OH0.5-zD7hDvC-iCWyqMyNMlmdF8XTkBx8HvuQ8NtyUD5F8"));
+      System.out.println(parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIxYWI0MDJiOTNiZDk0MmQzOTM2NWRlMWQzN2Y2N2NkNiIsInN1YiI6IjIiLCJpc3MiOiJzZyIsImlhdCI6MTcwMDA4ODU1MH0.4kgDWbIfIGFe9PHdIfT7VgSfOs_k7-c_zBEJy1jDq2g"));
     }
 
     /**

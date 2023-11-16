@@ -15,6 +15,7 @@ import com.gduf.service.ScriptService;
 import com.gduf.task.RefreshScore;
 import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
+import com.gduf.util.SensitiveWordFilterUtils;
 import com.mongodb.client.result.UpdateResult;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
@@ -53,10 +54,17 @@ public class ScriptServiceImpl implements ScriptService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    @Autowired
+    private SensitiveWordFilterUtils sensitiveWordFilterUtils;
+
     //    增加剧本 （名称及id及乱七八糟）
     @Override
     public ScriptMsg insertOrUpdateScript(ScriptMsg scriptMsg, ScriptInfluenceName scriptInfluenceName) {
         ScriptMsg script = scriptDAO.getScriptById(scriptMsg.getScriptId());
+
+//        处理敏感词
+        scriptMsg = sensitiveWordFilterUtils.sensitiveWordFilter(scriptMsg);
+        scriptInfluenceName = sensitiveWordFilterUtils.sensitiveWordFilter(scriptInfluenceName);
 
         try {
             if (Objects.isNull(script)) {
@@ -81,6 +89,9 @@ public class ScriptServiceImpl implements ScriptService {
     @Override
     public boolean insertOrUpdateScriptNodes(List<ScriptNode> scriptNodes) {
         for (ScriptNode scriptNode : scriptNodes) {
+
+            scriptNode = sensitiveWordFilterUtils.sensitiveWordFilter(scriptNode);
+
             Integer scriptId = scriptNode.getScriptId();
             Integer nodeId = scriptNode.getNodeId();
 //            构造映射对象
@@ -139,6 +150,8 @@ public class ScriptServiceImpl implements ScriptService {
         ScriptEnd scriptEnd;
         try {
             scriptEnd = scriptSpecialEnd.getScriptEnd();
+            scriptEnd = sensitiveWordFilterUtils.sensitiveWordFilter(scriptEnd);
+
             Integer scriptId = scriptSpecialEnd.getScriptId();
             Integer endId = scriptEnd.getEndId();
 //            如果之前没有记录过这个结局的话 传过来的endId是空的
@@ -162,7 +175,10 @@ public class ScriptServiceImpl implements ScriptService {
 
     @Override
     public Integer insertOrUpdateScriptNormalEnds(ScriptEnds scriptEnds) {
+//        敏感此过滤
         ScriptNormalEnd scriptNormalEnd = scriptEnds.getScriptNormalEnd();
+        scriptNormalEnd = sensitiveWordFilterUtils.sensitiveWordFilter(scriptNormalEnd);
+
         scriptNormalEnd.setScriptId(scriptEnds.getScriptId());
         try {
             if (!scriptNormalEnd.isEmpty()) {
@@ -190,9 +206,9 @@ public class ScriptServiceImpl implements ScriptService {
             int producerId = decodeToId(token);
             Integer status = scriptDAO.selectIfScriptExist(producerId, scriptId);
             if (!Objects.isNull(status) && status.equals(100)) {
-//                TODO 存在当前剧本时（更新已上架剧本的操作的默认逻辑）TBD
+//          存在当前剧本时（更新已上架剧本的操作的默认逻辑）暂无
             } else if (!Objects.isNull(status) && status.equals(120)) {
-//                TODO 存在当前剧本时（更新草稿箱剧本的操作的默认逻辑）TBD
+//          存在当前剧本时（更新草稿箱剧本的操作的默认逻辑）暂无
             } else {
 //                进入else语句则表示没有当前的剧本的状态
                 ScriptStatus defaultScriptStatus = new ScriptStatus(scriptId, producerId);
@@ -261,7 +277,7 @@ public class ScriptServiceImpl implements ScriptService {
         HashMap<Integer, Integer> eachOnLineScriptScore = refreshScore.getScore();
         for (ScriptMsg scriptMsg : scriptMsgsInClassification) {
             Integer scriptStatus = scriptDAO.getScriptStatus(scriptMsg.getScriptId());
-            if (scriptStatus.equals(120))
+            if (scriptStatus.equals(SCRIPT_STATUS_REPOSITORY))
                 continue;
             Integer score = eachOnLineScriptScore.get(scriptMsg.getScriptId());
             ScriptWithScore scriptWithScore = new ScriptWithScore(scriptMsg, score);
@@ -471,6 +487,8 @@ public class ScriptServiceImpl implements ScriptService {
             communityDAO.insertPost(post);
             Integer postId = post.getPostId();
 
+            communityDAO.insertScriptPostRecord(postId, scriptId);
+
             PostTheme postTheme = new PostTheme(1);
             postTheme.setPostId(postId);
             communityDAO.insertPostTheme(postTheme);
@@ -488,7 +506,7 @@ public class ScriptServiceImpl implements ScriptService {
     public boolean insertScriptFollower(Integer scriptId) {
         ScriptWithEnd script = getScript(scriptId);
 //            这里的script是 复制之前的 原来的剧本的标识 利用它找到整个对象
-        upsertScript(script,scriptId);
+        upsertScript(script, scriptId);
 //        将分享剧本的数据由redis迁移至mongodb
 //        redisCache.setCacheObject("script" + scriptId, new ScriptWithProducer(script, username));
         return true;
@@ -550,6 +568,7 @@ public class ScriptServiceImpl implements ScriptService {
 //            加进去之后 由于在DAO层语句中 设置了回显主键 此时的scriptMsg是有自己独立的scriptId的
             forkRepository(scriptMsg.getScriptId(), forkUserId, setScriptId(scriptWithEnd, scriptMsg.getScriptId()));
         } catch (Exception e) {
+            log.info(e.toString());
             return false;
         }
         return true;

@@ -3,6 +3,7 @@ package com.gduf.controller;
 import com.gduf.pojo.community.Post;
 import com.gduf.pojo.community.PostAbout;
 import com.gduf.pojo.community.PostWithComments;
+import com.gduf.pojo.community.ScriptPost;
 import com.gduf.pojo.user.User;
 import com.gduf.service.CommunityService;
 import com.gduf.util.JwtUtil;
@@ -42,7 +43,7 @@ public class CommunityController {
 
     @GetMapping("/script")
     public Result showScriptPost(){
-        List<Post> posts;
+        List<ScriptPost> posts;
         try {
             posts = communityService.showScriptPost();
         }catch (Exception e){

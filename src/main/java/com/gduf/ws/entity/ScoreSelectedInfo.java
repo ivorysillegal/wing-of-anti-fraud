@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ScoreSelectedInfo {
     private UserMatchInfo userMatchInfo;
-    private Integer userSelectedAnswerIndex;
+    private String userSelectedAnswer;
 }

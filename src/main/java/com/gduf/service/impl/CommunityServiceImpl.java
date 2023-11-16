@@ -7,6 +7,7 @@ import com.gduf.pojo.user.User;
 import com.gduf.service.CommunityService;
 import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
+import com.gduf.util.SensitiveWordFilterUtils;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,9 @@ public class CommunityServiceImpl implements CommunityService {
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired
+    private SensitiveWordFilterUtils sensitiveWordFilterUtils;
+
     @Override
     public List<Post> showAllPost() {
         List<Post> posts = new ArrayList<>();
@@ -53,7 +57,8 @@ public class CommunityServiceImpl implements CommunityService {
             String username = userDAO.getUsername(userId);
             String pic = userDAO.getPic(userId);
             if (Objects.isNull(pic))
-                pic = DEFAULT_PIC;;
+                pic = DEFAULT_PIC;
+            ;
             comment.setPic(pic);
             comment.setUserName(username);
             retComments.add(comment);
@@ -93,12 +98,14 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public List<Post> showScriptPost() {
+    public List<ScriptPost> showScriptPost() {
         List<Integer> scriptPostId = communityDAO.showScriptPostId();
-        ArrayList<Post> posts = new ArrayList<>();
+        ArrayList<ScriptPost> posts = new ArrayList<>();
         for (Integer id : scriptPostId) {
+            Integer scriptId = communityDAO.showScriptPostRecord(id);
             Post post = communityDAO.showPostById(id);
-            posts.add(post);
+            ScriptPost scriptPost = new ScriptPost(post, scriptId);
+            posts.add(scriptPost);
         }
         return posts;
     }
@@ -106,7 +113,8 @@ public class CommunityServiceImpl implements CommunityService {
     @Override
     public boolean insertPost(Post post, String token) {
         try {
-//            User user = JwtUtil.decode(token);
+            post = sensitiveWordFilterUtils.sensitiveWordFilter(post);
+//            在新增帖子的时候 使用敏感词过滤 将敏感词换成*
             User user = decode(token);
             post.setWriterId(user.getUserId());
             communityDAO.insertPost(post);
@@ -170,6 +178,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     @Override
     public void insertComment(String commentMsg, Integer postId, Integer userId) {
+        commentMsg = sensitiveWordFilterUtils.sensitiveWordFilter(commentMsg);
         communityDAO.insertComment(commentMsg, postId, userId);
         communityDAO.updateCommentsInCommunity(postId);
     }
