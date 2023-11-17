@@ -59,6 +59,10 @@ public interface CommunityDAO {
     @Update("update tb_post set likes = (likes + 1) where post_id = #{postId}")
     public void updateLikesInCommunity(Integer postId);
 
+    //    当点赞的时候 更新社区表中点赞数量
+    @Update("update tb_post set likes = (likes - 1) where post_id = #{postId}")
+    public void reduceLikesInCommunity(Integer postId);
+
     //    更新收藏
     @Update("update tb_post set stars = (stars + 1) where post_id = #{postId}")
     public void updateStarsInCommunity(Integer postId);
@@ -88,4 +92,10 @@ public interface CommunityDAO {
 
     @Select("select * from tb_comment where user_id = #{userId}")
     public List<Comment> showCommentById(Integer userId);
+
+    @Select("select count(*) from user_like_posts where user_id = #{userId} AND post_id = #{postId}")
+    public Integer checkIsLikePost(Integer userId,Integer postId);
+
+    @Delete("delete from user_like_posts where user_id = #{userId} AND post_id = #{postId}")
+    public void cancelLikePost(Integer userId,Integer postId);
 }

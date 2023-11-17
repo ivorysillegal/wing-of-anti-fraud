@@ -42,11 +42,11 @@ public class CommunityController {
     }
 
     @GetMapping("/script")
-    public Result showScriptPost(){
+    public Result showScriptPost() {
         List<ScriptPost> posts;
         try {
             posts = communityService.showScriptPost();
-        }catch (Exception e){
+        } catch (Exception e) {
             return new Result("获取帖子失败", SHOW_POST_ERR, null);
         }
         return new Result("获取帖子成功", SHOW_POST_OK, posts);
@@ -98,18 +98,30 @@ public class CommunityController {
         } else return new Result("上传帖子失败", INSERT_POST_ERR, null);
     }
 
+    @PostMapping("/like/is")
+    public Result IsLikePost(@RequestHeader String token, @RequestBody Map map) {
+        Integer postId = (Integer) map.get("postId");
+        try {
+            boolean isLike = communityService.checkIsLike(token, postId);
+            if (isLike)
+                return new Result("用户已经点赞过", COMMUNITY_LIKE_LIKED, null);
+        } catch (Exception e) {
+            return new Result("系统错误", COMMUNITY_LIKE_ERR, null);
+        }
+        return new Result("用户还未点赞过", COMMUNITY_LIKE_NEVER, null);
+    }
+
     //    点赞功能
-//    TODO 增加取消点赞功能
 //    业务层增加判断是否点赞过就好 若未点赞过则点赞 点赞过则取消
     @PostMapping("/like")
     public Result like(@RequestHeader String token, @RequestBody Map<String, Integer> likes) {
         try {
             Integer postId = likes.get("postId");
-//            User user = JwtUtil.decode(token);
             User user = decode(token);
-            System.out.println(123456);
-            communityService.insertLike(user.getUserId(), postId);
-            System.out.println(123);
+            Integer isLike = communityService.insertLike(user.getUserId(), postId);
+            if (isLike.equals(2)) {
+                return new Result("取消点赞成功", COMMUNITY_LIKE_CANCEL_OK, null);
+            }
         } catch (Exception e) {
             return new Result("点赞失败", COMMUNITY_LIKE_ERR, null);
         }
@@ -162,7 +174,7 @@ public class CommunityController {
         return new Result("点赞评论成功", COMMUNITY_COMMENT_LIKE_OK, null);
     }
 
-//    展示帖子主要内容
+    //    展示帖子主要内容
     @PostMapping("/main")
     public Result showPost(@RequestBody Map<String, Integer> map) {
         Integer postId = map.get("postId");

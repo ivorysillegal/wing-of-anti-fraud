@@ -89,6 +89,10 @@ public class Code {
 
     public static final Integer COMMUNITY_LIKE_OK = 300;
     public static final Integer COMMUNITY_LIKE_ERR = 321;
+    public static final Integer COMMUNITY_LIKE_CANCEL_OK = 322;
+
+    public static final Integer COMMUNITY_LIKE_LIKED = 300;
+    public static final Integer COMMUNITY_LIKE_NEVER = 321;
 
     public static final Integer COMMUNITY_STAR_OK = 300;
     public static final Integer COMMUNITY_STAR_ERR = 321;

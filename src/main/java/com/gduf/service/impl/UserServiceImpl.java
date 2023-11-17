@@ -13,9 +13,6 @@ import com.gduf.service.UserService;
 import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
 import io.jsonwebtoken.Claims;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -55,22 +52,32 @@ public class UserServiceImpl implements UserService {
     @Override
     public String login(String username, String password) {
 
-        Subject subject = SecurityUtils.getSubject();
-        UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(username,password);
-        subject.login(usernamePasswordToken);
+//        Subject subject = SecurityUtils.getSubject();
+//        UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(username, password.toCharArray());
+//
+//        subject.login(usernamePasswordToken);
+//        AuthenticationInfo authInfo = subject.getPrincipals().oneByType(AuthenticationInfo.class);
+
+//        User user = null;
+//        Integer userId;
+//        if (authInfo != null) {
+//            user = (User) authInfo.getPrincipals().getPrimaryPrincipal();
+//            userId = user.getUserId();
+//        } else
+//            return null;
 
         User user = userDAO.getByUsername(username);
         if (user != null) {
-//            if (!user.getPassword().equals(JwtUtil.createJWT(password))) {
             if (!user.getPassword().equals(password))
                 return null;
-
+//
             Integer userId = user.getUserId();
+
 //        生成token
-            String jwt = JwtUtil.createJWT(String.valueOf(userId));
+        String jwt = JwtUtil.createJWT(String.valueOf(userId));
 //        存入redis
-            redisCache.setCacheObject("login" + userId, user);
-            return jwt;
+        redisCache.setCacheObject("login" + userId, user);
+        return jwt;
         } else return null;
     }
 
@@ -304,11 +311,8 @@ public class UserServiceImpl implements UserService {
                 scripts.add(script);
             }
         }
-        redisCache.setCacheList("userPlayedScripts" + userId, scripts);
+        redisCache.setCacheList("userPlayedScripts" + userId, scripts,5,TimeUnit.MINUTES,false);
         return scripts;
     }
 
 }
-
-
-

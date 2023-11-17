@@ -24,7 +24,9 @@ public interface CommunityService {
 
     public boolean insertPostAbout(PostAbout postAbout);
 
-    public void insertLike(Integer userId,Integer postId);
+    public Integer insertLike(Integer userId,Integer postId);
+
+    public boolean checkIsLike(String token,Integer postId);
 
     public void insertStar(Integer userId,Integer postId);
 

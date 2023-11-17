@@ -30,6 +30,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.gduf.controller.Code.SCRIPT_STATUS_OK;
 import static com.gduf.controller.Code.SCRIPT_STATUS_REPOSITORY;
 
 @Slf4j
@@ -63,8 +64,8 @@ public class ScriptServiceImpl implements ScriptService {
         ScriptMsg script = scriptDAO.getScriptById(scriptMsg.getScriptId());
 
 //        处理敏感词
-        scriptMsg = sensitiveWordFilterUtils.sensitiveWordFilter(scriptMsg);
-        scriptInfluenceName = sensitiveWordFilterUtils.sensitiveWordFilter(scriptInfluenceName);
+//        scriptMsg = sensitiveWordFilterUtils.sensitiveWordFilter(scriptMsg);
+//        scriptInfluenceName = sensitiveWordFilterUtils.sensitiveWordFilter(scriptInfluenceName);
 
         try {
             if (Objects.isNull(script)) {
@@ -90,7 +91,7 @@ public class ScriptServiceImpl implements ScriptService {
     public boolean insertOrUpdateScriptNodes(List<ScriptNode> scriptNodes) {
         for (ScriptNode scriptNode : scriptNodes) {
 
-            scriptNode = sensitiveWordFilterUtils.sensitiveWordFilter(scriptNode);
+//            scriptNode = sensitiveWordFilterUtils.sensitiveWordFilter(scriptNode);
 
             Integer scriptId = scriptNode.getScriptId();
             Integer nodeId = scriptNode.getNodeId();
@@ -150,8 +151,7 @@ public class ScriptServiceImpl implements ScriptService {
         ScriptEnd scriptEnd;
         try {
             scriptEnd = scriptSpecialEnd.getScriptEnd();
-            scriptEnd = sensitiveWordFilterUtils.sensitiveWordFilter(scriptEnd);
-
+//            scriptEnd = sensitiveWordFilterUtils.sensitiveWordFilter(scriptEnd);
             Integer scriptId = scriptSpecialEnd.getScriptId();
             Integer endId = scriptEnd.getEndId();
 //            如果之前没有记录过这个结局的话 传过来的endId是空的
@@ -177,7 +177,7 @@ public class ScriptServiceImpl implements ScriptService {
     public Integer insertOrUpdateScriptNormalEnds(ScriptEnds scriptEnds) {
 //        敏感此过滤
         ScriptNormalEnd scriptNormalEnd = scriptEnds.getScriptNormalEnd();
-        scriptNormalEnd = sensitiveWordFilterUtils.sensitiveWordFilter(scriptNormalEnd);
+//        scriptNormalEnd = sensitiveWordFilterUtils.sensitiveWordFilter(scriptNormalEnd);
 
         scriptNormalEnd.setScriptId(scriptEnds.getScriptId());
         try {
@@ -256,7 +256,9 @@ public class ScriptServiceImpl implements ScriptService {
     @Override
     public List<ScriptWithScore> getAllScriptOnline() {
         List<Integer> onlineScriptId = scriptDAO.selectScriptOnline();
-        HashMap<Integer, Integer> eachOnLineScriptScore = refreshScore.getScore();
+//        HashMap<Integer, Integer> eachOnLineScriptScore = refreshScore.getScore();
+
+        HashMap<Integer, Integer> eachOnLineScriptScore = fakeScore();
         ArrayList<ScriptWithScore> scriptWithScores = new ArrayList<>();
         for (Integer id : onlineScriptId) {
             ScriptMsg scriptById = scriptDAO.getScriptById(id);
@@ -267,6 +269,19 @@ public class ScriptServiceImpl implements ScriptService {
         return scriptWithScores;
     }
 
+    //    测试专用
+    private HashMap<Integer, Integer> fakeScore() {
+        HashMap<Integer, Integer> eachOnLineScriptScore = new HashMap<>();
+        eachOnLineScriptScore.put(1, 5);
+        eachOnLineScriptScore.put(2, 3);
+        eachOnLineScriptScore.put(3, 4);
+        eachOnLineScriptScore.put(4, 4);
+        eachOnLineScriptScore.put(5, 5);
+        eachOnLineScriptScore.put(6, 2);
+        return eachOnLineScriptScore;
+    }
+
+
     @Override
     public List<ScriptWithScore> getScriptByClassification(String classification) {
         boolean isClassification = checkClassificationLegality(classification);
@@ -274,10 +289,14 @@ public class ScriptServiceImpl implements ScriptService {
         if (!isClassification)
             return null;
         List<ScriptMsg> scriptMsgsInClassification = scriptDAO.getScriptMsgByClassification(classification);
-        HashMap<Integer, Integer> eachOnLineScriptScore = refreshScore.getScore();
+//        HashMap<Integer, Integer> eachOnLineScriptScore = refreshScore.getScore();
+        HashMap<Integer, Integer> eachOnLineScriptScore = fakeScore();
+
         for (ScriptMsg scriptMsg : scriptMsgsInClassification) {
             Integer scriptStatus = scriptDAO.getScriptStatus(scriptMsg.getScriptId());
-            if (scriptStatus.equals(SCRIPT_STATUS_REPOSITORY))
+            if (Objects.isNull(scriptStatus))
+                continue;
+            if (!scriptStatus.equals(SCRIPT_STATUS_OK))
                 continue;
             Integer score = eachOnLineScriptScore.get(scriptMsg.getScriptId());
             ScriptWithScore scriptWithScore = new ScriptWithScore(scriptMsg, score);
@@ -507,6 +526,7 @@ public class ScriptServiceImpl implements ScriptService {
         ScriptWithEnd script = getScript(scriptId);
 //            这里的script是 复制之前的 原来的剧本的标识 利用它找到整个对象
         upsertScript(script, scriptId);
+        upsertScriptNodePosition(scriptId);
 //        将分享剧本的数据由redis迁移至mongodb
 //        redisCache.setCacheObject("script" + scriptId, new ScriptWithProducer(script, username));
         return true;
@@ -519,6 +539,16 @@ public class ScriptServiceImpl implements ScriptService {
         UpdateResult updateResult = mongoTemplate.updateFirst(query, update, WholeScript.class);
         if (updateResult.getModifiedCount() == 0)
             mongoTemplate.insert(wholeScript);
+    }
+
+    public void upsertScriptNodePosition(Integer scriptId) {
+        List<ScriptNodePosition> scriptNodePositions = scriptDAO.showNodePosition(scriptId);
+        ScriptWithPosition scriptWithPosition = new ScriptWithPosition(scriptNodePositions, scriptId);
+        Query query = new Query(Criteria.where("scriptId").is(scriptId));
+        Update update = new Update().set("scriptNodePositions", scriptWithPosition);
+        UpdateResult updateResult = mongoTemplate.updateMulti(query, update, ScriptWithPosition.class);
+        if (updateResult.getModifiedCount() == 0)
+            mongoTemplate.insert(scriptWithPosition);
     }
 
     //    此方法包装剧本信息 成为帖子格式
@@ -567,11 +597,22 @@ public class ScriptServiceImpl implements ScriptService {
             scriptDAO.insertScript(scriptMsg);
 //            加进去之后 由于在DAO层语句中 设置了回显主键 此时的scriptMsg是有自己独立的scriptId的
             forkRepository(scriptMsg.getScriptId(), forkUserId, setScriptId(scriptWithEnd, scriptMsg.getScriptId()));
+
+            Query query1 = new Query(Criteria.where("scriptId").is(scriptId));
+            List<ScriptWithPosition> scriptNodePositions = mongoTemplate.find(query1, ScriptWithPosition.class);
+            forkNodePosition(scriptNodePositions.get(0).getScriptNodePositions(), scriptMsg.getScriptId());
         } catch (Exception e) {
             log.info(e.toString());
             return false;
         }
         return true;
+    }
+
+    private void forkNodePosition(List<ScriptNodePosition> scriptNodePositions, Integer scriptId) {
+        for (ScriptNodePosition scriptNodePosition : scriptNodePositions) {
+            scriptNodePosition.setScriptId(scriptId);
+            scriptDAO.insertNodePosition(scriptNodePosition);
+        }
     }
 
     private ScriptWithEnd getScript(Integer scriptId) {

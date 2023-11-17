@@ -71,7 +71,7 @@ public class ChatWebsocket {
     }
 
     @Autowired
-    public void setAnswerSituationUtil(AnswerSituationUtil answerSituationUtil){
+    public void setAnswerSituationUtil(AnswerSituationUtil answerSituationUtil) {
         ChatWebsocket.answerSituationUtil = answerSituationUtil;
     }
 
@@ -424,7 +424,7 @@ public class ChatWebsocket {
 
 //        获取answerSituation对象 此对象中是所有正在游戏中的用户的回答信息 暂时存在这里
 //        TODO 迁移到redis中
-        answerSituationUtil.addAnswer(userId,userSelectedAnswer);
+        answerSituationUtil.addAnswer(userId, userSelectedAnswer);
 
         UserMatchInfo userMatchInfo = new UserMatchInfo();
         userMatchInfo.setUserId(userId);
@@ -457,10 +457,10 @@ public class ChatWebsocket {
         log.info("ChatWebsocket gameover 用户对局结束 userId: {}, message: {}", userId, jsonObject.toJSONString());
 
 //        设置响应数据类型
-        MessageReply<AnswerSituation> messageReply = new MessageReply<>();
+        MessageReply<RoomAnswerSituation> messageReply = new MessageReply<>();
 
 //        设置响应数据 改变玩家的状态
-        ChatMessage<AnswerSituation> result = new ChatMessage<>();
+        ChatMessage<RoomAnswerSituation> result = new ChatMessage<>();
         result.setSender(userId);
         String receiver = matchCacheUtil.getUserFromRoom(userId);
         result.setType(MessageTypeEnum.GAME_OVER);
@@ -482,17 +482,17 @@ public class ChatWebsocket {
 
 //                获取对战后的对战信息
                 AnswerSituation selfAnswer = answerSituationUtil.getAnswer(userId);
-                result.setData(selfAnswer);
+                AnswerSituation opponentAnswer = answerSituationUtil.getAnswer(receiver);
+                RoomAnswerSituation roomAnswerSituation = new RoomAnswerSituation(userId, receiver, selfAnswer, opponentAnswer);
+                result.setData(roomAnswerSituation);
+
 //                设置完结后的返回信息
                 messageReply.setChatMessage(result);
                 Set<String> set = new HashSet<>();
                 set.add(receiver);
                 result.setReceivers(set);
                 sendMessageAll(messageReply);
-
-                AnswerSituation opponentAnswer = answerSituationUtil.getAnswer(receiver);
-                result.setData(opponentAnswer);
-                messageReply.setChatMessage(result);
+//                屎山会出手 两边全部发
                 set.clear();
                 set.add(userId);
                 result.setReceivers(set);

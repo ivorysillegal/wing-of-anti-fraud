@@ -9,6 +9,8 @@ import com.gduf.util.JwtUtil;
 import com.gduf.util.RedisCache;
 import com.gduf.util.SensitiveWordFilterUtils;
 import io.jsonwebtoken.Claims;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import java.util.Objects;
 import static com.gduf.controller.Code.DEFAULT_PIC;
 
 @Service
+@Slf4j
 public class CommunityServiceImpl implements CommunityService {
 
     @Autowired
@@ -165,9 +168,30 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     @Override
-    public void insertLike(Integer userId, Integer postId) {
+    public Integer insertLike(Integer userId, Integer postId) {
+        Integer isLike = communityDAO.checkIsLikePost(userId, postId);
+        try {
+            if (!isLike.equals(0)) {
+                communityDAO.cancelLikePost(userId, postId);
+                communityDAO.reduceLikesInCommunity(postId);
+                return 2;
+            }
+        } catch (Exception e) {
+            log.info(e.toString());
+            return -1;
+        }
         communityDAO.insetLike(postId, userId);
         communityDAO.updateLikesInCommunity(postId);
+        return 1;
+    }
+
+    @SneakyThrows
+    @Override
+    public boolean checkIsLike(String token, Integer postId) {
+        User user = decode(token);
+        Integer userId = user.getUserId();
+        Integer isLike = communityDAO.checkIsLikePost(postId, userId);
+        return isLike.equals(1);
     }
 
     @Override
